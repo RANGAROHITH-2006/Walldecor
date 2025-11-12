@@ -1,5 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:walldecor/bloc/guest/guest_bloc.dart';
 import 'package:walldecor/firebase_options.dart';
+import 'package:walldecor/repositories/guest_repository.dart';
 import 'package:walldecor/router.dart';
 import 'package:flutter/material.dart';
 
@@ -16,13 +19,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => GuestBloc(
+            guestRepository: GuestRepository(),
+          ),
+        ),
+      ],
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        ),
+        routerConfig: route,
       ),
-      routerConfig: route,
     );
   }
 }

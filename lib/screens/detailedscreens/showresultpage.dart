@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:walldecor/static/diolog.dart';
+import 'package:walldecor/screens/static/diolog.dart';
 
 class Showresultpage extends StatefulWidget {
   final String imagePath;

@@ -1,5 +1,5 @@
-import 'package:walldecor/static/custom_button.dart';
-import 'package:walldecor/static/login_divider_line.dart';
+import 'package:walldecor/screens/static/custom_button.dart';
+import 'package:walldecor/screens/static/login_divider_line.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {

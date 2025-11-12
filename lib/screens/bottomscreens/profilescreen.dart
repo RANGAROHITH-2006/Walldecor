@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:walldecor/screens/navscreens/notificationpage.dart';
 import 'package:walldecor/screens/navscreens/settingspage.dart';
-import 'package:walldecor/static/custom_button.dart';
+import 'package:walldecor/screens/static/custom_button.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -11,6 +12,24 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  String userName = '';
+
+ @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final storedName = prefs.getString('userName') ?? 'Guest User';
+
+    setState(() {
+      userName = storedName;
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +59,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Column(
               children: [
                 IconButton(onPressed: (){}, icon: Image.asset('assets/images/profile.png', width: 80, height: 80),),        
-                Text('Name Here', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600),),
+                Text(
+                  userName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),

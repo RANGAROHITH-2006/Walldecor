@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 import 'package:go_router/go_router.dart';
+import 'package:walldecor/bloc/guest/guest_bloc.dart';
+import 'package:walldecor/bloc/guest/guest_event.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,8 +16,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 2), () {
-      context.go('/loginscreen');
+    Timer(const Duration(seconds: 3), () {
+      context.read<GuestBloc>().add(const CheckGuestEvent());
+      context.go('/mainscreen');
     });
   }
 

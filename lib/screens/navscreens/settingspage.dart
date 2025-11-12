@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:walldecor/static/modeicon.dart';
+import 'package:walldecor/screens/static/modeicon.dart';
 
 class Settingspage extends StatefulWidget {
   const Settingspage({super.key});

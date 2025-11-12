@@ -22,6 +22,7 @@ class _HomescreenState extends State<Homescreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF25272F),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: const Color(0xFF25272F),
         elevation: 0,
         title: const Text(
