@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "313737940069",
+    "project_id": "walldecor-88cdf",
+    "storage_bucket": "walldecor-88cdf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:313737940069:android:1c112c6561665e2c758a8c",
+        "android_client_info": {
+          "package_name": "com.example.walldecorapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvguBjufM1Z8TeJB3vUNJEWGORHco16g4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
