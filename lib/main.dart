@@ -1,8 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:walldecor/bloc/guest/guest_bloc.dart';
+import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:walldecor/firebase_options.dart';
-import 'package:walldecor/repositories/guest_repository.dart';
+import 'package:walldecor/repositories/auth_repository.dart';
 import 'package:walldecor/router.dart';
 import 'package:flutter/material.dart';
 
@@ -22,8 +22,8 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => GuestBloc(
-            guestRepository: GuestRepository(),
+          create: (context) => AuthBloc(
+            authRepository: AuthRepository(),
           ),
         ),
       ],

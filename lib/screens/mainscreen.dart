@@ -1,7 +1,8 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:walldecor/bloc/guest/guest_bloc.dart';
-import 'package:walldecor/bloc/guest/guest_state.dart';
+import 'package:walldecor/bloc/auth/auth_bloc.dart';
+import 'package:walldecor/bloc/auth/auth_state.dart';
 import 'package:walldecor/screens/bottomscreens/homescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:walldecor/screens/bottomscreens/librarypage.dart';
@@ -20,37 +21,51 @@ class _MainScreenState extends State<MainScreen> {
   List<Widget> bottomScreens = [
     const Homescreen(),
     const Librarypage(),
-    const CollectionDetailsPage(title: 'Allover Homestyle',),
+    const CollectionDetailsPage(title: 'Allover Homestyle'),
     const ProfileScreen(),
   ];
 
+  void getFcmToken() async {
+    String? token = await FirebaseMessaging.instance.getToken();
+    print('🔥 FCM Token: $token');
+    // loginWithGoogle();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getFcmToken();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocListener<GuestBloc, GuestState>(
+    return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state is GuestError) {
+        if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor:  Color(0xFFEE5776),
+              backgroundColor: Color(0xFFEE5776),
               duration: const Duration(seconds: 3),
             ),
           );
         }
       },
-      child: BlocBuilder<GuestBloc, GuestState>(
+      child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           return Scaffold(
             backgroundColor: const Color(0xFF25272F),
             body: Stack(
               children: [
                 bottomScreens[currentIndex],
-                if (state is GuestLoading)
+                if (state is AuthLoading)
                   Container(
                     color: const Color(0xFF25272F).withOpacity(0.7),
                     child: const Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFEE5776)),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Color(0xFFEE5776),
+                        ),
                       ),
                     ),
                   ),
@@ -59,7 +74,9 @@ class _MainScreenState extends State<MainScreen> {
             bottomNavigationBar: Container(
               decoration: const BoxDecoration(
                 color: Color(0xFF25272F),
-                border: Border(top: BorderSide(color: Color(0xFF3A3D47), width: 0.5)),
+                border: Border(
+                  top: BorderSide(color: Color(0xFF3A3D47), width: 0.5),
+                ),
               ),
               child: Theme(
                 data: Theme.of(context).copyWith(
@@ -78,39 +95,51 @@ class _MainScreenState extends State<MainScreen> {
                   elevation: 0,
                   items: [
                     BottomNavigationBarItem(
-                      icon: SvgPicture.asset('assets/svg/home.svg',
-                          color: currentIndex == 0
-                              ? const Color(0xFFEE5776)
-                              : const Color(0xFF868EAE),
-                          width: 24,
-                          height: 24),
+                      icon: SvgPicture.asset(
+                        'assets/svg/home.svg',
+                        color:
+                            currentIndex == 0
+                                ? const Color(0xFFEE5776)
+                                : const Color(0xFF868EAE),
+                        width: 24,
+                        height: 24,
+                      ),
                       label: "",
                     ),
                     BottomNavigationBarItem(
-                      icon: SvgPicture.asset('assets/svg/library.svg',
-                          color: currentIndex == 1
-                              ? const Color(0xFFEE5776)
-                              : const Color(0xFF868EAE),
-                          width: 24,
-                          height: 24),
-                      label: "",
-                    ),
-                   BottomNavigationBarItem(
-                      icon: SvgPicture.asset('assets/svg/grid.svg',
-                          color: currentIndex == 2
-                              ? const Color(0xFFEE5776)
-                              : const Color(0xFF868EAE),
-                          width: 24,
-                          height: 24),
+                      icon: SvgPicture.asset(
+                        'assets/svg/library.svg',
+                        color:
+                            currentIndex == 1
+                                ? const Color(0xFFEE5776)
+                                : const Color(0xFF868EAE),
+                        width: 24,
+                        height: 24,
+                      ),
                       label: "",
                     ),
                     BottomNavigationBarItem(
-                      icon: SvgPicture.asset('assets/svg/person.svg',
-                          color: currentIndex == 3
-                              ? const Color(0xFFEE5776)
-                              : const Color(0xFF868EAE),
-                          width: 24,
-                          height: 24),
+                      icon: SvgPicture.asset(
+                        'assets/svg/grid.svg',
+                        color:
+                            currentIndex == 2
+                                ? const Color(0xFFEE5776)
+                                : const Color(0xFF868EAE),
+                        width: 24,
+                        height: 24,
+                      ),
+                      label: "",
+                    ),
+                    BottomNavigationBarItem(
+                      icon: SvgPicture.asset(
+                        'assets/svg/person.svg',
+                        color:
+                            currentIndex == 3
+                                ? const Color(0xFFEE5776)
+                                : const Color(0xFF868EAE),
+                        width: 24,
+                        height: 24,
+                      ),
                       label: "",
                     ),
                   ],

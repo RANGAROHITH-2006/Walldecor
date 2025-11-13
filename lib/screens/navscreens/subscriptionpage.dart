@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:walldecor/screens/loginscreen.dart';
 import 'package:walldecor/screens/mainscreen.dart';
 
 class SubscriptionPage extends StatefulWidget {
@@ -111,7 +112,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen(),));
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFFED6383),
                       minimumSize: const Size(118, 42),
