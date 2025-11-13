@@ -1,25 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:walldecor/bloc/category/category_bloc.dart';
+import 'package:walldecor/bloc/category/category_event.dart';
+import 'package:walldecor/bloc/category/category_state.dart';
+import 'package:walldecor/models/category_model.dart';
+import 'package:walldecor/repositories/category_repository.dart';
+import 'package:walldecor/screens/detailedscreens/categorydetailespage.dart';
 
-class Categorypage extends StatefulWidget {
+class Categorypage extends StatelessWidget {
   const Categorypage({super.key});
 
   @override
-  State<Categorypage> createState() => _CategorypageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) =>
+          CategoryBloc(CategoryRepository())..add(FetchCategoryEvent()),
+      child: const _CategoryView(),
+    );
+  }
 }
 
-class _CategorypageState extends State<Categorypage> {
+class _CategoryView extends StatefulWidget {
+  const _CategoryView();
+
+  @override
+  State<_CategoryView> createState() => _CategoryViewState();
+}
+
+class _CategoryViewState extends State<_CategoryView> {
   final List<Map<String, String>> trending = [
     {'title': 'Fashion', 'image': 'assets/home/tranding1.png'},
     {'title': 'Street', 'image': 'assets/home/tranding2.png'},
     {'title': 'Beach', 'image': 'assets/home/tranding3.png'},
     {'title': 'Rivers', 'image': 'assets/home/featured1.png'},
-  ];
-
-  final List<Map<String, String>> categories = [
-    {'title': 'Nature', 'image': 'assets/home/categories1.png'},
-    {'title': 'Sunset Aesthetic', 'image': 'assets/home/categories2.png'},
-    {'title': 'Wildlife', 'image': 'assets/home/categories3.png'},
-    {'title': 'Architectures', 'image': 'assets/home/featured2.png'},
   ];
 
   @override
@@ -54,8 +67,8 @@ class _CategorypageState extends State<Categorypage> {
                   },
                 ),
               ),
-
               const SizedBox(height: 20),
+
               const Text(
                 'All Categories',
                 style: TextStyle(
@@ -66,14 +79,33 @@ class _CategorypageState extends State<Categorypage> {
               ),
               const SizedBox(height: 12),
 
-              Column(
-                children:
-                    categories.map((cat) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: _buildCategoryCard(cat['title']!, cat['image']!),
-                      );
-                    }).toList(),
+              BlocBuilder<CategoryBloc, CategoryState>(
+                builder: (context, state) {
+                  if (state is CategoryLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    );
+                  } else if (state is CategoryLoaded) {
+                    return Column(
+                      children: state.data.map((category) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: _buildCategoryCard(
+                           category
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  } else if (state is CategoryError) {
+                    return Center(
+                      child: Text(
+                        'Error: ${state.message}',
+                        style: const TextStyle(color: Colors.redAccent),
+                      ),
+                    );
+                  }
+                  return const SizedBox();
+                },
               ),
             ],
           ),
@@ -100,16 +132,15 @@ class _CategorypageState extends State<Categorypage> {
               width: 40,
               height: 40,
               fit: BoxFit.cover,
-              errorBuilder:
-                  (context, error, stackTrace) => Container(
-                    width: 40,
-                    height: 40,
-                    color: const Color(0xFF3A3D47),
-                    child: const Icon(
-                      Icons.image_not_supported,
-                      color: Color(0xFF868EAE),
-                    ),
-                  ),
+              errorBuilder: (context, error, stackTrace) => Container(
+                width: 40,
+                height: 40,
+                color: const Color(0xFF3A3D47),
+                child: const Icon(
+                  Icons.image_not_supported,
+                  color: Color(0xFF868EAE),
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 10),
@@ -130,10 +161,19 @@ class _CategorypageState extends State<Categorypage> {
     );
   }
 
-  Widget _buildCategoryCard(String title, String imagePath) {
+  Widget _buildCategoryCard(CategoryModel category) {
     return GestureDetector(
       onTap: () {
-        debugPrint('Category tapped: $title');
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CategoryDetailsPage(
+              title: category.title,
+              categoryId: category.id,
+            ),
+          ),
+        );
+        debugPrint('Category tapped: ${category.title}');
       },
       child: Container(
         height: 140,
@@ -142,7 +182,7 @@ class _CategorypageState extends State<Categorypage> {
           color: const Color(0xFF2E3138),
           boxShadow: [
             BoxShadow(
-              color: Colors.black,
+              color: Colors.black.withOpacity(0.5),
               blurRadius: 6,
               offset: const Offset(0, 4),
             ),
@@ -153,25 +193,23 @@ class _CategorypageState extends State<Categorypage> {
           child: Stack(
             children: [
               Positioned.fill(
-                child: Image.asset(
-                  imagePath,
+                child: Image.network(
+                  category.coverPhoto.urls.regular,
                   fit: BoxFit.fill,
-                  errorBuilder:
-                      (context, error, stackTrace) => Container(
-                        color: const Color(0xFF3A3D47),
-                        child: const Icon(
-                          Icons.image_not_supported,
-                          color: Color(0xFF868EAE),
-                        ),
-                      ),
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: const Color(0xFF3A3D47),
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      color: Color(0xFF868EAE),
+                    ),
+                  ),
                 ),
               ),
-
               Positioned(
                 left: 16,
                 bottom: 14,
                 child: Text(
-                  title,
+                  category.title,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -179,7 +217,6 @@ class _CategorypageState extends State<Categorypage> {
                   ),
                 ),
               ),
-
               Positioned(
                 right: 12,
                 bottom: 8,

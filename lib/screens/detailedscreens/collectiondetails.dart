@@ -106,7 +106,6 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
                         },
                       ),
                     ),
-        
                     Positioned(
                       bottom: 8,
                       right: 8,

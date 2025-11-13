@@ -96,10 +96,10 @@ class _CustomButtonState extends State<CustomButton> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         if (widget.text == 'Login With Google') {
-           googleSignIn();
-          _handleGoogleSignIn(context);
+          await googleSignIn();
+          await _handleGoogleSignIn(context);
         } else {
           context.push(widget.screen);
         }
