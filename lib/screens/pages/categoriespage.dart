@@ -3,8 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:walldecor/bloc/category/category_bloc.dart';
 import 'package:walldecor/bloc/category/category_event.dart';
 import 'package:walldecor/bloc/category/category_state.dart';
+import 'package:walldecor/bloc/trending/trending_bloc.dart';
+import 'package:walldecor/bloc/trending/trending_event.dart';
+import 'package:walldecor/bloc/trending/trending_state.dart';
 import 'package:walldecor/models/category_model.dart';
 import 'package:walldecor/repositories/category_repository.dart';
+import 'package:walldecor/repositories/trending_repository.dart';
 import 'package:walldecor/screens/detailedscreens/categorydetailespage.dart';
 
 class Categorypage extends StatelessWidget {
@@ -12,29 +16,30 @@ class Categorypage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) =>
-          CategoryBloc(CategoryRepository())..add(FetchCategoryEvent()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) =>
+              CategoryBloc(CategoryRepository())..add(FetchCategoryEvent()),
+        ),
+        BlocProvider(
+          create: (_) =>
+              TrendingBloc(TrendingRepository())..add(FetchCategoryTrendingEvent()),
+        ),
+      ],
       child: const _CategoryView(),
     );
   }
 }
 
 class _CategoryView extends StatefulWidget {
-  const _CategoryView();
+  const _CategoryView({super.key});
 
   @override
   State<_CategoryView> createState() => _CategoryViewState();
 }
 
 class _CategoryViewState extends State<_CategoryView> {
-  final List<Map<String, String>> trending = [
-    {'title': 'Fashion', 'image': 'assets/home/tranding1.png'},
-    {'title': 'Street', 'image': 'assets/home/tranding2.png'},
-    {'title': 'Beach', 'image': 'assets/home/tranding3.png'},
-    {'title': 'Rivers', 'image': 'assets/home/featured1.png'},
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -46,6 +51,7 @@ class _CategoryViewState extends State<_CategoryView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ---------------- Trending ----------------
               const Text(
                 'Trending',
                 style: TextStyle(
@@ -55,20 +61,46 @@ class _CategoryViewState extends State<_CategoryView> {
                 ),
               ),
               const SizedBox(height: 8),
-              SizedBox(
-                height: 56,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: trending.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    final item = trending[index];
-                    return buildTrendingPill(item['title']!, item['image']!);
-                  },
-                ),
+
+              BlocBuilder<TrendingBloc, TrendingState>(
+                builder: (context, state) {
+                  if (state is TrendingLoading) {
+                    return const SizedBox(
+                      height: 60,
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+
+                  if (state is TrendingError) {
+                    return Text(
+                      state.message,
+                      style: const TextStyle(color: Colors.red),
+                    );
+                  }
+
+                  if (state is CategoryTrendingLoaded) {
+                    return SizedBox(
+                      height: 60,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: state.data.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          final item = state.data[index];
+                          return buildTrendingPill(item);
+                        },
+                      ),
+                    );
+                  }
+
+                  return const SizedBox();
+                },
               ),
+
               const SizedBox(height: 20),
 
+              // ---------------- Categories ----------------
               const Text(
                 'All Categories',
                 style: TextStyle(
@@ -85,18 +117,20 @@ class _CategoryViewState extends State<_CategoryView> {
                     return const Center(
                       child: CircularProgressIndicator(color: Colors.white),
                     );
-                  } else if (state is CategoryLoaded) {
+                  }
+
+                  if (state is CategoryLoaded) {
                     return Column(
                       children: state.data.map((category) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12.0),
-                          child: _buildCategoryCard(
-                           category
-                          ),
+                          child: _buildCategoryCard(category),
                         );
                       }).toList(),
                     );
-                  } else if (state is CategoryError) {
+                  }
+
+                  if (state is CategoryError) {
                     return Center(
                       child: Text(
                         'Error: ${state.message}',
@@ -104,6 +138,7 @@ class _CategoryViewState extends State<_CategoryView> {
                       ),
                     );
                   }
+
                   return const SizedBox();
                 },
               ),
@@ -114,7 +149,8 @@ class _CategoryViewState extends State<_CategoryView> {
     );
   }
 
-  Widget buildTrendingPill(String title, String imagePath) {
+  // ---------------- Trending Pill UI ----------------
+  Widget buildTrendingPill(item) {
     return Container(
       width: 140,
       decoration: BoxDecoration(
@@ -127,8 +163,8 @@ class _CategoryViewState extends State<_CategoryView> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              imagePath,
+            child: Image.network(
+              item.coverPhoto.urls.small,
               width: 40,
               height: 40,
               fit: BoxFit.cover,
@@ -146,7 +182,7 @@ class _CategoryViewState extends State<_CategoryView> {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              title,
+              item.title,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
@@ -161,6 +197,7 @@ class _CategoryViewState extends State<_CategoryView> {
     );
   }
 
+  // ---------------- Category Card UI ----------------
   Widget _buildCategoryCard(CategoryModel category) {
     return GestureDetector(
       onTap: () {
@@ -169,11 +206,10 @@ class _CategoryViewState extends State<_CategoryView> {
           MaterialPageRoute(
             builder: (context) => CategoryDetailsPage(
               title: category.title,
-              categoryId: category.id,
+              id: category.id,
             ),
           ),
         );
-        debugPrint('Category tapped: ${category.title}');
       },
       child: Container(
         height: 140,

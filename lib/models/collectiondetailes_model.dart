@@ -1,90 +1,62 @@
 import 'dart:convert';
-class CollectionModel {
+
+class CollectiondetailesModel {
     final String id;
-    final String title;
-    final CoverPhoto coverPhoto;
+    final Urls urls;
     final User user;
 
-    CollectionModel({
+    CollectiondetailesModel({
         required this.id,
-        required this.title,
-        required this.coverPhoto,
+        required this.urls,
         required this.user,
     });
 
-    CollectionModel copyWith({
+    CollectiondetailesModel copyWith({
         String? id,
-        String? title,
-        CoverPhoto? coverPhoto,
+        Urls? urls,
         User? user,
     }) => 
-        CollectionModel(
+        CollectiondetailesModel(
             id: id ?? this.id,
-            title: title ?? this.title,
-            coverPhoto: coverPhoto ?? this.coverPhoto,
+            urls: urls ?? this.urls,
             user: user ?? this.user,
         );
 
-    factory CollectionModel.fromRawJson(String str) => CollectionModel.fromJson(json.decode(str));
+    factory CollectiondetailesModel.fromRawJson(String str) => CollectiondetailesModel.fromJson(json.decode(str));
 
     String toRawJson() => json.encode(toJson());
 
-    factory CollectionModel.fromJson(Map<String, dynamic> json) => CollectionModel(
+    factory CollectiondetailesModel.fromJson(Map<String, dynamic> json) => CollectiondetailesModel(
         id: json["id"],
-        title: json["title"],
-        coverPhoto: CoverPhoto.fromJson(json["cover_photo"]),
+        urls: Urls.fromJson(json["urls"]),
         user: User.fromJson(json["user"]),
     );
 
     Map<String, dynamic> toJson() => {
         "id": id,
-        "title": title,
-        "cover_photo": coverPhoto.toJson(),
+        "urls": urls.toJson(),
         "user": user.toJson(),
     };
 }
 
-class CoverPhoto {
-    final Urls urls;
-
-    CoverPhoto({
-        required this.urls,
-    });
-
-    CoverPhoto copyWith({
-        Urls? urls,
-    }) => 
-        CoverPhoto(
-            urls: urls ?? this.urls,
-        );
-
-    factory CoverPhoto.fromRawJson(String str) => CoverPhoto.fromJson(json.decode(str));
-
-    String toRawJson() => json.encode(toJson());
-
-    factory CoverPhoto.fromJson(Map<String, dynamic> json) => CoverPhoto(
-        urls: Urls.fromJson(json["urls"]),
-    );
-
-    Map<String, dynamic> toJson() => {
-        "urls": urls.toJson(),
-    };
-}
-
 class Urls {
+    final String full;
     final String regular;
     final String small;
 
     Urls({
+        required this.full,
         required this.regular,
         required this.small,
     });
 
     Urls copyWith({
+        String? full,
         String? regular,
         String? small,
     }) => 
         Urls(
+            full: full ?? this.full,
             regular: regular ?? this.regular,
             small: small ?? this.small,
         );
@@ -94,11 +66,13 @@ class Urls {
     String toRawJson() => json.encode(toJson());
 
     factory Urls.fromJson(Map<String, dynamic> json) => Urls(
+        full: json["full"],
         regular: json["regular"],
         small: json["small"],
     );
 
     Map<String, dynamic> toJson() => {
+        "full": full,
         "regular": regular,
         "small": small,
     };
@@ -133,7 +107,7 @@ class User {
         String? profileImage,
     }) => 
         User(
-            id: id ?? this.id ,
+            id: id ?? this.id,
             username: username ?? this.username,
             name: name ?? this.name,
             firstName: firstName ?? this.firstName,

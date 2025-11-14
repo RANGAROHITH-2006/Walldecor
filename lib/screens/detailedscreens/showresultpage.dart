@@ -88,6 +88,7 @@ class _ShowresultpageState extends State<Showresultpage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xFF25272F),
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -142,6 +143,7 @@ class _ShowresultpageState extends State<Showresultpage> {
                       onTap: () {
                         showAddFloorDialog(
                           context: context,
+                          imageUrl: widget.imagePath,
                           onCreate: (libraryName) {},
                         );
                       },

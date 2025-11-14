@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:walldecor/bloc/category/category_bloc.dart';
 import 'package:walldecor/bloc/category/category_event.dart';
 import 'package:walldecor/bloc/category/category_state.dart';
+import 'package:walldecor/bloc/collection/collection_bloc.dart';
+import 'package:walldecor/bloc/collection/collection_event.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/screens/navscreens/notificationpage.dart';
@@ -10,12 +12,12 @@ import 'package:walldecor/screens/navscreens/searchpage.dart';
 
 class CategoryDetailsPage extends StatefulWidget {
   final String title;
-  final String categoryId;
+  final String id;
 
   const CategoryDetailsPage({
     super.key,
     required this.title,
-    required this.categoryId,
+    required this.id,
   });
 
   @override
@@ -27,8 +29,10 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
   void initState() {
     super.initState();
     context.read<CategoryBloc>().add(
-      FetchCategoryDetailsEvent(widget.categoryId),
+      FetchCategoryDetailsEvent(widget.id),
     );
+    context.read<CollectionBloc>().add(FetchCollectionDetailsEvent(widget.id));
+  
   }
 
   @override
@@ -96,7 +100,10 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                         MaterialPageRoute(
                           builder:
                               (context) =>
-                                  Resultpage(imagePath: item.urls.regular),
+                                  Resultpage(
+                                    urls: item.urls,
+                                    user: item.user,
+                                  ),
                         ),
                       );
                       debugPrint('image $index tapped');
