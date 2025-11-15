@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:walldecor/screens/static/diolog.dart';
+// import 'package:walldecor/screens/static/diolog.dart';
 
 class Librarypage extends StatelessWidget {
   const Librarypage({super.key});
@@ -196,10 +196,10 @@ class Librarypage extends StatelessWidget {
                         ),
                         GestureDetector(
                           onTap: () {
-                            EditlibraryDialog(
-                              context: context,
-                              onCreate: (libraryName) {},
-                            );
+                            // EditlibraryDialog(
+                            //   context: context,
+                            //   onCreate: (libraryName) {},
+                            // );
                           },
                           child: SvgPicture.asset(
                             'assets/svg/Pen.svg',

@@ -26,6 +26,35 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
         emit(LibraryError(e.toString()));
       }
     });
+    on<UpdateLibraryEvent>((event, emit) async {
+      emit(LibraryLoading());
+
+      try {
+        final response = await repository.updateLibrary(
+          event.libraryId,
+          urls: event.urls,
+          user: event.user,
+        );
+
+        emit(LibraryUpdateSuccess(response));
+      } catch (e) {
+        emit(LibraryError(e.toString()));
+      }
+    });
+    on<RenameLibraryEvent>((event, emit) async {
+      emit(LibraryLoading());
+
+      try {
+        final response = await repository.renameLibrary(
+          event.libraryId,
+          libraryName: event.libraryName,
+        );
+
+        emit(LibraryRenameSuccess(response));
+      } catch (e) {
+        emit(LibraryError(e.toString()));
+      }
+    });
   }
 
   

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:walldecor/bloc/library/library_bloc.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
+import 'package:walldecor/repositories/library_repository.dart';
 import 'package:walldecor/screens/static/diolog.dart';
 
 class Resultpage extends StatefulWidget {
@@ -88,108 +91,114 @@ class _ResultpageState extends State<Resultpage> {
 
     final image = widget.urls.regular;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: const Color(0xFF25272F),
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
-        ),
+    return BlocProvider(
+      create: (context) => LibraryBloc(LibraryRepository()),
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: const Color(0xFF25272F),
-        title: const Text('Show Result', style: TextStyle(color: Colors.white)),
-        actions: const [
-          Icon(Icons.favorite_border, color: Colors.white),
-        ],
-      ),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
+          ),
+          backgroundColor: const Color(0xFF25272F),
+          title: const Text('Show Result', style: TextStyle(color: Colors.white)),
+          actions: const [
+            Icon(Icons.favorite_border, color: Colors.white),
+          ],
+        ),
 
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20.0),
-              child: Image.network(
-                image,
-                fit: BoxFit.cover,
-                height: 544,
-                errorBuilder: (_, __, ___) => Container(
-                  color: Colors.grey[800],
-                  child: const Icon(Icons.image_not_supported, color: Colors.white),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20.0),
+                child: Image.network(
+                  image,
+                  fit: BoxFit.cover,
+                  height: 544,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: Colors.grey[800],
+                    child: const Icon(Icons.image_not_supported, color: Colors.white),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Unsplash In Collaboration with Danial Miralev',
-              style: TextStyle(color: Color(0xFF4A4D57), fontSize: 12),
-            ),
-            const SizedBox(height: 16),
-
-            // Bottom Action Container
-            Container(
-              width: 311,
-              height: 61,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEE5776),
-                borderRadius: BorderRadius.circular(25),
+              const SizedBox(height: 16),
+              const Text(
+                'Unsplash In Collaboration with Danial Miralev',
+                style: TextStyle(color: Color(0xFF4A4D57), fontSize: 12),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        AddLibraryDialog(
-                          context: context,
-                          urls: widget.urls,
-                          user: widget.user,
-                          onCreate: (libraryName) {},
-                        );
-                      },
-                      child: SvgPicture.asset(
-                        'assets/svg/library.svg',
-                        width: 28,
-                        height: 28,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: const Color(0xFF25272F).withOpacity(0.8),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.vertical(top: Radius.circular(20)),
-                          ),
-                          builder: (context) => const SaveLibrarySheet(),
-                        );
-                      },
-                      child: SvgPicture.asset(
-                        'assets/svg/download.svg',
-                        width: 36,
-                        height: 36,
-                      ),
-                    ),
-                    CompositedTransformTarget(
-                      link: _layerLink,
-                      child: GestureDetector(
-                        onTap: _togglePopup,
+              const SizedBox(height: 16),
+
+              // Bottom Action Container
+              Container(
+                width: 311,
+                height: 61,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEE5776),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          AddLibraryDialog(
+                            context: context,
+                            urls: widget.urls,
+                            user: widget.user,
+                            onCreate: (libraryName) {},
+                          );
+                        },
                         child: SvgPicture.asset(
-                          'assets/svg/share.svg',
+                          'assets/svg/library.svg',
                           width: 28,
                           height: 28,
                         ),
                       ),
-                    ),
-                  ],
+                      GestureDetector(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: const Color(0xFF25272F).withOpacity(0.8),
+                            shape: const RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.vertical(top: Radius.circular(20)),
+                            ),
+                            builder: (context) => SaveLibrarySheet(
+                              urls: widget.urls,
+                              user: widget.user,
+                            ),
+                          );
+                        },
+                        child: SvgPicture.asset(
+                          'assets/svg/download.svg',
+                          width: 36,
+                          height: 36,
+                        ),
+                      ),
+                      CompositedTransformTarget(
+                        link: _layerLink,
+                        child: GestureDetector(
+                          onTap: _togglePopup,
+                          child: SvgPicture.asset(
+                            'assets/svg/share.svg',
+                            width: 28,
+                            height: 28,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

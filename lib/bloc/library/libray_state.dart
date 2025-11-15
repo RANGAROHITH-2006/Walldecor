@@ -31,3 +31,19 @@ class LibraryLoaded extends LibraryState {
   final List<AllLibraryModel> data;
   LibraryLoaded(this.data);
 }
+
+class LibraryUpdateSuccess extends LibraryState {
+  final Map<String, dynamic> data;
+  LibraryUpdateSuccess(this.data);
+
+  @override
+  List<Object?> get props => [data];
+}
+
+class LibraryRenameSuccess extends LibraryState {
+  final Map<String, dynamic> data;
+  LibraryRenameSuccess(this.data);
+
+  @override
+  List<Object?> get props => [data];
+}

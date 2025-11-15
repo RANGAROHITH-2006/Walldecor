@@ -44,20 +44,7 @@ class _LibrarypageDataState extends State<LibrarypageData> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.refresh,
-              color: Colors.white,
-              size: 20,
-            ),
-            onPressed: () {
-              print('🔥 LibrarypageData: Refresh button pressed');
-              context.read<LibraryBloc>().add(GetAllLibraryEvent());
-            },
-          ),
-        ],
+        
       ),
       body: BlocBuilder<LibraryBloc, LibraryState>(
         builder: (context, state) {
@@ -193,6 +180,8 @@ class _LibrarypageDataState extends State<LibrarypageData> {
                           onTap: () {
                             EditlibraryDialog(
                               context: context,
+                              libraryId: item.id,
+                              currentName: item.name,
                               onCreate: (libraryName) {},
                             );
                           },

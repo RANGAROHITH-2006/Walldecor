@@ -30,3 +30,31 @@ class CreateLibraryEvent extends LibraryEvent {
 
 
 class GetAllLibraryEvent extends LibraryEvent {}
+
+class UpdateLibraryEvent extends LibraryEvent {
+  final String libraryId;
+  final Urls urls;
+  final User user;
+
+  UpdateLibraryEvent({
+    required this.libraryId,
+    required this.urls,
+    required this.user,
+  });
+
+  @override
+  List<Object?> get props => [libraryId, urls, user];
+}
+
+class RenameLibraryEvent extends LibraryEvent {
+  final String libraryId;
+  final String libraryName;
+
+  RenameLibraryEvent({
+    required this.libraryId,
+    required this.libraryName,
+  });
+
+  @override
+  List<Object?> get props => [libraryId, libraryName];
+}
