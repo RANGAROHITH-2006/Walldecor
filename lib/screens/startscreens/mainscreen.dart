@@ -6,6 +6,7 @@ import 'package:walldecor/bloc/auth/auth_state.dart';
 import 'package:walldecor/screens/bottomscreens/homescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:walldecor/screens/bottomscreens/librarypage.dart';
+import 'package:walldecor/screens/bottomscreens/librarypagedata.dart';
 import 'package:walldecor/screens/bottomscreens/profilescreen.dart';
 import 'package:walldecor/screens/detailedscreens/collectiondetails.dart';
 
@@ -20,7 +21,7 @@ class _MainScreenState extends State<MainScreen> {
   int currentIndex = 0;
   List<Widget> bottomScreens = [
     const Homescreen(),
-    const Librarypage(),
+    const LibrarypageData(),
     const CollectionDetailsPage(title: 'Allover Homestyle'),
     const ProfileScreen(),
   ];

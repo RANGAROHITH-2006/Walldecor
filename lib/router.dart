@@ -1,8 +1,8 @@
 import 'package:walldecor/screens/bottomscreens/homescreen.dart';
 import 'package:walldecor/screens/detailedscreens/librarydownload.dart';
-import 'package:walldecor/screens/loginscreen.dart';
-import 'package:walldecor/screens/mainscreen.dart';
-import 'package:walldecor/screens/splashscreen.dart';
+import 'package:walldecor/screens/startscreens/loginscreen.dart';
+import 'package:walldecor/screens/startscreens/mainscreen.dart';
+import 'package:walldecor/screens/startscreens/splashscreen.dart';
 import 'package:go_router/go_router.dart';
 
 final route = GoRouter(

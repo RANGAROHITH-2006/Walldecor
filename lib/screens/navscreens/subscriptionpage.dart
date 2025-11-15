@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:walldecor/screens/loginscreen.dart';
-import 'package:walldecor/screens/mainscreen.dart';
+import 'package:walldecor/screens/startscreens/loginscreen.dart';
+import 'package:walldecor/screens/startscreens/mainscreen.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});

@@ -33,6 +33,7 @@ class Categorypage extends StatelessWidget {
 }
 
 class _CategoryView extends StatefulWidget {
+  // ignore: unused_element_parameter
   const _CategoryView({super.key});
 
   @override
@@ -67,14 +68,14 @@ class _CategoryViewState extends State<_CategoryView> {
                   if (state is TrendingLoading) {
                     return const SizedBox(
                       height: 60,
-                      child: Center(child: CircularProgressIndicator()),
+                      child: Center(child: CircularProgressIndicator(color: Color(0xFFEE5776))),
                     );
                   }
 
                   if (state is TrendingError) {
                     return Text(
                       state.message,
-                      style: const TextStyle(color: Colors.red),
+                      style: const TextStyle(color: Color(0xFFEE5776)),
                     );
                   }
 
@@ -115,7 +116,7 @@ class _CategoryViewState extends State<_CategoryView> {
                 builder: (context, state) {
                   if (state is CategoryLoading) {
                     return const Center(
-                      child: CircularProgressIndicator(color: Colors.white),
+                      child: CircularProgressIndicator(color: Color(0xFFEE5776)),
                     );
                   }
 
@@ -134,7 +135,7 @@ class _CategoryViewState extends State<_CategoryView> {
                     return Center(
                       child: Text(
                         'Error: ${state.message}',
-                        style: const TextStyle(color: Colors.redAccent),
+                        style: const TextStyle(color: Color(0xFFEE5776)),
                       ),
                     );
                   }

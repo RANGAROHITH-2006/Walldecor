@@ -32,7 +32,7 @@ class _CollectionPageState extends State<CollectionPage> {
         bloc: _collectionBloc,
         builder: (context, state) {
           if (state is CollectionLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator(color: Color(0xFFEE5776)));
           } else if (state is CollectionLoaded) {
             final collections = state.data;
             return Padding(

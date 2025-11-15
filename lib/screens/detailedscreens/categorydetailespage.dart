@@ -77,7 +77,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         builder: (context, state) {
           if (state is CategoryLoading) {
             return const Center(
-              child: CircularProgressIndicator(color: Colors.white),
+              child: CircularProgressIndicator(color: Color(0xFFEE5776)),
             );
           } else if (state is CategoryDetailsLoaded) {
             final List<CategorydetailesModel> details = state.data;

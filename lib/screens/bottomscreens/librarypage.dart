@@ -99,7 +99,9 @@ class Librarypage extends StatelessWidget {
                       child: Column(
                         children: [
                           ClipRRect(
-                            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(12),
+                            ),
                             child: Image.asset(
                               collection['mainImage'],
                               fit: BoxFit.cover,

@@ -16,7 +16,6 @@ import 'package:walldecor/repositories/library_repository.dart';
 import 'package:walldecor/repositories/trending_repository.dart';
 import 'package:walldecor/router.dart';
 import 'package:flutter/material.dart';
-import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

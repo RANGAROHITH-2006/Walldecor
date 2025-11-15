@@ -22,6 +22,11 @@ class CreateLibraryEvent extends LibraryEvent {
     required this.user,
   });
 
+
+
   @override
   List<Object?> get props => [token, libraryName, id, urls, user];
 }
+
+
+class GetAllLibraryEvent extends LibraryEvent {}
