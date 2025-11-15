@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:walldecor/bloc/auth/auth_bloc.dart';
+import 'package:walldecor/bloc/auth/auth_state.dart';
 import 'package:walldecor/screens/navscreens/notificationpage.dart';
 import 'package:walldecor/screens/navscreens/settingspage.dart';
 import 'package:walldecor/screens/static/custom_button.dart';
@@ -12,23 +14,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String userName = '';
-
- @override
-  void initState() {
-    super.initState();
-    _loadUserName();
-  }
-
-  Future<void> _loadUserName() async {
-    final prefs = await SharedPreferences.getInstance();
-    final storedName = prefs.getString('userName') ?? 'Guest User';
-
-    setState(() {
-      userName = storedName;
-    });
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -56,18 +41,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Column(
-              children: [
-                IconButton(onPressed: (){}, icon: Image.asset('assets/images/profile.png', width: 80, height: 80),),        
-                Text(
-                  userName,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                String userName = 'Guest User';
+                
+                if (state is GoogleAuthenticated) {
+                  userName = '${state.firstName} ${state.lastName}'.trim();
+                  if (userName.isEmpty) {
+                    userName = state.email.split('@')[0]; // Use email prefix if name is empty
+                  }
+                  
+                } else if (state is GuestAuthenticated) {
+                  userName = 'Guest User';
+              
+                }
+                
+                return Column(
+                  children: [
+                    IconButton(
+                      onPressed: () {}, 
+                      icon: Image.asset('assets/images/profile.png', width: 80, height: 80),
+                    ),        
+                    Text(
+                      userName,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 16),
             ProfileCustomButton(image: 'assets/navbaricons/downloadlimit.png', text: 'Download Limit : 10 Img', color: '0xFF2C2E36', screen: ''),
