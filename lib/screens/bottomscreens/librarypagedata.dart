@@ -5,6 +5,7 @@ import 'package:walldecor/bloc/library/library_bloc.dart';
 import 'package:walldecor/bloc/library/library_event.dart';
 import 'package:walldecor/bloc/library/libray_state.dart';
 import 'package:walldecor/screens/static/diolog.dart';
+import 'package:walldecor/screens/static/noresult.dart';
 
 class LibrarypageData extends StatefulWidget {
   const LibrarypageData({super.key});
@@ -92,14 +93,8 @@ class _LibrarypageDataState extends State<LibrarypageData> {
             print('🔥 LibraryLoaded: ${data.length} items');
 
             if (data.isEmpty) {
-              return const Center(
-                child: Text(
-                  'No library data found',
-                  style: TextStyle(color: Colors.white70),
-                ),
-              );
+              return Noresult();
             }
-
             return GridView.builder(
               padding: const EdgeInsets.all(12),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

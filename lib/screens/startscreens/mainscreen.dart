@@ -5,7 +5,7 @@ import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:walldecor/bloc/auth/auth_state.dart';
 import 'package:walldecor/screens/bottomscreens/homescreen.dart';
 import 'package:flutter/material.dart';
-import 'package:walldecor/screens/bottomscreens/librarypage.dart';
+// import 'package:walldecor/screens/bottomscreens/librarypage.dart';
 import 'package:walldecor/screens/bottomscreens/librarypagedata.dart';
 import 'package:walldecor/screens/bottomscreens/profilescreen.dart';
 import 'package:walldecor/screens/detailedscreens/collectiondetails.dart';
