@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:walldecor/bloc/auth/auth_event.dart';
-import 'package:walldecor/services/google_auth_service.dart';
+import 'package:walldecor/repositories/services/google_auth_service.dart';
 
 class CustomButton extends StatefulWidget {
   final String color;
