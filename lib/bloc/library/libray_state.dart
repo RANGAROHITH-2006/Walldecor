@@ -1,6 +1,7 @@
 // bloc/library_state.dart
 import 'package:equatable/equatable.dart';
 import 'package:walldecor/models/all_library_model.dart';
+import 'package:walldecor/models/library_details_model.dart';
 
 abstract class LibraryState extends Equatable {
   @override
@@ -46,4 +47,9 @@ class LibraryRenameSuccess extends LibraryState {
 
   @override
   List<Object?> get props => [data];
+}
+
+class LibraryDetailsLoaded extends LibraryState {
+  final List<LibraryDetailsModel> data;
+  LibraryDetailsLoaded(this.data);
 }

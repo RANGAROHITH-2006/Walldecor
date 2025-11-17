@@ -152,48 +152,61 @@ class _CategoryViewState extends State<_CategoryView> {
 
   // ---------------- Trending Pill UI ----------------
   Widget buildTrendingPill(item) {
-    return Container(
-      width: 140,
-      decoration: BoxDecoration(
-        color: const Color(0xFF2E3138),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF3A3D47)),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              item.coverPhoto.urls.small,
-              width: 40,
-              height: 40,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CategoryDetailsPage(
+              title: item.title,
+              id: item.id,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        width: 140,
+        decoration: BoxDecoration(
+          color: const Color(0xFF2E3138),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF3A3D47)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                item.coverPhoto.urls.small,
                 width: 40,
                 height: 40,
-                color: const Color(0xFF3A3D47),
-                child: const Icon(
-                  Icons.image_not_supported,
-                  color: Color(0xFF868EAE),
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  width: 40,
+                  height: 40,
+                  color: const Color(0xFF3A3D47),
+                  child: const Icon(
+                    Icons.image_not_supported,
+                    color: Color(0xFF868EAE),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              item.title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                item.title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

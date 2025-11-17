@@ -97,6 +97,7 @@ class _ResultpageState extends State<Resultpage> {
         resizeToAvoidBottomInset: false,
         backgroundColor: const Color(0xFF25272F),
         appBar: AppBar(
+          titleSpacing: 0,
           automaticallyImplyLeading: false,
           leading: IconButton(
             onPressed: () => Navigator.pop(context),

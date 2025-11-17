@@ -9,6 +9,7 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
 
   LibraryBloc(this.repository) : super(LibraryInitial()) {
     on<GetAllLibraryEvent>(_getAllLibrary);
+    on<GetAllLibraryDetailsEvent>(_onFetchLibraryDetails);
     on<CreateLibraryEvent>((event, emit) async {
       emit(LibraryLoading());
 
@@ -67,6 +68,20 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
       final data = await repository.fetchLibraryData();
       print("🔥 BLOC: Received ${data.length} items from repository");
       emit(LibraryLoaded(data));
+    } catch (e) {
+      emit(LibraryError(e.toString()));
+    }
+  }
+
+
+  void _onFetchLibraryDetails(
+    GetAllLibraryDetailsEvent event,
+    Emitter<LibraryState> emit,
+  ) async {
+    emit(LibraryLoading());
+    try {
+      final data = await repository.fetchLibraryDetailedData(event.libraryId);
+      emit(LibraryDetailsLoaded(data));
     } catch (e) {
       emit(LibraryError(e.toString()));
     }

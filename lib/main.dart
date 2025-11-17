@@ -6,6 +6,7 @@ import 'package:walldecor/bloc/category/category_event.dart';
 import 'package:walldecor/bloc/collection/collection_bloc.dart';
 import 'package:walldecor/bloc/collection/collection_event.dart';
 import 'package:walldecor/bloc/library/library_bloc.dart';
+// import 'package:walldecor/bloc/library/library_event.dart';
 import 'package:walldecor/bloc/trending/trending_bloc.dart';
 import 'package:walldecor/bloc/trending/trending_event.dart';
 import 'package:walldecor/firebase_options.dart';
@@ -16,6 +17,7 @@ import 'package:walldecor/repositories/library_repository.dart';
 import 'package:walldecor/repositories/trending_repository.dart';
 import 'package:walldecor/router.dart';
 import 'package:flutter/material.dart';
+// import 'package:walldecor/screens/bottomscreens/librarypagedata.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

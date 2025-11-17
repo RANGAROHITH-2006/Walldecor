@@ -58,3 +58,9 @@ class RenameLibraryEvent extends LibraryEvent {
   @override
   List<Object?> get props => [libraryId, libraryName];
 }
+
+class GetAllLibraryDetailsEvent extends LibraryEvent {
+  final String libraryId;
+
+  GetAllLibraryDetailsEvent(this.libraryId);
+}
