@@ -2,14 +2,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:walldecor/bloc/trending/trending_bloc.dart';
 import 'package:walldecor/bloc/trending/trending_state.dart';
 import 'package:walldecor/bloc/trending/trending_event.dart';
 import 'package:walldecor/bloc/search/search_bloc.dart';
 import 'package:walldecor/bloc/search/search_state.dart';
 import 'package:walldecor/bloc/search/search_event.dart';
-import 'package:walldecor/screens/static/noresult.dart';
+
 
 class Searchpage extends StatefulWidget {
   const Searchpage({super.key});
