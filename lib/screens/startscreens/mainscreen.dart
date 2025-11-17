@@ -5,10 +5,10 @@ import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:walldecor/bloc/auth/auth_state.dart';
 import 'package:walldecor/screens/bottomscreens/homescreen.dart';
 import 'package:flutter/material.dart';
+import 'package:walldecor/screens/bottomscreens/premiumscreen.dart';
 // import 'package:walldecor/screens/bottomscreens/librarypage.dart';
 import 'package:walldecor/screens/library/librarypreview.dart';
 import 'package:walldecor/screens/bottomscreens/profilescreen.dart';
-import 'package:walldecor/screens/detailedscreens/collectiondetails.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -22,7 +22,7 @@ class _MainScreenState extends State<MainScreen> {
   List<Widget> bottomScreens = [
     const Homescreen(),
     const LibrarypageData(),
-    const CollectionDetails(title: 'Allover Homestyle'),
+    const PremiumScreen(),
     const ProfileScreen(),
   ];
 
