@@ -22,7 +22,7 @@ class _MainScreenState extends State<MainScreen> {
   List<Widget> bottomScreens = [
     const Homescreen(),
     const LibrarypageData(),
-    const CollectionDetailsPage(title: 'Allover Homestyle'),
+    const CollectionDetails(title: 'Allover Homestyle'),
     const ProfileScreen(),
   ];
 

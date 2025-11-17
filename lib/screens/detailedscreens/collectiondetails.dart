@@ -3,15 +3,15 @@ import 'package:walldecor/screens/detailedscreens/showresultpage.dart';
 import 'package:walldecor/screens/navscreens/notificationpage.dart';
 import 'package:walldecor/screens/navscreens/searchpage.dart';
 
-class CollectionDetailsPage extends StatefulWidget {
+class CollectionDetails extends StatefulWidget {
   final String title;
-  const CollectionDetailsPage({super.key, required this.title});
+  const CollectionDetails({super.key, required this.title});
 
   @override
-  State<CollectionDetailsPage> createState() => _CollectionDetailsPageState();
+  State<CollectionDetails> createState() => _CollectionDetailsState();
 }
 
-class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
+class _CollectionDetailsState extends State<CollectionDetails> {
   List<String> images = [
     'assets/collection/collection1.png',
     'assets/collection/collection2.png',
@@ -142,7 +142,7 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
         },
             ),
       ),
-    
+
       
     );
   }

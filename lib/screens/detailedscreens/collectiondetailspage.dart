@@ -1,28 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:walldecor/bloc/category/category_bloc.dart';
-import 'package:walldecor/bloc/category/category_event.dart';
-import 'package:walldecor/bloc/category/category_state.dart';
-import 'package:walldecor/models/categorydetailes_model.dart';
+import 'package:walldecor/bloc/collection/collection_bloc.dart';
+import 'package:walldecor/bloc/collection/collection_event.dart';
+import 'package:walldecor/bloc/collection/collection_state.dart';
+import 'package:walldecor/models/collectiondetailes_model.dart';
+import 'package:walldecor/models/categorydetailes_model.dart' as CategoryModel;
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/screens/navscreens/notificationpage.dart';
 import 'package:walldecor/screens/navscreens/searchpage.dart';
 
-class CategoryDetailsPage extends StatefulWidget {
+// Converter functions to convert collection models to category models
+CategoryModel.Urls convertUrls(Urls urls) {
+  return CategoryModel.Urls(
+    full: urls.full,
+    regular: urls.regular,
+    small: urls.small,
+  );
+}
+
+CategoryModel.User convertUser(User user) {
+  return CategoryModel.User(
+    id: user.id,
+    username: user.username,
+    name: user.name,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    profileLink: user.profileLink,
+    profileImage: user.profileImage,
+  );
+}
+
+class CollectionDetailsPage extends StatefulWidget {
   final String title;
   final String id;
 
-  const CategoryDetailsPage({super.key, required this.title, required this.id});
+  const CollectionDetailsPage({super.key, required this.title, required this.id});
 
   @override
-  State<CategoryDetailsPage> createState() => _CategoryDetailsPageState();
+  State<CollectionDetailsPage> createState() => _CollectionDetailsPageState();
 }
 
-class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
+class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
   @override
   void initState() {
     super.initState();
-    context.read<CategoryBloc>().add(FetchCategoryDetailsEvent(widget.id));
+    context.read<CollectionBloc>().add(FetchCollectionDetailsEvent(widget.id));
   }
 
   @override
@@ -63,14 +85,14 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
           ),
         ],
       ),
-      body: BlocBuilder<CategoryBloc, CategoryState>(
+      body: BlocBuilder<CollectionBloc, CollectionState>(
         builder: (context, state) {
-          if (state is CategoryLoading) {
+          if (state is CollectionLoading) {
             return const Center(
               child: CircularProgressIndicator(color: Color(0xFFEE5776)),
             );
-          } else if (state is CategoryDetailsLoaded) {
-            final List<CategorydetailesModel> details = state.data;
+          } else if (state is CollectionDetailsLoaded) {
+            final List<CollectiondetailesModel> details = state.data;
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: GridView.builder(
@@ -88,12 +110,13 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder:
-                              (context) =>
-                                  Resultpage(urls: item.urls, user: item.user),
+                          builder: (context) => Resultpage(
+                            urls: convertUrls(item.urls), 
+                            user: convertUser(item.user),
+                          ),
                         ),
                       );
-                      debugPrint('image $index tapped');
+                      debugPrint('collection image $index tapped');
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -114,17 +137,15 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                               child: Image.network(
                                 item.urls.small,
                                 fit: BoxFit.cover,
-                                errorBuilder:
-                                    (_, __, ___) => Container(
-                                      color: Colors.grey[800],
-                                      child: const Icon(
-                                        Icons.image_not_supported,
-                                        color: Colors.white,
-                                      ),
-                                    ),
+                                errorBuilder: (_, __, ___) => Container(
+                                  color: Colors.grey[800],
+                                  child: const Icon(
+                                    Icons.image_not_supported,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
                             ),
-
                             Positioned(
                               bottom: 8,
                               right: 8,
@@ -161,11 +182,42 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 },
               ),
             );
-          } else if (state is CategoryError) {
+          } else if (state is CollectionError) {
             return Center(
-              child: Text(
-                'Error: ${state.message}',
-                style: const TextStyle(color: Colors.redAccent),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.redAccent,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error loading collection',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.message,
+                    style: const TextStyle(color: Colors.redAccent),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<CollectionBloc>().add(FetchCollectionDetailsEvent(widget.id));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEE5776),
+                    ),
+                    child: const Text('Retry'),
+                  ),
+                ],
               ),
             );
           } else {

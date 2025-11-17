@@ -44,7 +44,7 @@ class CollectionRepository {
       }
 
       print('$baseUrl/unsplashImage/collection/$id');
-    final response = await http.get(Uri.parse('$baseUrl/unsplashImage/collection/_UYE3W-Rj7s'),
+    final response = await http.get(Uri.parse('$baseUrl/unsplashImage/collection/$id'),
      headers: {
           'Content-Type': 'application/json',
           'Authorization': token, 

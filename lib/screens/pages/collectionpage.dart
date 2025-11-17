@@ -5,7 +5,7 @@ import 'package:walldecor/bloc/collection/collection_bloc.dart';
 import 'package:walldecor/bloc/collection/collection_event.dart';
 import 'package:walldecor/bloc/collection/collection_state.dart';
 import 'package:walldecor/repositories/collection_repository.dart';
-import 'package:walldecor/screens/detailedscreens/categorydetailespage.dart';
+import 'package:walldecor/screens/detailedscreens/collectiondetailspage.dart';
 
 class CollectionPage extends StatefulWidget {
   const CollectionPage({super.key});
@@ -92,7 +92,7 @@ class _CollectionPageState extends State<CollectionPage> {
     return GestureDetector(
       onTap: () {
         Navigator.push(context, MaterialPageRoute(
-          builder: (context) => CategoryDetailsPage(title: collections[index].title,id: collections[index].id),
+          builder: (context) => CollectionDetailsPage(title: collections[index].title,id: collections[index].id),
         ));
       },
       child: Container(
