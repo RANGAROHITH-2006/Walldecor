@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:walldecor/screens/library/download_screen.dart';
+import 'package:walldecor/screens/library/favorite_screen.dart';
 import 'package:walldecor/screens/navscreens/notificationpage.dart';
-import 'package:walldecor/screens/pages/downloadpage.dart';
 
 
 class Librarydownload extends StatefulWidget {
@@ -111,11 +112,11 @@ class _LibrarydownloadState extends State<Librarydownload> {
 Widget _buildTabContent() {
     switch (selectedTabIndex) {
       case 0:
-        return const Downloadpage();
+        return const DownloadScreen();
       case 1:
-        return const Downloadpage();
+        return const FavoriteScreen();
       default:
-        return const Downloadpage();
+        return const DownloadScreen();
     }
   }
 }

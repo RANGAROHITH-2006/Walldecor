@@ -5,6 +5,8 @@ import 'package:walldecor/bloc/category/category_bloc.dart';
 import 'package:walldecor/bloc/category/category_event.dart';
 import 'package:walldecor/bloc/collection/collection_bloc.dart';
 import 'package:walldecor/bloc/collection/collection_event.dart';
+import 'package:walldecor/bloc/download/download_bloc.dart';
+import 'package:walldecor/bloc/favorite/favorite_bloc.dart';
 import 'package:walldecor/bloc/library/library_bloc.dart';
 import 'package:walldecor/bloc/search/search_bloc.dart';
 // import 'package:walldecor/bloc/library/library_event.dart';
@@ -14,6 +16,8 @@ import 'package:walldecor/firebase_options.dart';
 import 'package:walldecor/repositories/auth_repository.dart';
 import 'package:walldecor/repositories/category_repository.dart';
 import 'package:walldecor/repositories/collection_repository.dart';
+import 'package:walldecor/repositories/download_repository.dart';
+import 'package:walldecor/repositories/favorite_repository.dart';
 import 'package:walldecor/repositories/library_repository.dart';
 import 'package:walldecor/repositories/Search_repository.dart';
 import 'package:walldecor/repositories/trending_repository.dart';
@@ -35,6 +39,8 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => LibraryBloc(LibraryRepository())),
+        BlocProvider(create: (_) => DownloadBloc(downloadRepository: DownloadRepository())),
+        BlocProvider(create: (_) => FavoriteBloc(favoriteRepository: FavoriteRepository())),
         BlocProvider(create: (_) => SearchBloc(SearchRepository())),
         BlocProvider(
           create:

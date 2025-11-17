@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:walldecor/bloc/library/library_bloc.dart';
+import 'package:walldecor/bloc/favorite/favorite_bloc.dart';
+import 'package:walldecor/bloc/favorite/favorite_event.dart';
+import 'package:walldecor/bloc/favorite/favorite_state.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
 import 'package:walldecor/repositories/library_repository.dart';
+import 'package:walldecor/repositories/favorite_repository.dart';
 import 'package:walldecor/screens/static/diolog.dart';
 
 class Resultpage extends StatefulWidget {
@@ -54,13 +58,23 @@ class _ResultpageState extends State<Resultpage> {
               ),
               child: Column(
                 children: [
-                  Row(
-                    children: const [
-                      Icon(Icons.favorite_border, color: Colors.white),
-                      SizedBox(width: 8),
-                      Text("Add to Favorites",
-                          style: TextStyle(color: Colors.white, fontSize: 15)),
-                    ],
+                  GestureDetector(
+                    onTap: () {
+                      _removePopup();
+                      context.read<FavoriteBloc>().add(AddToFavoriteEvent(
+                        id: widget.user.id,
+                        urls: widget.urls.toJson(),
+                        user: widget.user.toJson(),
+                      ));
+                    },
+                    child: Row(
+                      children: const [
+                        Icon(Icons.favorite_border, color: Colors.white),
+                        SizedBox(width: 8),
+                        Text("Add to Favorites",
+                            style: TextStyle(color: Colors.white, fontSize: 15)),
+                      ],
+                    ),
                   ),
                   Divider(color: Colors.white54, thickness: 1),
                   Row(
@@ -91,9 +105,34 @@ class _ResultpageState extends State<Resultpage> {
 
     final image = widget.urls.regular;
 
-    return BlocProvider(
-      create: (context) => LibraryBloc(LibraryRepository()),
-      child: Scaffold(
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => LibraryBloc(LibraryRepository())),
+        BlocProvider(create: (context) => FavoriteBloc(favoriteRepository: FavoriteRepository())),
+      ],
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<FavoriteBloc, FavoriteState>(
+            listener: (context, state) {
+              if (state is FavoriteAddSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } else if (state is FavoriteAddError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: const Color(0xFFEE5776),
+                  ),
+                );
+              }
+            },
+          ),
+        ],
+        child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: const Color(0xFF25272F),
         appBar: AppBar(
@@ -202,6 +241,6 @@ class _ResultpageState extends State<Resultpage> {
           ),
         ),
       ),
-    );
+    ));
   }
 }

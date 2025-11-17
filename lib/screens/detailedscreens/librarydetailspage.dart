@@ -1,10 +1,12 @@
 // ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:walldecor/bloc/library/library_bloc.dart';
 import 'package:walldecor/bloc/library/library_event.dart';
 import 'package:walldecor/bloc/library/libray_state.dart';
+import 'package:walldecor/bloc/download/download_bloc.dart';
+import 'package:walldecor/bloc/download/download_event.dart';
+import 'package:walldecor/bloc/download/download_state.dart';
 import 'package:walldecor/models/library_details_model.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
@@ -105,29 +107,54 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
           ),
         ],
       ),
-      body: BlocListener<LibraryBloc, LibraryState>(
-        listener: (context, state) {
-          if (state is LibraryDeleteSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Library deleted successfully'),
-                backgroundColor: Colors.green,
-                duration: Duration(seconds: 2),
-              ),
-            );
-            // Refresh library data and go back
-            context.read<LibraryBloc>().add(GetAllLibraryEvent());
-            Navigator.pop(context);
-          } else if (state is LibraryDeleteError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Failed to delete library: ${state.message}'),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          }
-        },
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<LibraryBloc, LibraryState>(
+            listener: (context, state) {
+              if (state is LibraryDeleteSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Library deleted successfully'),
+                    backgroundColor: Colors.green,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+                // Refresh library data and go back
+                context.read<LibraryBloc>().add(GetAllLibraryEvent());
+                Navigator.pop(context);
+              } else if (state is LibraryDeleteError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Failed to delete library: ${state.message}'),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+              }
+            },
+          ),
+          BlocListener<DownloadBloc, DownloadState>(
+            listener: (context, state) {
+              if (state is DownloadAddSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.green,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              } else if (state is DownloadAddError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Download failed: ${state.message}'),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+              }
+            },
+          ),
+        ],
         child: BlocBuilder<LibraryBloc, LibraryState>(
           builder: (context, state) {
           print('🔥 LibraryDetailsPage: Current state - ${state.runtimeType}');
@@ -221,11 +248,13 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
                               child: GestureDetector(
                                 onTap: () {
                                   debugPrint('Downloading wallpaper $index');
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Downloading wallpaper...'),
-                                      backgroundColor: const Color(0xFF3A3D47),
-                                      duration: const Duration(seconds: 2),
+                                  
+                                  // Add to downloads using DownloadBloc
+                                  context.read<DownloadBloc>().add(
+                                    AddToDownloadEvent(
+                                      id: item.id,
+                                      urls: item.url.toJson(),
+                                      user: item.imageOwner.toJson(),
                                     ),
                                   );
                                 },

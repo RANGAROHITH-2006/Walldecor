@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:walldecor/bloc/category/category_bloc.dart';
 import 'package:walldecor/bloc/category/category_event.dart';
 import 'package:walldecor/bloc/category/category_state.dart';
+import 'package:walldecor/bloc/download/download_bloc.dart';
+import 'package:walldecor/bloc/download/download_event.dart';
+import 'package:walldecor/bloc/download/download_state.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/screens/navscreens/notificationpage.dart';
@@ -63,7 +66,27 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
           ),
         ],
       ),
-      body: BlocBuilder<CategoryBloc, CategoryState>(
+      body: BlocListener<DownloadBloc, DownloadState>(
+        listener: (context, state) {
+          if (state is DownloadAddSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          } else if (state is DownloadAddError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Download failed: ${state.message}'),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        },
+        child: BlocBuilder<CategoryBloc, CategoryState>(
         builder: (context, state) {
           if (state is CategoryLoading) {
             return const Center(
@@ -131,11 +154,14 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                               child: GestureDetector(
                                 onTap: () {
                                   debugPrint('Downloading wallpaper $index');
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Downloading wallpaper...'),
-                                      backgroundColor: const Color(0xFF3A3D47),
-                                      duration: const Duration(seconds: 2),
+                                  
+                                  // Add to downloads using DownloadBloc
+                                  final imageId = "cat_${item.id}_${DateTime.now().millisecondsSinceEpoch}";
+                                  context.read<DownloadBloc>().add(
+                                    AddToDownloadEvent(
+                                      id: imageId,
+                                      urls: item.urls.toJson(),
+                                      user: item.user.toJson(),
                                     ),
                                   );
                                 },
@@ -172,6 +198,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
             return const SizedBox.shrink();
           }
         },
+        ),
       ),
     );
   }

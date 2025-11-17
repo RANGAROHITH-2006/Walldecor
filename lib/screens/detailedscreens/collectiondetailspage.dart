@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:walldecor/bloc/collection/collection_bloc.dart';
 import 'package:walldecor/bloc/collection/collection_event.dart';
 import 'package:walldecor/bloc/collection/collection_state.dart';
+import 'package:walldecor/bloc/download/download_bloc.dart';
+import 'package:walldecor/bloc/download/download_event.dart';
+import 'package:walldecor/bloc/download/download_state.dart';
 import 'package:walldecor/models/collectiondetailes_model.dart';
 import 'package:walldecor/models/categorydetailes_model.dart' as CategoryModel;
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
@@ -85,7 +88,27 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
           ),
         ],
       ),
-      body: BlocBuilder<CollectionBloc, CollectionState>(
+      body: BlocListener<DownloadBloc, DownloadState>(
+        listener: (context, state) {
+          if (state is DownloadAddSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          } else if (state is DownloadAddError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Download failed: ${state.message}'),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        },
+        child: BlocBuilder<CollectionBloc, CollectionState>(
         builder: (context, state) {
           if (state is CollectionLoading) {
             return const Center(
@@ -152,11 +175,32 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
                               child: GestureDetector(
                                 onTap: () {
                                   debugPrint('Downloading wallpaper $index');
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Downloading wallpaper...'),
-                                      backgroundColor: const Color(0xFF3A3D47),
-                                      duration: const Duration(seconds: 2),
+                                  
+                                  // Add to downloads using DownloadBloc
+                                  final imageId = "col_${item.id}_${DateTime.now().millisecondsSinceEpoch}";
+                                  
+                                  // Convert collection model to compatible format
+                                  final urlsJson = {
+                                    "full": item.urls.full,
+                                    "regular": item.urls.regular,
+                                    "small": item.urls.small,
+                                  };
+                                  
+                                  final userJson = {
+                                    "id": item.user.id,
+                                    "username": item.user.username,
+                                    "name": item.user.name,
+                                    "first_name": item.user.firstName,
+                                    "last_name": item.user.lastName,
+                                    "profile_link": item.user.profileLink,
+                                    "profile_image": item.user.profileImage,
+                                  };
+                                  
+                                  context.read<DownloadBloc>().add(
+                                    AddToDownloadEvent(
+                                      id: imageId,
+                                      urls: urlsJson,
+                                      user: userJson,
                                     ),
                                   );
                                 },
@@ -224,6 +268,7 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
             return const SizedBox.shrink();
           }
         },
+        ),
       ),
     );
   }
