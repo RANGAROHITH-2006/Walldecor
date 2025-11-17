@@ -314,4 +314,66 @@ class LibraryRepository {
       throw Exception('Failed to fetch library details: $e');
     }
   }
+
+  Future<Map<String, dynamic>> deleteLibrary(
+    String libraryId, {
+    required String libraryName,
+  }) async {
+    final token = await _getSavedToken();
+    final url = Uri.parse("$baseUrl/library/$libraryId");
+
+    final requestBody = {"libraryName": libraryName};
+
+    print("🔥 Deleting library ID: $libraryId");
+    print("🔥 Library name: $libraryName");
+    print("🔥 Request body: ${jsonEncode(requestBody)}");
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token ?? "",
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      print("🔥 Delete response status: ${response.statusCode}");
+      print("🔥 Delete response body: ${response.body}");
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print("🔥 Library deleted successfully");
+
+        // Handle different response types
+        if (response.body.isEmpty) {
+          return {"success": true, "message": "Library deleted successfully"};
+        }
+
+        try {
+          final responseData = jsonDecode(response.body);
+
+          if (responseData is String) {
+            return {"success": true, "message": responseData};
+          }
+
+          if (responseData is Map<String, dynamic>) {
+            return responseData;
+          }
+
+          return {"success": true, "data": responseData};
+        } catch (jsonError) {
+          print("🔥 JSON decode error: $jsonError");
+          return {"success": true, "message": response.body};
+        }
+      } else {
+        print("🔥 API Error: ${response.statusCode} - ${response.body}");
+        throw Exception(
+          "Failed to delete library: ${response.statusCode} → ${response.body}",
+        );
+      }
+    } catch (e) {
+      print("🔥 Exception deleting library: $e");
+      throw Exception("Failed to delete library: $e");
+    }
+  }
 }

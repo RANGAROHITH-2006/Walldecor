@@ -64,3 +64,16 @@ class GetAllLibraryDetailsEvent extends LibraryEvent {
 
   GetAllLibraryDetailsEvent(this.libraryId);
 }
+
+class DeleteLibraryEvent extends LibraryEvent {
+  final String libraryId;
+  final String libraryName;
+
+  DeleteLibraryEvent({
+    required this.libraryId,
+    required this.libraryName,
+  });
+
+  @override
+  List<Object?> get props => [libraryId, libraryName];
+}

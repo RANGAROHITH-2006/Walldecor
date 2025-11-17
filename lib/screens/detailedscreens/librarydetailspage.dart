@@ -27,6 +27,53 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
     context.read<LibraryBloc>().add(GetAllLibraryDetailsEvent(widget.id));
   }
 
+  void _showDeleteConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor:const Color(0xFF25272F).withOpacity(0.7),
+          title: Center(
+            child: const Text(
+              'Delete Library',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to delete "${widget.name}"? This action cannot be undone.',
+            style: const TextStyle(color: Colors.white),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.white70),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                context.read<LibraryBloc>().add(
+                  DeleteLibraryEvent(
+                    libraryId: widget.id,
+                    libraryName: widget.name,
+                  ),
+                );
+              },
+              child: const Text(
+                'Delete',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,14 +99,37 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
         actions: [
           IconButton(
             onPressed: () {
-              
+              _showDeleteConfirmationDialog(context);
             },
             icon: Icon(Icons.delete, color: Colors.white),
           ),
         ],
       ),
-      body: BlocBuilder<LibraryBloc, LibraryState>(
-        builder: (context, state) {
+      body: BlocListener<LibraryBloc, LibraryState>(
+        listener: (context, state) {
+          if (state is LibraryDeleteSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Library deleted successfully'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
+              ),
+            );
+            // Refresh library data and go back
+            context.read<LibraryBloc>().add(GetAllLibraryEvent());
+            Navigator.pop(context);
+          } else if (state is LibraryDeleteError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to delete library: ${state.message}'),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        },
+        child: BlocBuilder<LibraryBloc, LibraryState>(
+          builder: (context, state) {
           print('🔥 LibraryDetailsPage: Current state - ${state.runtimeType}');
 
           if (state is LibraryLoading) {
@@ -236,6 +306,7 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
             );
           }
         },
+        ),
       ),
     );
   }

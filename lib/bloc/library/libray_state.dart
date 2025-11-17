@@ -53,3 +53,19 @@ class LibraryDetailsLoaded extends LibraryState {
   final List<LibraryDetailsModel> data;
   LibraryDetailsLoaded(this.data);
 }
+
+class LibraryDeleteSuccess extends LibraryState {
+  final Map<String, dynamic> data;
+  LibraryDeleteSuccess(this.data);
+
+  @override
+  List<Object?> get props => [data];
+}
+
+class LibraryDeleteError extends LibraryState {
+  final String message;
+  LibraryDeleteError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

@@ -56,6 +56,20 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
         emit(LibraryError(e.toString()));
       }
     });
+    on<DeleteLibraryEvent>((event, emit) async {
+      emit(LibraryLoading());
+
+      try {
+        final response = await repository.deleteLibrary(
+          event.libraryId,
+          libraryName: event.libraryName,
+        );
+
+        emit(LibraryDeleteSuccess(response));
+      } catch (e) {
+        emit(LibraryDeleteError(e.toString()));
+      }
+    });
   }
 
   
