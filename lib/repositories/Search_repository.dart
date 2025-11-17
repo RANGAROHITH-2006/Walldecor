@@ -30,7 +30,14 @@ class SearchRepository {
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       print("Library created successfully");
-      return jsonDecode(response.body);
+      final responseData = jsonDecode(response.body);
+      if (responseData is List) {
+        return {"results": responseData};
+      } else if (responseData is Map<String, dynamic>) {
+        return responseData;
+      } else {
+        throw Exception("Unexpected response format: ${responseData.runtimeType}");
+      }
     } else {
       throw Exception("Failed: ${response.statusCode} → ${response.body}");
     }
