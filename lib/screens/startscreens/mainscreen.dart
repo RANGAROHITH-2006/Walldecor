@@ -2,7 +2,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
-import 'package:walldecor/bloc/auth/auth_state.dart';
 import 'package:walldecor/screens/bottomscreens/homescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:walldecor/screens/bottomscreens/premiumscreen.dart';
@@ -42,10 +41,10 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state is AuthError) {
+        if (state.status == AuthStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.message),
+              content: Text(state.message ?? 'An error occurred'),
               backgroundColor: Color(0xFFEE5776),
               duration: const Duration(seconds: 3),
             ),
@@ -59,7 +58,7 @@ class _MainScreenState extends State<MainScreen> {
             body: Stack(
               children: [
                 bottomScreens[currentIndex],
-                if (state is AuthLoading)
+                if (state.status == AuthStatus.loading)
                   Container(
                     color: const Color(0xFF25272F).withOpacity(0.7),
                     child: const Center(

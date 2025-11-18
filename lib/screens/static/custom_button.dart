@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
-import 'package:walldecor/bloc/auth/auth_event.dart';
 import 'package:walldecor/repositories/services/google_auth_service.dart';
 
 class CustomButton extends StatefulWidget {
@@ -36,14 +35,20 @@ class _CustomButtonState extends State<CustomButton> {
       if (userData != null) {
         if (context.mounted) {
           context.read<AuthBloc>().add(
-            LoginWithGoogleEvent(
+            LoginWithGoogle(
               firstName: userData['firstName']!,
               lastName: userData['lastName']!,
+              googleIdToken: userData['idToken']!,
+              deviceId: userData['deviceId']!,
               email: userData['email']!,
               firebaseUserId: userData['firebaseUserId']!,
               pushToken: userData['pushToken']!,
-              deviceId: userData['deviceId']!,
-              idToken: userData['idToken']!,
+              onSuccess: (user) {
+                print('Login successful: ${user.id}');
+              },
+              onError: (error) {
+                print('Login failed: $error');
+              },
             ),
           );
         }

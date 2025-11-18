@@ -17,7 +17,6 @@ class GoogleAuthService {
         return null;
       }
 
-    
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
       // Create a new credential
@@ -42,15 +41,15 @@ class GoogleAuthService {
       }
 
       // Get device ID
-      final String deviceId = await _getDeviceId();
+      final String deviceId = await getDeviceId();
       // Get FCM push token
       final String? fcmToken = await FirebaseMessaging.instance.getToken();
-      final String pushToken = fcmToken ?? 'no_fcm_token_available';
+      final String pushToken = fcmToken ?? '';
 
       // Extract user information
       final displayName = user.displayName ?? '';
       final nameParts = displayName.split(' ');
-      final firstName = nameParts.isNotEmpty ? nameParts.first : 'User';
+      final firstName = nameParts.isNotEmpty ? nameParts.first : '';
       final lastName = nameParts.length > 1 ? nameParts.skip(1).join(' ') : '';
 
       return {
@@ -69,7 +68,7 @@ class GoogleAuthService {
   }
 
   /// Get unique device ID
-  Future<String> _getDeviceId() async {
+  Future<String> getDeviceId() async {
     try {
       if (Platform.isAndroid) {
         final androidInfo = await _deviceInfo.androidInfo;
@@ -105,4 +104,35 @@ class GoogleAuthService {
 
   /// Get current Firebase user
   User? get currentUser => _firebaseAuth.currentUser;
+
+  /// Refresh Firebase ID token
+  Future<String?> refreshFirebaseToken() async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user != null) {
+        final token = await user.getIdToken(true); // Force refresh
+        return token;
+      }
+      return null;
+    } catch (e) {
+      print('Error refreshing Firebase token: $e');
+      return null;
+    }
+  }
+
+  /// Check if Firebase user session is valid
+  Future<bool> isFirebaseSessionValid() async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user != null) {
+        // Try to get a fresh token to verify session
+        final token = await user.getIdToken(false);
+        return token != null && token.isNotEmpty;
+      }
+      return false;
+    } catch (e) {
+      print('Firebase session validation failed: $e');
+      return false;
+    }
+  }
 }

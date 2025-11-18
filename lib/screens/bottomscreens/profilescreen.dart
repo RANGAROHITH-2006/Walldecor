@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
-import 'package:walldecor/bloc/auth/auth_state.dart';
 import 'package:walldecor/screens/navscreens/notificationpage.dart';
 import 'package:walldecor/screens/navscreens/settingspage.dart';
 import 'package:walldecor/screens/static/custom_button.dart';
@@ -45,13 +44,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               builder: (context, state) {
                 String userName = 'Guest User';
                 
-                if (state is GoogleAuthenticated) {
-                  userName = '${state.firstName} ${state.lastName}'.trim();
+                if (state.status == AuthStatus.success && state.user != null) {
+                  userName = '${state.user!.firstName} ${state.user!.lastName}'.trim();
                   if (userName.isEmpty) {
-                    userName = state.email.split('@')[0]; // Use email prefix if name is empty
+                    userName = state.user!.email.split('@')[0]; // Use email prefix if name is empty
                   }
                   
-                } else if (state is GuestAuthenticated) {
+                } else {
                   userName = 'Guest User';
               
                 }

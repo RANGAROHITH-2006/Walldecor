@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 import 'package:go_router/go_router.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
-import 'package:walldecor/bloc/auth/auth_event.dart';
+import 'package:walldecor/repositories/services/google_auth_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -17,9 +18,80 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Timer(const Duration(seconds: 3), () {
-      context.read<AuthBloc>().add(const CheckGuestEvent());
-      context.go('/mainscreen');
+      _checkExistingSession();
     });
+  }
+
+  Future<void> _checkExistingSession() async {
+    try {
+      // First check if there's an existing session
+      if (mounted) {
+        context.read<AuthBloc>().add(
+          SessionRequest(
+            onSuccess: (user) {
+              print('✅ Existing session found for user: ${user.email.isNotEmpty ? user.email : user.id}');
+              print('User type: ${user.userType}');
+              if (mounted) {
+                context.go('/mainscreen');
+              }
+            },
+            onError: (error) {
+              print('❌ Session check failed: $error');
+              print('🔄 Creating new guest session...');
+              // If no session or session expired, create guest login
+              _initializeGuestLogin();
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error checking existing session: $e');
+      _initializeGuestLogin();
+    }
+  }
+
+  Future<void> _initializeGuestLogin() async {
+    try {
+      final googleAuthService = GoogleAuthService();
+      final deviceId = await googleAuthService.getDeviceId();
+      
+      // Get FCM token
+      String pushToken = '';
+      try {
+        final fcmToken = await FirebaseMessaging.instance.getToken();
+        pushToken = fcmToken ?? '';
+      } catch (e) {
+        print('Failed to get FCM token: $e');
+      }
+      
+      if (mounted) {
+        context.read<AuthBloc>().add(
+          GuestLogin(
+            deviceId: deviceId,
+            pushToken: pushToken,
+            onSuccess: (user) {
+              print('✅ Guest login successful: ${user.id}');
+              print('Guest name: ${user.firstName} ${user.lastName}');
+              if (mounted) {
+                context.go('/mainscreen');
+              }
+            },
+            onError: (error) {
+              print('❌ Guest login failed: $error');
+              print('⚠️ Continuing to main screen anyway...');
+              if (mounted) {
+                context.go('/mainscreen'); // Go anyway
+              }
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error initializing guest login: $e');
+      if (mounted) {
+        context.go('/mainscreen');
+      }
+    }
   }
 
   @override

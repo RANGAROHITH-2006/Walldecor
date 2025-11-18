@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:uuid/uuid.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:io';
 
 class AuthRepository {
@@ -203,8 +204,6 @@ class AuthRepository {
       print('Firebase User ID: $firebaseUserId');
 
       final requestBody = {
-        'firstName': firstName,
-        'lastName': lastName,
         'email': email,
         'firebaseUserId': firebaseUserId,
         'pushToken': pushToken,
@@ -286,6 +285,80 @@ class AuthRepository {
     } catch (e) {
       print('Error logging in with Google: $e');
       throw Exception('Failed to login with Google: $e');
+    }
+  }
+
+  /// Logout via API (calls logout endpoint to remove push token)
+  Future<void> logout() async {
+    try {
+      print('🚀 Starting logout process...');
+      
+      // Get stored tokens
+      final prefs = await SharedPreferences.getInstance();
+      final authToken = prefs.getString(_authTokenKey);
+      
+      if (authToken != null) {
+        // Get FCM token to send to logout API
+        final pushToken = await _getFCMToken();
+        
+        print('Logout request with push token: $pushToken');
+        
+        final requestBody = {
+          'pushToken': pushToken,
+        };
+        
+        print('Request body: ${jsonEncode(requestBody)}');
+        print('Making logout API request to: $_baseUrl/auth/logout');
+
+        final response = await _httpClient.post(
+          Uri.parse('$_baseUrl/auth/logout'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authToken,
+          },
+          body: jsonEncode(requestBody),
+        ).timeout(
+          const Duration(seconds: 25),
+          onTimeout: () {
+            print('❌ Logout request timed out after 25 seconds');
+            throw Exception('Request timed out');
+          },
+        );
+
+        print('✅ Logout API response received!');
+        print('Response status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+
+        if (response.statusCode != 200) {
+          print('⚠️ Logout API failed, but continuing with local cleanup');
+          print('Status code: ${response.statusCode}');
+          print('Response body: ${response.body}');
+        }
+      }
+      
+      // Always remove local data regardless of API call result
+      await removeAuthData();
+      print('✅ Logout completed successfully!');
+      
+    } catch (e) {
+      print('❌ Error during logout API call: $e');
+      // Even if API call fails, remove local data
+      await removeAuthData();
+      print('✅ Local data cleared after API error');
+      throw Exception('Logout completed with warnings: $e');
+    }
+  }
+
+  /// Get FCM token for logout
+  Future<String> _getFCMToken() async {
+    try {
+      // Import firebase_messaging
+      final firebaseMessaging = FirebaseMessaging.instance;
+      final token = await firebaseMessaging.getToken();
+      return token ?? 'no_token_available';
+    } catch (e) {
+      print('Failed to get FCM token: $e');
+      return 'token_error';
     }
   }
 

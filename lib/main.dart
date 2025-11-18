@@ -13,7 +13,7 @@ import 'package:walldecor/bloc/search/search_bloc.dart';
 import 'package:walldecor/bloc/trending/trending_bloc.dart';
 import 'package:walldecor/bloc/trending/trending_event.dart';
 import 'package:walldecor/firebase_options.dart';
-import 'package:walldecor/repositories/auth_repository.dart';
+
 import 'package:walldecor/repositories/category_repository.dart';
 import 'package:walldecor/repositories/collection_repository.dart';
 import 'package:walldecor/repositories/download_repository.dart';
@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
                     ..add(FetchSearchTrendingEvent()),
         ),
         BlocProvider(
-          create: (context) => AuthBloc(authRepository: AuthRepository()),
+          create: (context) => AuthBloc(),
         ),
         BlocProvider(create: (_) => CategoryBloc(CategoryRepository())),
         BlocProvider(

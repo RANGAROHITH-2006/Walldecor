@@ -1,61 +1,39 @@
-import 'package:equatable/equatable.dart';
+part of 'auth_bloc.dart';
 
-abstract class AuthState extends Equatable {
-  const AuthState();
-
-  @override
-  List<Object> get props => [];
+enum AuthStatus {
+  initial,
+  success,
+  failure,
+  loading,
 }
 
-/// Initial state when the bloc is created
+class AuthState extends Equatable {
+  final AuthStatus status;
+  final String? token;
+  final String? message;
+  final User? user;
+
+   const AuthState({
+    this.status = AuthStatus.initial,
+    this.token,
+    this.message,
+     this.user,
+  });
+
+  AuthState copyWith(
+      {AuthStatus? status, User? user, String? token, String? message}) {
+    return AuthState(
+      status: status ?? this.status,
+      token: token ?? this.token,
+      message: message ?? this.message,
+      user: user ?? this.user,
+    );
+  }
+
+  @override
+  List<Object?> get props => [status, token, message, user];
+}
+
 class AuthInitial extends AuthState {
-  const AuthInitial();
-}
-
-/// Loading state when API call is in progress
-class AuthLoading extends AuthState {
-  const AuthLoading();
-}
-
-/// Success state when guest account is created
-class GuestAuthenticated extends AuthState {
-  final String guestId;
-  final String authToken;
-
-  const GuestAuthenticated({
-    required this.guestId,
-    required this.authToken,
-  });
-
-  @override
-  List<Object> get props => [guestId, authToken];
-}
-
-/// Success state when Google login is successful
-class GoogleAuthenticated extends AuthState {
-  final String userId;
-  final String authToken;
-  final String email;
-  final String firstName;
-  final String lastName;
-
-  const GoogleAuthenticated({
-    required this.userId,
-    required this.authToken,
-    required this.email,
-    required this.firstName,
-    required this.lastName,
-  });
-
-  @override
-  List<Object> get props => [userId, authToken, email, firstName, lastName];
-}
-
-class AuthError extends AuthState {
-  final String message;
-
-  const AuthError(this.message);
-
-  @override
-  List<Object> get props => [message];
+   const AuthInitial() : super(status: AuthStatus.initial);
 }
