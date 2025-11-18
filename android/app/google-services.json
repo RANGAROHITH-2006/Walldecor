@@ -39,10 +39,10 @@
               "client_type": 3
             },
             {
-              "client_id": "313737940069-v269kr593tsa9v5fvom8gv9e0b4ta05g.apps.googleusercontent.com",
+              "client_id": "313737940069-ghfu959khod5pjg9l0f69ottppn4eook.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.walldecorapp"
+                "bundle_id": "com.zooq.ai.photo.art.image.generator"
               }
             }
           ]
@@ -57,6 +57,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "313737940069-3uodidsm9krof9jcrup092q5rf1to7m0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zooq.ai.photo.art.image.generator",
+            "certificate_hash": "0e819d718404bd24ec56ea221ca967b92710ddc9"
+          }
+        },
         {
           "client_id": "313737940069-4tm5udu51fj7fjrfi8asgr0qgcgbdhc4.apps.googleusercontent.com",
           "client_type": 3
@@ -75,10 +83,10 @@
               "client_type": 3
             },
             {
-              "client_id": "313737940069-v269kr593tsa9v5fvom8gv9e0b4ta05g.apps.googleusercontent.com",
+              "client_id": "313737940069-ghfu959khod5pjg9l0f69ottppn4eook.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.walldecorapp"
+                "bundle_id": "com.zooq.ai.photo.art.image.generator"
               }
             }
           ]
