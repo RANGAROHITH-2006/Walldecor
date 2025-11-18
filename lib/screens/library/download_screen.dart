@@ -5,7 +5,7 @@ import 'package:walldecor/bloc/download/download_event.dart';
 import 'package:walldecor/bloc/download/download_state.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
-import 'package:walldecor/screens/static/noresult.dart';
+import 'package:walldecor/screens/widgets/noresult.dart';
 
 class DownloadScreen extends StatefulWidget {
   const DownloadScreen({super.key});

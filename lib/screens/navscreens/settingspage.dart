@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:walldecor/screens/static/modeicon.dart';
+import 'package:walldecor/screens/widgets/modeicon.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';

@@ -5,8 +5,8 @@ import 'package:walldecor/bloc/library/library_bloc.dart';
 import 'package:walldecor/bloc/library/library_event.dart';
 import 'package:walldecor/bloc/library/libray_state.dart';
 import 'package:walldecor/screens/detailedscreens/librarydetailspage.dart';
-import 'package:walldecor/screens/static/diolog.dart';
-import 'package:walldecor/screens/static/noresult.dart';
+import 'package:walldecor/screens/widgets/diolog.dart';
+import 'package:walldecor/screens/widgets/noresult.dart';
 
 class LibrarypageData extends StatefulWidget {
   const LibrarypageData({super.key});

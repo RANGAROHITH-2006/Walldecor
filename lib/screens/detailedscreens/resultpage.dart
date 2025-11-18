@@ -8,7 +8,7 @@ import 'package:walldecor/bloc/favorite/favorite_state.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
 import 'package:walldecor/repositories/library_repository.dart';
 import 'package:walldecor/repositories/favorite_repository.dart';
-import 'package:walldecor/screens/static/diolog.dart';
+import 'package:walldecor/screens/widgets/diolog.dart';
 
 class Resultpage extends StatefulWidget {
   final Urls urls;
