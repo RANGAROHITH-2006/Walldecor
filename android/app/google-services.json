@@ -12,7 +12,20 @@
           "package_name": "com.example.walldecorapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "313737940069-dvg0o6tkmaau7vnaeqgmoso74nl5irnl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.walldecorapp",
+            "certificate_hash": "0e819d718404bd24ec56ea221ca967b92710ddc9"
+          }
+        },
+        {
+          "client_id": "313737940069-4tm5udu51fj7fjrfi8asgr0qgcgbdhc4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAvguBjufM1Z8TeJB3vUNJEWGORHco16g4"
@@ -20,7 +33,55 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "313737940069-4tm5udu51fj7fjrfi8asgr0qgcgbdhc4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "313737940069-v269kr593tsa9v5fvom8gv9e0b4ta05g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.walldecorapp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:313737940069:android:9c5788b037de41f0758a8c",
+        "android_client_info": {
+          "package_name": "com.zooq.ai.photo.art.image.generator"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "313737940069-4tm5udu51fj7fjrfi8asgr0qgcgbdhc4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvguBjufM1Z8TeJB3vUNJEWGORHco16g4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "313737940069-4tm5udu51fj7fjrfi8asgr0qgcgbdhc4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "313737940069-v269kr593tsa9v5fvom8gv9e0b4ta05g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.walldecorapp"
+              }
+            }
+          ]
         }
       }
     }

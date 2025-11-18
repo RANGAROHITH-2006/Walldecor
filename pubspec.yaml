@@ -26,6 +26,7 @@ dependencies:
   uuid: ^4.2.1
   equatable: ^2.0.5
   firebase_messaging: ^16.0.4
+  in_app_purchase: ^3.2.3
 
 dev_dependencies:
   flutter_test:

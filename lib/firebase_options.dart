@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAvguBjufM1Z8TeJB3vUNJEWGORHco16g4',
-    appId: '1:313737940069:android:1c112c6561665e2c758a8c',
+    appId: '1:313737940069:android:9c5788b037de41f0758a8c',
     messagingSenderId: '313737940069',
     projectId: 'walldecor-88cdf',
     storageBucket: 'walldecor-88cdf.firebasestorage.app',
@@ -60,20 +60,24 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAyj6gyOcGR2bZPYdFPu3K7yDn2LK37Y1M',
-    appId: '1:313737940069:ios:965ac6ad26c34ac9758a8c',
+    appId: '1:313737940069:ios:2c98ebefec62f4fc758a8c',
     messagingSenderId: '313737940069',
     projectId: 'walldecor-88cdf',
     storageBucket: 'walldecor-88cdf.firebasestorage.app',
-    iosBundleId: 'com.example.walldecorapp',
+    androidClientId: '313737940069-dvg0o6tkmaau7vnaeqgmoso74nl5irnl.apps.googleusercontent.com',
+    iosClientId: '313737940069-ghfu959khod5pjg9l0f69ottppn4eook.apps.googleusercontent.com',
+    iosBundleId: 'com.zooq.ai.photo.art.image.generator',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAyj6gyOcGR2bZPYdFPu3K7yDn2LK37Y1M',
-    appId: '1:313737940069:ios:965ac6ad26c34ac9758a8c',
+    appId: '1:313737940069:ios:2c98ebefec62f4fc758a8c',
     messagingSenderId: '313737940069',
     projectId: 'walldecor-88cdf',
     storageBucket: 'walldecor-88cdf.firebasestorage.app',
-    iosBundleId: 'com.example.walldecorapp',
+    androidClientId: '313737940069-dvg0o6tkmaau7vnaeqgmoso74nl5irnl.apps.googleusercontent.com',
+    iosClientId: '313737940069-ghfu959khod5pjg9l0f69ottppn4eook.apps.googleusercontent.com',
+    iosBundleId: 'com.zooq.ai.photo.art.image.generator',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
@@ -85,4 +89,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'walldecor-88cdf.firebasestorage.app',
     measurementId: 'G-2M7BT07P7L',
   );
+
 }
