@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+// import 'package:share_plus/share_plus.dart';
+// import 'package:url_launcher/url_launcher.dart';
 import 'package:walldecor/screens/widgets/modeicon.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:walldecor/screens/widgets/feedback_dialog.dart';
 
 class Settingspage extends StatefulWidget {
   const Settingspage({super.key});
@@ -13,7 +16,6 @@ class Settingspage extends StatefulWidget {
 }
 
 class _SettingspageState extends State<Settingspage> {
-  
   /// Show logout confirmation dialog
   void _showLogoutDialog() {
     showDialog(
@@ -34,10 +36,7 @@ class _SettingspageState extends State<Settingspage> {
           ),
           content: const Text(
             'Are you sure you want to logout?',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 16,
-            ),
+            style: TextStyle(color: Colors.white70, fontSize: 16),
           ),
           actions: [
             TextButton(
@@ -46,10 +45,7 @@ class _SettingspageState extends State<Settingspage> {
               },
               child: const Text(
                 'Cancel',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16,
-                ),
+                style: TextStyle(color: Colors.white70, fontSize: 16),
               ),
             ),
             TextButton(
@@ -80,9 +76,7 @@ class _SettingspageState extends State<Settingspage> {
         barrierDismissible: false,
         builder: (BuildContext context) {
           return const Center(
-            child: CircularProgressIndicator(
-              color: Colors.white,
-            ),
+            child: CircularProgressIndicator(color: Colors.white),
           );
         },
       );
@@ -95,7 +89,7 @@ class _SettingspageState extends State<Settingspage> {
       } catch (e) {
         print('Failed to get FCM token for logout: $e');
       }
-      
+
       // Trigger logout with API call
       context.read<AuthBloc>().add(
         LogOutRequest(
@@ -106,10 +100,8 @@ class _SettingspageState extends State<Settingspage> {
           },
         ),
       );
-      
     } catch (e) {
-      
-      Navigator.of(context).pop(); 
+      Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Logout error: $e'),
@@ -124,26 +116,28 @@ class _SettingspageState extends State<Settingspage> {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-       if (state.status == AuthStatus.initial && state.user == null && state.token == null) {
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
-      context.go('/splashscreen');
-    } 
-    else if (state.status == AuthStatus.failure) {
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(state.message ?? 'An error occurred'),
-          backgroundColor: Colors.redAccent,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
-  },
+        if (state.status == AuthStatus.initial &&
+            state.user == null &&
+            state.token == null) {
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          }
+          context.go('/splashscreen');
+        } else if (state.status == AuthStatus.failure) {
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message ?? 'An error occurred'),
+              backgroundColor: Colors.redAccent,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      },
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: const Color(0xFF25272F),
         appBar: AppBar(
           backgroundColor: const Color(0xFF25272F),
@@ -152,7 +146,11 @@ class _SettingspageState extends State<Settingspage> {
             onPressed: () {
               Navigator.pop(context);
             },
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
+            icon: const Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
+              size: 18,
+            ),
           ),
           titleSpacing: 0,
           title: const Text('Settings', style: TextStyle(color: Colors.white)),
@@ -210,7 +208,7 @@ class _SettingspageState extends State<Settingspage> {
                       ),
 
                       onTap: () {
-                        // Navigate to Privacy settings
+                       
                       },
                     ),
                     ListTile(
@@ -219,12 +217,12 @@ class _SettingspageState extends State<Settingspage> {
                         color: Colors.white,
                       ),
                       title: const Text(
-                        'Feedback & Suggetion',
+                        'Feedback & Suggestion',
                         style: TextStyle(color: Colors.white, fontSize: 18),
                       ),
 
                       onTap: () {
-                        // Navigate to About page
+                        FeedbackDialog.show(context);
                       },
                     ),
                     ListTile(
