@@ -41,3 +41,13 @@ class DownloadRemoveError extends DownloadState {
 
   DownloadRemoveError({required this.message});
 }
+
+class DownloadStatusChecked extends DownloadState {
+  final String imageId;
+  final bool isDownloaded;
+
+  DownloadStatusChecked({
+    required this.imageId, 
+    required this.isDownloaded
+  });
+}

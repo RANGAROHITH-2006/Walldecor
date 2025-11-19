@@ -391,7 +391,8 @@ class _HomepageState extends State<Homepage> {
                     child: GestureDetector(
                       onTap: () {
                         // Add to downloads using DownloadBloc
-                        final imageId = "home_${image.id}_${DateTime.now().millisecondsSinceEpoch}";
+                        // Use only the actual image ID without timestamp for consistency
+                        final imageId = image.id;
                         
                         final urlsJson = {
                           "full": image.urls.full,
@@ -417,7 +418,7 @@ class _HomepageState extends State<Homepage> {
                           ),
                         );
                         
-                        debugPrint('Downloading wallpaper $index');
+                        debugPrint('Downloading wallpaper $index with ID: $imageId');
                       },
                       child: Container(
                         padding: const EdgeInsets.all(8),

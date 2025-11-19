@@ -177,7 +177,8 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
                                   debugPrint('Downloading wallpaper $index');
                                   
                                   // Add to downloads using DownloadBloc
-                                  final imageId = "col_${item.id}_${DateTime.now().millisecondsSinceEpoch}";
+                                  // Use only the actual image ID without timestamp for consistency
+                                  final imageId = item.id;
                                   
                                   // Convert collection model to compatible format
                                   final urlsJson = {

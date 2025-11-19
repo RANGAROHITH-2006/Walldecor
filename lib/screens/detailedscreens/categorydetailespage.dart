@@ -156,7 +156,8 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                   debugPrint('Downloading wallpaper $index');
                                   
                                   // Add to downloads using DownloadBloc
-                                  final imageId = "cat_${item.id}_${DateTime.now().millisecondsSinceEpoch}";
+                                  // Use only the actual image ID without timestamp for consistency
+                                  final imageId = item.id;
                                   context.read<DownloadBloc>().add(
                                     AddToDownloadEvent(
                                       id: imageId,

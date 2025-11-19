@@ -11,6 +11,7 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
     on<AddToDownloadEvent>(_onAddToDownload);
     on<GetAllDownloadsEvent>(_onGetAllDownloads);
     on<RemoveFromDownloadEvent>(_onRemoveFromDownload);
+    on<CheckDownloadStatusEvent>(_onCheckDownloadStatus);
   }
 
   Future<void> _onAddToDownload(
@@ -29,13 +30,13 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
 
       print('🔥 DownloadBloc: Add to downloads result - $result');
       
-      if (result['success'] == true || result.containsKey('message')) {
+      if (result['success'] == true) {
         emit(DownloadAddSuccess(
           message: result['message'] ?? 'Image added to downloads successfully',
         ));
       } else {
         emit(DownloadAddError(
-          message: result['error'] ?? 'Failed to add to downloads',
+          message: result['message'] ?? result['error'] ?? 'Failed to add to downloads',
         ));
       }
     } catch (e) {
@@ -75,18 +76,39 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
       
       print('🔥 DownloadBloc: Remove from downloads result - $result');
       
-      if (result['success'] == true || result.containsKey('message')) {
+      if (result['success'] == true) {
         emit(DownloadRemoveSuccess(
           message: result['message'] ?? 'Image removed from downloads successfully',
         ));
       } else {
         emit(DownloadRemoveError(
-          message: result['error'] ?? 'Failed to remove from downloads',
+          message: result['message'] ?? result['error'] ?? 'Failed to remove from downloads',
         ));
       }
     } catch (e) {
       print('🔥 DownloadBloc: Remove from downloads error - $e');
       emit(DownloadRemoveError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onCheckDownloadStatus(
+    CheckDownloadStatusEvent event,
+    Emitter<DownloadState> emit,
+  ) async {
+    try {
+      print('🔥 DownloadBloc: Checking download status for - ${event.imageId}');
+      
+      final isDownloaded = await downloadRepository.isImageDownloaded(event.imageId);
+      
+      print('🔥 DownloadBloc: Image ${event.imageId} download status - $isDownloaded');
+      
+      emit(DownloadStatusChecked(
+        imageId: event.imageId,
+        isDownloaded: isDownloaded,
+      ));
+    } catch (e) {
+      print('🔥 DownloadBloc: Check download status error - $e');
+      emit(DownloadError(message: e.toString()));
     }
   }
 }

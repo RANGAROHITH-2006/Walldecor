@@ -12,30 +12,87 @@ class DownloadRepository {
     return prefs.getString('auth_token');
   }
 
+  // Helper method to extract actual image ID from prefixed IDs
+  String _extractActualImageId(String id) {
+    List<String> parts = id.split('_');
+    
+    if (parts.length >= 2) {
+      // Remove first part if it's a known prefix
+      if (parts[0] == 'home' || parts[0] == 'col' || parts[0] == 'cat') {
+        parts.removeAt(0);
+      }
+      
+      // Remove last part if it looks like a timestamp (13+ digits)
+      if (parts.isNotEmpty && parts.last.length >= 13 && RegExp(r'^\d+$').hasMatch(parts.last)) {
+        parts.removeLast();
+      }
+      
+      return parts.join('_');
+    }
+    
+    return id; // Return as-is if no pattern matches
+  }
+
+
+
+
+
+
+  // Check if an image is already downloaded
+  Future<bool> isImageDownloaded(String imageId) async {
+    try {
+      String actualImageId = _extractActualImageId(imageId);
+      final existingDownloads = await fetchDownloads();
+      return existingDownloads.any((download) {
+        String existingActualId = _extractActualImageId(download.id ?? '');
+        return existingActualId == actualImageId;
+      });
+    } catch (e) {
+      print("🔥 Error checking if image is downloaded: $e");
+      return false; // Assume not downloaded on error
+    }
+  }
+
+
+
+
+
+
+
+
   // Add image to downloads
   Future<Map<String, dynamic>> addToDownloads({
     required String id,
     required Map<String, dynamic> urls,
     required Map<String, dynamic> user,
   }) async {
-    // First check if already exists in downloads
+    // Extract the actual image ID (remove prefixes and timestamp if present)
+    String actualImageId = _extractActualImageId(id);
+    
+    // First check if already exists in downloads using actual image ID
     try {
       final existingDownloads = await fetchDownloads();
-      final isAlreadyDownloaded = existingDownloads.any((download) => download.id == id);
+      final isAlreadyDownloaded = existingDownloads.any((download) {
+        String existingActualId = _extractActualImageId(download.id ?? '');
+        return existingActualId == actualImageId;
+      });
       
       if (isAlreadyDownloaded) {
-        return {"success": false, "message": "Image is already in downloads"};
+        return {"success": false, "message": "Image is already downloaded"};
       }
     } catch (e) {
       print("🔥 Error checking existing downloads: $e");
       // Continue with add operation if check fails
     }
 
+    // Use consistent ID format: actual image ID without timestamp
+    final consistentId = actualImageId;
+
     final url = Uri.parse("$baseUrl/user/download");
     final token = await _getSavedToken();
 
     final requestBody = {
-      "id": id,
+      "id": consistentId, // Use consistent ID instead of original
       "urls": urls,  // Changed back to "urls" to match API expectation
       "user": user,  // Changed back to "user" to match API expectation
     };
@@ -78,6 +135,13 @@ class DownloadRepository {
       throw Exception("Failed to add to downloads: $e");
     }
   }
+
+
+
+
+
+
+
 
   // Fetch user downloads
   Future<List<DownloadImageModel>> fetchDownloads() async {
@@ -188,6 +252,13 @@ class DownloadRepository {
     print('🔥 All endpoints failed, returning empty list');
     return [];
   }
+
+
+
+
+
+
+
 
   // Remove from downloads (optional feature)
   Future<Map<String, dynamic>> removeFromDownloads(String imageId) async {

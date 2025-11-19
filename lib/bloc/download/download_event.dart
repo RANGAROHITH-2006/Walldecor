@@ -19,3 +19,9 @@ class RemoveFromDownloadEvent extends DownloadEvent {
 
   RemoveFromDownloadEvent({required this.imageId});
 }
+
+class CheckDownloadStatusEvent extends DownloadEvent {
+  final String imageId;
+
+  CheckDownloadStatusEvent({required this.imageId});
+}
