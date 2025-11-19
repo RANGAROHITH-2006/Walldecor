@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:walldecor/bloc/category/category_bloc.dart';
 import 'package:walldecor/bloc/category/category_event.dart';
 import 'package:walldecor/bloc/category/category_state.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_bloc.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_event.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_state.dart';
 import 'package:walldecor/bloc/download/download_bloc.dart';
 import 'package:walldecor/bloc/download/download_event.dart';
 import 'package:walldecor/bloc/download/download_state.dart';
@@ -10,6 +13,7 @@ import 'package:walldecor/models/categorydetailes_model.dart';
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/screens/navscreens/notificationpage.dart';
 import 'package:walldecor/screens/navscreens/searchpage.dart';
+import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 
 class CategoryDetailsPage extends StatefulWidget {
   final String title;
@@ -66,33 +70,43 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
           ),
         ],
       ),
-      body: BlocListener<DownloadBloc, DownloadState>(
-        listener: (context, state) {
-          if (state is DownloadAddSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.green,
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          } else if (state is DownloadAddError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Download failed: ${state.message}'),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 3),
-              ),
+      body: BlocBuilder<ConnectivityBloc, ConnectivityState>(
+        builder: (context, connectivityState) {
+          if (connectivityState is ConnectivityOffline) {
+            return NoInternetWidget(
+              onRetry: () {
+                context.read<ConnectivityBloc>().add(CheckConnectivity());
+              },
             );
           }
-        },
-        child: BlocBuilder<CategoryBloc, CategoryState>(
-        builder: (context, state) {
-          if (state is CategoryLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: Color(0xFFEE5776)),
-            );
-          } else if (state is CategoryDetailsLoaded) {
+          
+          return BlocListener<DownloadBloc, DownloadState>(
+            listener: (context, state) {
+              if (state is DownloadAddSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.green,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              } else if (state is DownloadAddError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Download failed: ${state.message}'),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+              }
+            },
+            child: BlocBuilder<CategoryBloc, CategoryState>(
+            builder: (context, state) {
+              if (state is CategoryLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+                );
+              } else if (state is CategoryDetailsLoaded) {
             final List<CategorydetailesModel> details = state.data;
             return Padding(
               padding: const EdgeInsets.all(8.0),
@@ -188,18 +202,44 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 },
               ),
             );
-          } else if (state is CategoryError) {
-            return Center(
-              child: Text(
-                'Error: ${state.message}',
-                style: const TextStyle(color: Colors.redAccent),
-              ),
-            );
-          } else {
-            return const SizedBox.shrink();
-          }
+            } else if (state is CategoryError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.wifi_off,
+                      color: Color(0xFF868EAE),
+                      size: 48,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Unable to load category details',
+                      style: TextStyle(
+                        color: Color(0xFF868EAE),
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<CategoryBloc>().add(FetchCategoryDetailsEvent(widget.id));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFEE5776),
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              return const SizedBox.shrink();
+            }
+          },
+          ));
         },
-        ),
       ),
     );
   }

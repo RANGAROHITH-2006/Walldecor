@@ -4,8 +4,12 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:walldecor/bloc/collection/collection_bloc.dart';
 import 'package:walldecor/bloc/collection/collection_event.dart';
 import 'package:walldecor/bloc/collection/collection_state.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_bloc.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_event.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_state.dart';
 import 'package:walldecor/repositories/collection_repository.dart';
 import 'package:walldecor/screens/detailedscreens/collectiondetailspage.dart';
+import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 
 class CollectionPage extends StatefulWidget {
   const CollectionPage({super.key});
@@ -28,34 +32,76 @@ class _CollectionPageState extends State<CollectionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF25272F),
-      body: BlocBuilder<CollectionBloc, CollectionState>(
-        bloc: _collectionBloc,
-        builder: (context, state) {
-          if (state is CollectionLoading) {
-            return const Center(child: CircularProgressIndicator(color: Color(0xFFEE5776)));
-          } else if (state is CollectionLoaded) {
-            final collections = state.data;
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SingleChildScrollView(
-                child: StaggeredGrid.count(
-                  crossAxisCount: 6,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  children: List.generate(collections.length, (index) {
-                    return _buildStaggeredItem(
-                      collections,
-                      index,
-                    );
-                  }),
-                ),
-              ),
+      body: BlocBuilder<ConnectivityBloc, ConnectivityState>(
+        builder: (context, connectivityState) {
+          if (connectivityState is ConnectivityOffline) {
+            return NoInternetWidget(
+              onRetry: () {
+                context.read<ConnectivityBloc>().add(CheckConnectivity());
+              },
             );
-          } else if (state is CollectionError) {
-            return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
-          } else {
-            return const SizedBox.shrink();
           }
+          
+          return BlocBuilder<CollectionBloc, CollectionState>(
+            bloc: _collectionBloc,
+            builder: (context, state) {
+              if (state is CollectionLoading) {
+                return const Center(child: CircularProgressIndicator(color: Color(0xFFEE5776)));
+              } else if (state is CollectionLoaded) {
+                final collections = state.data;
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SingleChildScrollView(
+                    child: StaggeredGrid.count(
+                      crossAxisCount: 6,
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 8,
+                      children: List.generate(collections.length, (index) {
+                        return _buildStaggeredItem(
+                          collections,
+                          index,
+                        );
+                      }),
+                    ),
+                  ),
+                );
+              } else if (state is CollectionError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.wifi_off,
+                        color: Color(0xFF868EAE),
+                        size: 48,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Unable to load collections',
+                        style: TextStyle(
+                          color: Color(0xFF868EAE),
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          _collectionBloc.add(FetchCollectionEvent());
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFEE5776),
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                return const SizedBox.shrink();
+              }
+            },
+          );
         },
       ),
     );

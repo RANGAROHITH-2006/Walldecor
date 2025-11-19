@@ -5,6 +5,8 @@ import 'package:walldecor/bloc/category/category_bloc.dart';
 import 'package:walldecor/bloc/category/category_event.dart';
 import 'package:walldecor/bloc/collection/collection_bloc.dart';
 import 'package:walldecor/bloc/collection/collection_event.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_bloc.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_event.dart';
 import 'package:walldecor/bloc/download/download_bloc.dart';
 import 'package:walldecor/bloc/favorite/favorite_bloc.dart';
 import 'package:walldecor/bloc/library/library_bloc.dart';
@@ -13,6 +15,7 @@ import 'package:walldecor/bloc/search/search_bloc.dart';
 import 'package:walldecor/bloc/trending/trending_bloc.dart';
 import 'package:walldecor/bloc/trending/trending_event.dart';
 import 'package:walldecor/firebase_options.dart';
+import 'package:walldecor/repositories/connectivity_repository.dart';
 
 import 'package:walldecor/repositories/category_repository.dart';
 import 'package:walldecor/repositories/collection_repository.dart';
@@ -28,16 +31,26 @@ import 'package:flutter/material.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  
+  // Initialize connectivity service
+  final connectivityService = ConnectivityService();
+  connectivityService.initialize();
+  
+  runApp(MyApp(connectivityService: connectivityService));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final ConnectivityService connectivityService;
+  
+  const MyApp({super.key, required this.connectivityService});
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider(
+          create: (_) => ConnectivityBloc(connectivityService)..add(CheckConnectivity()),
+        ),
         BlocProvider(create: (_) => LibraryBloc(LibraryRepository())),
         BlocProvider(create: (_) => DownloadBloc(downloadRepository: DownloadRepository())),
         BlocProvider(create: (_) => FavoriteBloc(favoriteRepository: FavoriteRepository())),

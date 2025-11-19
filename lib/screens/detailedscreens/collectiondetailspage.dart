@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:walldecor/bloc/collection/collection_bloc.dart';
 import 'package:walldecor/bloc/collection/collection_event.dart';
 import 'package:walldecor/bloc/collection/collection_state.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_bloc.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_event.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_state.dart';
 import 'package:walldecor/bloc/download/download_bloc.dart';
 import 'package:walldecor/bloc/download/download_event.dart';
 import 'package:walldecor/bloc/download/download_state.dart';
@@ -11,6 +14,7 @@ import 'package:walldecor/models/categorydetailes_model.dart' as CategoryModel;
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/screens/navscreens/notificationpage.dart';
 import 'package:walldecor/screens/navscreens/searchpage.dart';
+import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 
 // Converter functions to convert collection models to category models
 CategoryModel.Urls convertUrls(Urls urls) {
@@ -88,33 +92,43 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
           ),
         ],
       ),
-      body: BlocListener<DownloadBloc, DownloadState>(
-        listener: (context, state) {
-          if (state is DownloadAddSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.green,
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          } else if (state is DownloadAddError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Download failed: ${state.message}'),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 3),
-              ),
+      body: BlocBuilder<ConnectivityBloc, ConnectivityState>(
+        builder: (context, connectivityState) {
+          if (connectivityState is ConnectivityOffline) {
+            return NoInternetWidget(
+              onRetry: () {
+                context.read<ConnectivityBloc>().add(CheckConnectivity());
+              },
             );
           }
-        },
-        child: BlocBuilder<CollectionBloc, CollectionState>(
-        builder: (context, state) {
-          if (state is CollectionLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: Color(0xFFEE5776)),
-            );
-          } else if (state is CollectionDetailsLoaded) {
+          
+          return BlocListener<DownloadBloc, DownloadState>(
+            listener: (context, state) {
+              if (state is DownloadAddSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.green,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              } else if (state is DownloadAddError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Download failed: ${state.message}'),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+              }
+            },
+            child: BlocBuilder<CollectionBloc, CollectionState>(
+            builder: (context, state) {
+              if (state is CollectionLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+                );
+              } else if (state is CollectionDetailsLoaded) {
             final List<CollectiondetailesModel> details = state.data;
             return Padding(
               padding: const EdgeInsets.all(8.0),
@@ -270,7 +284,8 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
           }
         },
         ),
-      ),
+        );
+  }),
     );
   }
 }

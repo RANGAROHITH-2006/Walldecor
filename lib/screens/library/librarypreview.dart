@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_bloc.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_event.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_state.dart';
 import 'package:walldecor/bloc/library/library_bloc.dart';
 import 'package:walldecor/bloc/library/library_event.dart';
 import 'package:walldecor/bloc/library/libray_state.dart';
 import 'package:walldecor/screens/detailedscreens/librarydetailspage.dart';
 import 'package:walldecor/screens/widgets/diolog.dart';
+import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 import 'package:walldecor/screens/widgets/noresult.dart';
 
 class LibrarypageData extends StatefulWidget {
@@ -46,7 +50,19 @@ class _LibrarypageDataState extends State<LibrarypageData> {
           ),
         ), 
       ),
-      body: BlocBuilder<LibraryBloc, LibraryState>(
+      body:
+      BlocBuilder<ConnectivityBloc, ConnectivityState>(
+        builder: (context, connectivityState) {
+          if (connectivityState is ConnectivityOffline) {
+            return NoInternetWidget(
+              onRetry: () {
+                context.read<ConnectivityBloc>().add(CheckConnectivity());
+              },
+            );
+          }
+          return
+      
+       BlocBuilder<LibraryBloc, LibraryState>(
         builder: (context, state) {
           print('🔥 LibrarypageData: Current state - ${state.runtimeType}');
 
@@ -216,7 +232,7 @@ class _LibrarypageDataState extends State<LibrarypageData> {
 
           return const SizedBox();
         },
-      ),
-    );
+      );
+   } ));
   }
 }

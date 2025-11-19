@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:walldecor/bloc/category/category_bloc.dart';
 import 'package:walldecor/bloc/category/category_event.dart';
 import 'package:walldecor/bloc/category/category_state.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_bloc.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_event.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_state.dart';
 import 'package:walldecor/bloc/trending/trending_bloc.dart';
 import 'package:walldecor/bloc/trending/trending_event.dart';
 import 'package:walldecor/bloc/trending/trending_state.dart';
@@ -10,6 +13,7 @@ import 'package:walldecor/models/category_model.dart';
 import 'package:walldecor/repositories/category_repository.dart';
 import 'package:walldecor/repositories/trending_repository.dart';
 import 'package:walldecor/screens/detailedscreens/categorydetailespage.dart';
+import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 
 class Categorypage extends StatelessWidget {
   const Categorypage({super.key});
@@ -45,107 +49,164 @@ class _CategoryViewState extends State<_CategoryView> {
   Widget build(BuildContext context) {
     return Container(
       color: const Color(0xFF25272F),
-      child: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ---------------- Trending ----------------
-              const Text(
-                'Trending',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
+      child: BlocBuilder<ConnectivityBloc, ConnectivityState>(
+        builder: (context, connectivityState) {
+          if (connectivityState is ConnectivityOffline) {
+            return NoInternetWidget(
+              onRetry: () {
+                context.read<ConnectivityBloc>().add(CheckConnectivity());
+              },
+            );
+          }
+          
+          return SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ---------------- Trending ----------------
+                  const Text(
+                    'Trending',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
 
-              BlocBuilder<TrendingBloc, TrendingState>(
-                builder: (context, state) {
-                  if (state is TrendingLoading) {
-                    return const SizedBox(
-                      height: 60,
-                      child: Center(child: CircularProgressIndicator(color: Color(0xFFEE5776))),
-                    );
-                  }
-
-                  if (state is TrendingError) {
-                    return Text(
-                      state.message,
-                      style: const TextStyle(color: Color(0xFFEE5776)),
-                    );
-                  }
-
-                  if (state is CategoryTrendingLoaded) {
-                    return SizedBox(
-                      height: 60,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: state.data.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(width: 12),
-                        itemBuilder: (context, index) {
-                          final item = state.data[index];
-                          return buildTrendingPill(item);
-                        },
-                      ),
-                    );
-                  }
-
-                  return const SizedBox();
-                },
-              ),
-
-              const SizedBox(height: 20),
-
-              // ---------------- Categories ----------------
-              const Text(
-                'All Categories',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              BlocBuilder<CategoryBloc, CategoryState>(
-                builder: (context, state) {
-                  if (state is CategoryLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(color: Color(0xFFEE5776)),
-                    );
-                  }
-
-                  if (state is CategoryLoaded) {
-                    return Column(
-                      children: state.data.map((category) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: _buildCategoryCard(category),
+                  BlocBuilder<TrendingBloc, TrendingState>(
+                    builder: (context, state) {
+                      if (state is TrendingLoading) {
+                        return const SizedBox(
+                          height: 60,
+                          child: Center(child: CircularProgressIndicator(color: Color(0xFFEE5776))),
                         );
-                      }).toList(),
-                    );
-                  }
+                      }
 
-                  if (state is CategoryError) {
-                    return Center(
-                      child: Text(
-                        'Error: ${state.message}',
-                        style: const TextStyle(color: Color(0xFFEE5776)),
-                      ),
-                    );
-                  }
+                      if (state is TrendingError) {
+                        return SizedBox(
+                          height: 60,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.wifi_off,
+                                  color: Color(0xFF868EAE),
+                                  size: 20,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Unable to load trending',
+                                  style: const TextStyle(
+                                    color: Color(0xFF868EAE),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
 
-                  return const SizedBox();
-                },
+                      if (state is CategoryTrendingLoaded) {
+                        return SizedBox(
+                          height: 60,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: state.data.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: 12),
+                            itemBuilder: (context, index) {
+                              final item = state.data[index];
+                              return buildTrendingPill(item);
+                            },
+                          ),
+                        );
+                      }
+
+                      return const SizedBox();
+                    },
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // ---------------- Categories ----------------
+                  const Text(
+                    'All Categories',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  BlocBuilder<CategoryBloc, CategoryState>(
+                    builder: (context, state) {
+                      if (state is CategoryLoading) {
+                        return const Center(
+                          child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+                        );
+                      }
+
+                      if (state is CategoryLoaded) {
+                        return Column(
+                          children: state.data.map((category) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12.0),
+                              child: _buildCategoryCard(category),
+                            );
+                          }).toList(),
+                        );
+                      }
+
+                      if (state is CategoryError) {
+                        return Center(
+                          child: Column(
+                            children: [
+                              const Icon(
+                                Icons.wifi_off,
+                                color: Color(0xFF868EAE),
+                                size: 32,
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Unable to load categories',
+                                style: TextStyle(
+                                  color: Color(0xFF868EAE),
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              TextButton(
+                                onPressed: () {
+                                  context.read<CategoryBloc>().add(FetchCategoryEvent());
+                                },
+                                child: const Text(
+                                  'Retry',
+                                  style: TextStyle(
+                                    color: Color(0xFFEE5776),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      return const SizedBox();
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

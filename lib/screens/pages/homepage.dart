@@ -7,9 +7,13 @@ import 'package:walldecor/bloc/category/category_state.dart';
 import 'package:walldecor/bloc/collection/collection_bloc.dart';
 import 'package:walldecor/bloc/collection/collection_event.dart';
 import 'package:walldecor/bloc/collection/collection_state.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_bloc.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_event.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_state.dart';
 import 'package:walldecor/bloc/download/download_bloc.dart';
 import 'package:walldecor/bloc/download/download_event.dart';
 import 'package:walldecor/bloc/download/download_state.dart';
+import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 import 'package:walldecor/repositories/category_repository.dart';
 import 'package:walldecor/repositories/collection_repository.dart';
 import 'package:walldecor/models/category_model.dart';
@@ -54,67 +58,79 @@ class _HomepageState extends State<Homepage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF25272F),
-      body: MultiBlocListener(
-        listeners: [
-          BlocListener<CategoryBloc, CategoryState>(
-            bloc: _categoryBloc,
-            listener: (context, state) {
-              if (state is CategoryDetailsLoaded) {
-                setState(() {
-                  categoryImages = state.data;
-                });
-              } else if (state is CategoryLoaded && selectedCategoryId == null) {
-                // Auto-select first category by default
-                final categories = state.data;
-                if (categories.isNotEmpty) {
-                  setState(() {
-                    selectedCategoryId = categories.first.id;
-                    selectedCategoryTitle = categories.first.title;
-                  });
-                  _categoryBloc.add(FetchCategoryDetailsEvent(categories.first.id));
-                }
-              }
-            },
-          ),
-          BlocListener<DownloadBloc, DownloadState>(
-            listener: (context, state) {
-              if (state is DownloadAddSuccess) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: Colors.green,
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              } else if (state is DownloadAddError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Download failed: ${state.message}'),
-                    backgroundColor: Colors.red,
-                    duration: const Duration(seconds: 3),
-                  ),
-                );
-              }
-            },
-          ),
-        ],
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                buildFeaturedCollectionSection(),
-                const SizedBox(height: 16),
-                _buildDiscoverMoreSection(),
-                const SizedBox(height: 16),
-                _buildCategoryFilterSection(),
-                const SizedBox(height: 16),
-                _buildWallpapersGrid(),
-              ],
+      body: BlocBuilder<ConnectivityBloc, ConnectivityState>(
+        builder: (context, connectivityState) {
+          if (connectivityState is ConnectivityOffline) {
+            return NoInternetWidget(
+              onRetry: () {
+                context.read<ConnectivityBloc>().add(CheckConnectivity());
+              },
+            );
+          }
+          
+          return MultiBlocListener(
+            listeners: [
+              BlocListener<CategoryBloc, CategoryState>(
+                bloc: _categoryBloc,
+                listener: (context, state) {
+                  if (state is CategoryDetailsLoaded) {
+                    setState(() {
+                      categoryImages = state.data;
+                    });
+                  } else if (state is CategoryLoaded && selectedCategoryId == null) {
+                    // Auto-select first category by default
+                    final categories = state.data;
+                    if (categories.isNotEmpty) {
+                      setState(() {
+                        selectedCategoryId = categories.first.id;
+                        selectedCategoryTitle = categories.first.title;
+                      });
+                      _categoryBloc.add(FetchCategoryDetailsEvent(categories.first.id));
+                    }
+                  }
+                },
+              ),
+              BlocListener<DownloadBloc, DownloadState>(
+                listener: (context, state) {
+                  if (state is DownloadAddSuccess) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: Colors.green,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  } else if (state is DownloadAddError) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Download failed: ${state.message}'),
+                        backgroundColor: Colors.red,
+                        duration: const Duration(seconds: 3),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    buildFeaturedCollectionSection(),
+                    const SizedBox(height: 16),
+                    _buildDiscoverMoreSection(),
+                    const SizedBox(height: 16),
+                    _buildCategoryFilterSection(),
+                    const SizedBox(height: 16),
+                    _buildWallpapersGrid(),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -195,10 +211,40 @@ class _HomepageState extends State<Homepage> {
                   },
                 );
               } else if (state is CollectionError) {
-                return Center(
-                  child: Text(
-                    'Error loading collections',
-                    style: TextStyle(color: Colors.red),
+                return SizedBox(
+                  height: 146,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.wifi_off,
+                          color: Color(0xFF868EAE),
+                          size: 32,
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Unable to load collections',
+                          style: TextStyle(
+                            color: Color(0xFF868EAE),
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: () {
+                            _collectionBloc.add(FetchCollectionEvent());
+                          },
+                          child: const Text(
+                            'Retry',
+                            style: TextStyle(
+                              color: Color(0xFFEE5776),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }
@@ -302,10 +348,40 @@ class _HomepageState extends State<Homepage> {
               },
             );
           } else if (state is CategoryError) {
-            return Center(
-              child: Text(
-                'Error loading categories',
-                style: TextStyle(color: Colors.red),
+            return SizedBox(
+              height: 36,
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.wifi_off,
+                      color: Color(0xFF868EAE),
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Unable to load categories',
+                      style: TextStyle(
+                        color: Color(0xFF868EAE),
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    TextButton(
+                      onPressed: () {
+                        _categoryBloc.add(FetchCategoryEvent());
+                      },
+                      child: const Text(
+                        'Retry',
+                        style: TextStyle(
+                          color: Color(0xFFEE5776),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }

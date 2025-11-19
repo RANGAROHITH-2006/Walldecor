@@ -5,9 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:walldecor/bloc/trending/trending_bloc.dart';
 import 'package:walldecor/bloc/trending/trending_state.dart';
 import 'package:walldecor/bloc/trending/trending_event.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_bloc.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_event.dart';
+import 'package:walldecor/bloc/connectivity/connectivity_state.dart';
 import 'package:walldecor/bloc/search/search_bloc.dart';
 import 'package:walldecor/bloc/search/search_state.dart';
 import 'package:walldecor/bloc/search/search_event.dart';
+import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 
 
 class Searchpage extends StatefulWidget {
@@ -108,53 +112,65 @@ class _SearchpageState extends State<Searchpage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xFF25272F),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ---------------- Search Bar ----------------
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (value) {
-                    _onSearchChanged(value);
-                    setState(() {}); // Rebuild to update suffix icon
-                  },
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: 'Search here',
-                    hintStyle: const TextStyle(color: Color(0xFF646770)),
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: Color(0xFF646770),
-                      size: 22,
+      body: BlocBuilder<ConnectivityBloc, ConnectivityState>(
+        builder: (context, connectivityState) {
+          if (connectivityState is ConnectivityOffline) {
+            return NoInternetWidget(
+              onRetry: () {
+                context.read<ConnectivityBloc>().add(CheckConnectivity());
+              },
+            );
+          }
+          
+          return SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ---------------- Search Bar ----------------
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    suffixIcon:
-                        _searchController.text.isNotEmpty
-                            ? IconButton(
-                              icon: const Icon(
-                                Icons.close,
-                                color: Colors.white70,
-                              ),
-                              onPressed: _clearSearch,
-                            )
-                            : const Icon(Icons.close, color: Colors.white70),
-                    border: InputBorder.none,
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
+                        _onSearchChanged(value);
+                        setState(() {}); // Rebuild to update suffix icon
+                      },
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: 'Search here',
+                        hintStyle: const TextStyle(color: Color(0xFF646770)),
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          color: Color(0xFF646770),
+                          size: 22,
+                        ),
+                        suffixIcon:
+                            _searchController.text.isNotEmpty
+                                ? IconButton(
+                                  icon: const Icon(
+                                    Icons.close,
+                                    color: Colors.white70,
+                                  ),
+                                  onPressed: _clearSearch,
+                                )
+                                : const Icon(Icons.close, color: Colors.white70),
+                        border: InputBorder.none,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
-              // Show search results if searching, otherwise show original content
-              _isSearching ? _buildSearchResults() : _buildOriginalContent(),
-            ],
-          ),
-        ),
+                  // Show search results if searching, otherwise show original content
+                  _isSearching ? _buildSearchResults() : _buildOriginalContent(),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -170,7 +186,41 @@ class _SearchpageState extends State<Searchpage> {
         }
 
         if (state is SearchError) {
-          return Center(child: _buildNoResultsScreen());
+          return Center(
+            child: Column(
+              children: [
+                const SizedBox(height: 50),
+                const Icon(
+                  Icons.wifi_off,
+                  color: Color(0xFF868EAE),
+                  size: 48,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Unable to search',
+                  style: TextStyle(
+                    color: Color(0xFF868EAE),
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () {
+                    if (_searchController.text.isNotEmpty) {
+                      context.read<SearchBloc>().add(CreateSearchEvent(text: _searchController.text));
+                    }
+                  },
+                  child: const Text(
+                    'Retry',
+                    style: TextStyle(
+                      color: Color(0xFFEE5776),
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
         }
 
         if (state is SearchSuccess) {
@@ -379,9 +429,36 @@ class _SearchpageState extends State<Searchpage> {
 
             if (state is TrendingError) {
               return Center(
-                child: Text(
-                  state.message,
-                  style: const TextStyle(color: Colors.red),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 50),
+                    const Icon(
+                      Icons.wifi_off,
+                      color: Color(0xFF868EAE),
+                      size: 32,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Unable to load trending',
+                      style: TextStyle(
+                        color: Color(0xFF868EAE),
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () {
+                        context.read<TrendingBloc>().add(FetchSearchTrendingEvent());
+                      },
+                      child: const Text(
+                        'Retry',
+                        style: TextStyle(
+                          color: Color(0xFFEE5776),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               );
             }
