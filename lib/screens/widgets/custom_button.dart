@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:walldecor/repositories/services/google_auth_service.dart';
+import 'package:walldecor/repositories/services/apple_auth_service.dart';
+import 'dart:io';
 
 class CustomButton extends StatefulWidget {
   final String color;
@@ -65,6 +67,85 @@ class _CustomButtonState extends State<CustomButton> {
     }
   }
 
+ Future<void> _handleAppleSignIn(BuildContext context) async {
+    try {
+      setState(() => isLoading = true);
+      
+     // Check if Apple Sign In is available
+      if (!Platform.isIOS && !Platform.isMacOS) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Apple Sign-In is only available on iOS and macOS'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      final appleAuthService = AppleAuthService();
+      
+      // Check availability
+      final isAvailable = await appleAuthService.isAppleSignInAvailable();
+      if (!isAvailable) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Apple Sign-In is not available on this device'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      final userData = await appleAuthService.signInWithApple();
+      
+      if (userData != null) {
+        if (context.mounted) {
+          context.read<AuthBloc>().add(
+            LoginWithApple(
+              firstName: userData['firstName']!,
+              lastName: userData['lastName']!,
+              appleIdToken: userData['idToken']!,
+              deviceId: userData['deviceId']!,
+              email: userData['email']!,
+              firebaseUserId: userData['firebaseUserId']!,
+              pushToken: userData['pushToken']!,
+              appleUserId: userData['appleUserId'],
+              onSuccess: (user) {
+                print('Apple login successful: ${user.id}');
+              },
+              onError: (error) {
+                print('Apple login failed: $error');
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Apple Sign-In failed: $error'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Apple Sign-In failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => isLoading = false);
+    }
+  }
+
 
   Future<void> googleSignIn() async {
     try {
@@ -106,6 +187,8 @@ class _CustomButtonState extends State<CustomButton> {
           await googleSignIn();
           await _handleGoogleSignIn(context);
           context.pop();
+        } else if (widget.text == 'Login With Apple') {
+          await _handleAppleSignIn(context);
         } else {
           context.push(widget.screen);
         }

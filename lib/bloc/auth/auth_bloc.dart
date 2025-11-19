@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:walldecor/models/userdata_model.dart';
 import 'package:walldecor/repositories/services/google_auth_service.dart';
+import 'package:walldecor/repositories/services/apple_auth_service.dart';
 import 'package:walldecor/repositories/auth_repository.dart';
 
 part 'auth_event.dart';
@@ -24,6 +25,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SessionRequest>(_onSessionRequest);
     on<GuestLogin>(_onGuestLogin);
     on<LoginWithGoogle>(_onLoginWithGoogle);
+    on<LoginWithApple>(_onLoginWithApple);
     on<LogOutRequest>(_onLogOutRequest);
     on<SetLoginInitial>(_setLoginInitial);
     on<DeleteUser>(_onDeleteUser);
@@ -75,6 +77,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           await prefs.remove('isProUser');
           
           event.onError!('Google session expired');
+          emit(state.copyWith(status: AuthStatus.failure));
+          return;
+        }
+      }
+
+      // If it's an Apple user, check Firebase session validity
+      if (userType == 'apple') {
+        // Import apple auth service if needed
+        // For now, we'll use the same Firebase validation logic
+        final appleAuthService = AppleAuthService();
+        final isFirebaseValid = await appleAuthService.isFirebaseSessionValid();
+        
+        if (!isFirebaseValid) {
+          print('Apple Firebase session expired, clearing stored data');
+          await prefs.remove('auth_token');
+          await prefs.remove('user_id');
+          await prefs.remove('user_data');
+          await prefs.remove('user_type');
+          await prefs.remove('isProUser');
+          
+          event.onError!('Apple session expired');
           emit(state.copyWith(status: AuthStatus.failure));
           return;
         }
@@ -256,6 +279,63 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (kDebugMode) {
         print(e);
         print('---------------- ERROR LOGIN WITH GOOGLE ----------------');
+        event.onError('Something went wrong!');
+        emit(state.copyWith(status: AuthStatus.failure));
+      }
+    }
+  }
+
+  Future<void> _onLoginWithApple(
+      LoginWithApple event, Emitter<AuthState> emit) async {
+    try {
+      emit(state.copyWith(status: AuthStatus.loading));
+      var resp = await http.post(
+        Uri.parse('$_baseUrl/auth/loginWithApple'),
+        headers: {
+          'Content-Type': 'application/json',
+          "apple-id-token": event.appleIdToken,
+        },
+        body: jsonEncode({
+          if (event.firstName.isNotEmpty) "firstName": event.firstName,
+          if (event.lastName.isNotEmpty) "lastName": event.lastName,
+          "email": event.email,
+          "firebaseUserId": event.firebaseUserId,
+          "deviceId": event.deviceId,
+          if (event.pushToken.isNotEmpty) "pushToken": event.pushToken,
+        }),
+      );
+
+      if (resp.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(resp.body);
+        var token = resp.headers["x-auth-token"];
+        var id = data["_id"];
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('auth_token', token!);
+        prefs.setString('user_id', id);
+        prefs.setString('user_data', jsonEncode(data));
+        prefs.setString('user_type', 'apple');
+        bool isProUser = data['isProUser'] ?? false;
+        prefs.setBool('isProUser', isProUser);
+        
+        User user = User.fromJson(data);
+        event.onSuccess(user);
+        emit(state.copyWith(
+          status: AuthStatus.success,
+          token: token,
+          user: user,
+        ));
+      } else {
+        print(resp.body);
+        print(resp.statusCode);
+
+        var data = jsonDecode(resp.body);
+        event.onError(data["message"]);
+        emit(state.copyWith(status: AuthStatus.failure));
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+        print('---------------- ERROR LOGIN WITH APPLE ----------------');
         event.onError('Something went wrong!');
         emit(state.copyWith(status: AuthStatus.failure));
       }

@@ -75,6 +75,46 @@ class LoginWithGoogle extends AuthEvent {
       ];
 }
 
+class LoginWithApple extends AuthEvent {
+  final String firstName;
+  final String lastName;
+  final String appleIdToken;
+  final String deviceId;
+  final String email;
+  final String firebaseUserId;
+  final String pushToken;
+  final String? appleUserId;
+  final Function(User) onSuccess;
+  final Function(String) onError;
+
+  const LoginWithApple({
+    required this.firstName,
+    required this.lastName,
+    required this.appleIdToken,
+    required this.deviceId,
+    required this.email,
+    required this.firebaseUserId,
+    required this.pushToken,
+    this.appleUserId,
+    required this.onSuccess,
+    required this.onError,
+  });
+
+  @override
+  List<Object?> get props => [
+        firstName,
+        lastName,
+        email,
+        deviceId,
+        firebaseUserId,
+        pushToken,
+        appleUserId,
+        onSuccess,
+        appleIdToken,
+        onError,
+      ];
+}
+
 class LogOutRequest extends AuthEvent {
   final String fcmToken;
   final VoidCallback onSuccess;

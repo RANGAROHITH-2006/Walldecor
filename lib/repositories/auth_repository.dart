@@ -288,6 +288,108 @@ class AuthRepository {
     }
   }
 
+  /// Login with Apple via API
+  Future<Map<String, String>> loginWithApple({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String firebaseUserId,
+    required String pushToken,
+    required String deviceId,
+    required String idToken,
+    String? appleUserId,
+  }) async {
+    try {
+      print('Logging in with Apple:');
+      print('Email: $email');
+      print('Firebase User ID: $firebaseUserId');
+
+      final requestBody = {
+        'email': email,
+        'firebaseUserId': firebaseUserId,
+        'pushToken': pushToken,
+        'deviceId': deviceId,
+      };
+
+      print('Request body: ${jsonEncode(requestBody)}');
+      print('Making API request to: $_baseUrl/auth/loginWithApple');
+
+      final response = await _httpClient.post(
+        Uri.parse('$_baseUrl/auth/loginWithApple'),
+        headers: {
+          'Content-Type': 'application/json',
+          'apple-id-token': idToken,
+        },
+        body: jsonEncode(requestBody),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          print('❌ Apple login request timed out after 30 seconds');
+          throw Exception('Request timed out');
+        },
+      );
+
+      print('✅ Apple login response received!');
+      print('Response status code: ${response.statusCode}');
+      print('Response headers: ${response.headers}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        print('🎉 SUCCESS: Apple login successful!');
+        
+        final data = jsonDecode(response.body);
+        final userId = data['_id'] ?? data['userId'];
+        final authToken = response.headers['x-auth-token'] ?? data['token'];
+
+        print('Extracted data:');
+        print('User ID: $userId');
+        print('X-Auth-token: $authToken');
+
+        if (userId == null) {
+          throw Exception('User ID not found in API response');
+        }
+
+        if (authToken == null) {
+          throw Exception('X-Auth-token not found in API response');
+        }
+
+        print('💾 Saving Apple authentication data...');
+
+        // Save authentication data
+        await saveAuthData(
+          guestId: userId,
+          authToken: authToken,
+          userType: 'apple',
+          userData: {
+            'email': email,
+            'firstName': firstName,
+            'lastName': lastName,
+            'firebaseUserId': firebaseUserId,
+            'appleUserId': appleUserId,
+          },
+        );
+
+        print('✅ Apple authentication data saved successfully!');
+        print('🎯 Apple login completed successfully!');
+
+        return {
+          'userId': userId,
+          'authToken': authToken,
+          'email': email,
+          'firstName': firstName,
+          'lastName': lastName,
+        };
+      } else {
+        throw Exception(
+          'Failed to login with Apple. Status: ${response.statusCode}, Body: ${response.body}',
+        );
+      }
+    } catch (e) {
+      print('Error logging in with Apple: $e');
+      throw Exception('Failed to login with Apple: $e');
+    }
+  }
+
   /// Logout via API (calls logout endpoint to remove push token)
   Future<void> logout() async {
     try {
