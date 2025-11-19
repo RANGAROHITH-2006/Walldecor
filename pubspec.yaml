@@ -42,8 +42,6 @@ flutter:
   assets:
     - assets/images/
     - assets/navbaricons/
-    - assets/home/
-    - assets/collection/
     - assets/trending/
     - assets/svg/
     
