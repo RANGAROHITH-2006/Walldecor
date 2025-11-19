@@ -59,7 +59,6 @@ class _HomepageState extends State<Homepage> {
           BlocListener<CategoryBloc, CategoryState>(
             bloc: _categoryBloc,
             listener: (context, state) {
-              print('CATEGORY LISTENER STATE -> $state');
               if (state is CategoryDetailsLoaded) {
                 setState(() {
                   categoryImages = state.data;

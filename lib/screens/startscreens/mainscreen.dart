@@ -25,7 +25,7 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     getFcmToken();
     bottomScreens = [
-      Homescreen(onTabChange: (index) => setState(() => currentIndex = index)),
+      Homescreen(),
       const LibrarypageData(),
       const PremiumScreen(),
       ProfileScreen(onTabChange: (index) => setState(() => currentIndex = index)),
