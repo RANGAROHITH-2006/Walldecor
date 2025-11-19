@@ -12,7 +12,7 @@ class FeedbackState extends Equatable {
   final String? errorMessage;
 
   const FeedbackState({
-    this.rating = 0,
+    this.rating = 5,
     this.option1 = false,
     this.option2 = false,
     this.option3 = false,

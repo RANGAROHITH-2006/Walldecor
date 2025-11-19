@@ -3,9 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../bloc/feedback/feedback_bloc.dart';
-import '../../bloc/feedback/feedback_event.dart';
-import '../../bloc/feedback/feedback_state.dart';
+import 'package:walldecor/bloc/feedback/feedback_bloc.dart';
+import 'package:walldecor/bloc/feedback/feedback_event.dart';
+import 'package:walldecor/bloc/feedback/feedback_state.dart';
+
 
 /// Simple static method to show feedback from anywhere in your app
 class FeedbackDialog {
@@ -207,7 +208,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFFEE5776),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25),
                       ),
