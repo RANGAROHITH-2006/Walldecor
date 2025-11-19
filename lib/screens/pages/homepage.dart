@@ -1,49 +1,118 @@
 import 'package:flutter/material.dart';
-import 'package:walldecor/screens/library/librarydownload.dart';
-import 'package:walldecor/screens/detailedscreens/showresultpage.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:walldecor/screens/detailedscreens/resultpage.dart';
+import 'package:walldecor/bloc/category/category_bloc.dart';
+import 'package:walldecor/bloc/category/category_event.dart';
+import 'package:walldecor/bloc/category/category_state.dart';
+import 'package:walldecor/bloc/collection/collection_bloc.dart';
+import 'package:walldecor/bloc/collection/collection_event.dart';
+import 'package:walldecor/bloc/collection/collection_state.dart';
+import 'package:walldecor/bloc/download/download_bloc.dart';
+import 'package:walldecor/bloc/download/download_event.dart';
+import 'package:walldecor/bloc/download/download_state.dart';
+import 'package:walldecor/repositories/category_repository.dart';
+import 'package:walldecor/repositories/collection_repository.dart';
+import 'package:walldecor/models/categorydetailes_model.dart';
 
 class Homepage extends StatefulWidget {
-  const Homepage({super.key});
+  final Function(int)? onTabChange;
+  const Homepage({super.key, this.onTabChange});
 
   @override
   State<Homepage> createState() => _HomepageState();
 }
 
 class _HomepageState extends State<Homepage> {
-  final List<String> featuredImages = [
-    'assets/home/featured1.png',
-    'assets/home/featured2.png',
-    'assets/home/featured3.png',
-  ];
+  late CategoryBloc _categoryBloc;
+  late CollectionBloc _collectionBloc;
+  
+  String? selectedCategoryId ;
+  String selectedCategoryTitle = 'All';
+  List<CategorydetailesModel> categoryImages = [];
 
-  final List<String> categories = ['Recent', 'Nature', 'Flower', 'Mountain'];
-  int selectedCategoryIndex = 0;
+  @override
+  void initState() {
+    super.initState();
+    _categoryBloc = CategoryBloc(CategoryRepository());
+    _collectionBloc = CollectionBloc(CollectionRepository());
+    
+    // Fetch initial data
+    _categoryBloc.add(FetchCategoryEvent());
+    print('INIT: created _categoryBloc = $_categoryBloc');
+    _collectionBloc.add(FetchCollectionEvent());
+  }
 
-  final List<String> wallpapers = [
-    'assets/home/discover1.png',
-    'assets/home/discover2.png',
-    'assets/home/discover3.png',
-    'assets/home/discover4.png',
-  ];
+  @override
+  void dispose() {
+    _categoryBloc.close();
+    _collectionBloc.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF25272F),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              buildFeaturedCollectionSection(),
-              const SizedBox(height: 24),
-              _buildDiscoverMoreSection(),
-              const SizedBox(height: 16),
-              _buildCategoryFilterSection(),
-              const SizedBox(height: 16),
-              _buildWallpapersGrid(),
-            ],
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<CategoryBloc, CategoryState>(
+            bloc: _categoryBloc,
+            listener: (context, state) {
+              print('CATEGORY LISTENER STATE -> $state');
+              if (state is CategoryDetailsLoaded) {
+                setState(() {
+                  categoryImages = state.data;
+                });
+              } else if (state is CategoryLoaded && selectedCategoryId == null) {
+                // Auto-select first category by default
+                final categories = state.data;
+                if (categories.isNotEmpty) {
+                  setState(() {
+                    selectedCategoryId = categories.first.id;
+                    selectedCategoryTitle = categories.first.title;
+                  });
+                  _categoryBloc.add(FetchCategoryDetailsEvent(categories.first.id));
+                }
+              }
+            },
+          ),
+          BlocListener<DownloadBloc, DownloadState>(
+            listener: (context, state) {
+              if (state is DownloadAddSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.green,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              } else if (state is DownloadAddError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Download failed: ${state.message}'),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+              }
+            },
+          ),
+        ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildFeaturedCollectionSection(),
+                const SizedBox(height: 16),
+                _buildDiscoverMoreSection(),
+                const SizedBox(height: 16),
+                _buildCategoryFilterSection(),
+                const SizedBox(height: 16),
+                _buildWallpapersGrid(),
+              ],
+            ),
           ),
         ),
       ),
@@ -67,7 +136,9 @@ class _HomepageState extends State<Homepage> {
             ),
             GestureDetector(
               onTap: () {
-                debugPrint('See more tapped');
+                if (widget.onTabChange != null) {
+                  widget.onTabChange!(2); // Switch to Collection tab (index 2)
+                }
               },
               child: const Text(
                 'See more >',
@@ -83,34 +154,55 @@ class _HomepageState extends State<Homepage> {
         const SizedBox(height: 16),
         SizedBox(
           height: 146,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: featuredImages.length,
-            itemBuilder: (context, index) {
-              return Container(
-                margin: const EdgeInsets.only(right: 12.0),
-                width: 106,
-                height: 146,
-                decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12.0),  
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12.0),
-                  child: Image.asset(
-                    featuredImages[index],
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: const Color(0xFF3A3D47),
-                        child: const Icon(
-                          Icons.image_not_supported,
-                          color: Color(0xFF868EAE),
+          child: BlocBuilder<CollectionBloc, CollectionState>(
+            bloc: _collectionBloc,
+            builder: (context, state) {
+              if (state is CollectionLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+                );
+              } else if (state is CollectionLoaded) {
+                final collections = state.data;
+                final displayCount = collections.length > 5 ? 5 : collections.length;
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: displayCount,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      margin: const EdgeInsets.only(right: 12.0),
+                      width: 106,
+                      height: 146,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12.0),
+                        child: Image.network(
+                          collections[index].coverPhoto.urls.regular,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: const Color(0xFF3A3D47),
+                              child: const Icon(
+                                Icons.image_not_supported,
+                                color: Color(0xFF868EAE),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
+                      ),
+                    );
+                  },
+                );
+              } else if (state is CollectionError) {
+                return Center(
+                  child: Text(
+                    'Error loading collections',
+                    style: TextStyle(color: Colors.red),
                   ),
-                ),
-              );
+                );
+              }
+              return const SizedBox.shrink();
             },
           ),
         ),
@@ -146,51 +238,85 @@ class _HomepageState extends State<Homepage> {
   Widget _buildCategoryFilterSection() {
     return SizedBox(
       height: 36,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final bool isSelected = selectedCategoryIndex == index;
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                selectedCategoryIndex = index;
-              });
-            },
-            child: Container(
-              margin: const EdgeInsets.only(right: 8.0),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
-              ),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color:
-                      isSelected ? Color(0xFFEE5776) : const Color(0xFF868EAE),
-                  width: 1.0,
-                ),
-                borderRadius: BorderRadius.circular(18.0),
-                color: isSelected ? Color(0xFFEE5776) : Colors.transparent,
-              ),
-              child: Center(
-                child: Text(
-                  categories[index],
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : const Color(0xFF868EAE),
-                    fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+      child: BlocBuilder<CategoryBloc, CategoryState>(
+        bloc: _categoryBloc,
+        builder: (context, state) {
+          print('CATEGORY BUILDER STATE -> $state');
+          if (state is CategoryLoading) {
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+            );
+          } else if (state is CategoryLoaded) {
+            final categories = state.data;
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                final category = categories[index];
+                final bool isSelected = selectedCategoryId == category.id;
+
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedCategoryId = category.id;
+                      selectedCategoryTitle = category.title;
+                    });
+                    
+                    _categoryBloc.add(FetchCategoryDetailsEvent(category.id));
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 8.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: isSelected ? Color(0xFFEE5776) : const Color(0xFF868EAE),
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(18.0),
+                      color: isSelected ? Color(0xFFEE5776) : Colors.transparent,
+                    ),
+                    child: Center(
+                      child: Text(
+                        category.title,
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : const Color(0xFF868EAE),
+                          fontSize: 14,
+                          fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                );
+              },
+            );
+          } else if (state is CategoryError) {
+            return Center(
+              child: Text(
+                'Error loading categories',
+                style: TextStyle(color: Colors.red),
               ),
-            ),
-          );
+            );
+          }
+          
+          return const SizedBox.shrink();
         },
       ),
     );
   }
 
   Widget _buildWallpapersGrid() {
-    if (wallpapers.isEmpty) {
+    if (categoryImages.isEmpty && selectedCategoryId != null && selectedCategoryId!.isNotEmpty) {
+      return Container(
+        height: 200,
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator(color: Color(0xFFEE5776)),
+      );
+    }
+
+    if (categoryImages.isEmpty) {
       return Container(
         height: 200,
         alignment: Alignment.center,
@@ -210,25 +336,33 @@ class _HomepageState extends State<Homepage> {
         mainAxisSpacing: 12,
         childAspectRatio: 1,
       ),
-      itemCount: wallpapers.length,
+      itemCount: categoryImages.length,
       itemBuilder: (context, index) {
+        final image = categoryImages[index];
         return GestureDetector(
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => Showresultpage(imagePath: wallpapers[index],)));
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Resultpage(
+                  urls: image.urls,
+                  user: image.user,
+                ),
+              ),
+            );
             debugPrint('Wallpaper $index tapped');
           },
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16.0),
-              
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16.0),
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: Image.asset(
-                      wallpapers[index],
+                    child: Image.network(
+                      image.urls.regular,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
@@ -242,41 +376,54 @@ class _HomepageState extends State<Homepage> {
                       },
                     ),
                   ),
-
-                 Positioned(
-                      bottom: 8,
-                      right: 8,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Librarydownload(),
-                            ),
-                          );
-                          debugPrint('Downloading wallpaper $index');
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Downloading wallpaper...'),
-                              backgroundColor: const Color(0xFF3A3D47),
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Color(0x33000000),
-                            borderRadius: BorderRadius.circular(20),
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () {
+                        // Add to downloads using DownloadBloc
+                        final imageId = "home_${image.id}_${DateTime.now().millisecondsSinceEpoch}";
+                        
+                        final urlsJson = {
+                          "full": image.urls.full,
+                          "regular": image.urls.regular,
+                          "small": image.urls.small,
+                        };
+                        
+                        final userJson = {
+                          "id": image.user.id,
+                          "username": image.user.username,
+                          "name": image.user.name,
+                          "first_name": image.user.firstName,
+                          "last_name": image.user.lastName,
+                          "profile_link": image.user.profileLink,
+                          "profile_image": image.user.profileImage,
+                        };
+                        
+                        context.read<DownloadBloc>().add(
+                          AddToDownloadEvent(
+                            id: imageId,
+                            urls: urlsJson,
+                            user: userJson,
                           ),
-                          child: Image.asset(
-                            'assets/navbaricons/download.png',
-                            width: 16,
-                            height: 16,
-                          ),
+                        );
+                        
+                        debugPrint('Downloading wallpaper $index');
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Color(0x33000000),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Image.asset(
+                          'assets/navbaricons/download.png',
+                          width: 16,
+                          height: 16,
                         ),
                       ),
                     ),
+                  ),
                 ],
               ),
             ),

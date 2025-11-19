@@ -132,13 +132,21 @@ class _HomescreenState extends State<Homescreen> {
   Widget _buildTabContent() {
     switch (selectedTabIndex) {
       case 0:
-        return const Homepage();
+        return Homepage(onTabChange: (int index) {
+          setState(() {
+            selectedTabIndex = index;
+          });
+        });
       case 1:
         return const Categorypage();
       case 2:
         return const CollectionPage();
       default:
-        return const Homepage();
+        return Homepage(onTabChange: (int index) {
+          setState(() {
+            selectedTabIndex = index;
+          });
+        });
     }
   }
 }
