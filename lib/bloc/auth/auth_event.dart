@@ -89,17 +89,16 @@ class LogOutRequest extends AuthEvent {
 }
 
 class DeleteUser extends AuthEvent {
-  String userId;
-  final Function(dynamic) onSuccess;
+  final Function(String) onSuccess;
   final Function(String) onError;
-  DeleteUser({
-    required this.userId,
+  
+  const DeleteUser({
     required this.onSuccess,
     required this.onError,
   });
 
   @override
-  List<Object> get props => [userId, onSuccess, onError];
+  List<Object> get props => [onSuccess, onError];
 }
 
 class SetLoginInitial extends AuthEvent {

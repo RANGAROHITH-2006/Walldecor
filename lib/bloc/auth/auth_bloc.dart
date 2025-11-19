@@ -10,12 +10,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:walldecor/models/userdata_model.dart';
 import 'package:walldecor/repositories/services/google_auth_service.dart';
+import 'package:walldecor/repositories/auth_repository.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   static const String _baseUrl = 'http://172.168.17.2:13024';
+  final AuthRepository _authRepository = AuthRepository();
   
   AuthBloc() : super(const AuthInitial()) {
     on<AuthEvent>((event, emit) {});
@@ -334,38 +336,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
       
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('auth_token');
+      // Use AuthRepository to delete account
+      final message = await _authRepository.deleteAccount();
       
-      if (token == null) {
-        event.onError('No auth token found');
-        emit(state.copyWith(status: AuthStatus.failure));
-        return;
-      }
+      // Clear auth state after successful deletion
+      emit(state.copyWith(
+        status: AuthStatus.initial,
+        token: null,
+        user: null,
+        message: null,
+      ));
       
-      var resp = await http.delete(
-        Uri.parse('$_baseUrl/user/${event.userId}'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token,
-        },
-      );
-
-      if (resp.statusCode == 200) {
-        var data = jsonDecode(resp.body);
-        event.onSuccess(data["message"]);
-        emit(state.copyWith(status: AuthStatus.success));
-      } else {
-        print(resp.body);
-        print(resp.statusCode);
-        var data = jsonDecode(resp.body);
-        event.onError(data["message"]);
-        emit(state.copyWith(status: AuthStatus.failure));
-      }
+      event.onSuccess(message);
     } catch (e) {
       print(e);
       print('---------------- ERROR DELETE USER ------------------');
-      event.onError('Something happened wrong try again after some time');
+      event.onError(e.toString().replaceFirst('Exception: ', ''));
       emit(state.copyWith(status: AuthStatus.failure));
     }
   }

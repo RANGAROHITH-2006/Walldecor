@@ -388,4 +388,74 @@ class AuthRepository {
       return null;
     }
   }
+
+  /// Delete user account via API
+  Future<String> deleteAccount() async {
+    try {
+      print('🚀 Starting account deletion process...');
+      
+      // Get stored tokens
+      final prefs = await SharedPreferences.getInstance();
+      final authToken = prefs.getString(_authTokenKey);
+      
+      if (authToken == null) {
+        throw Exception('No auth token found');
+      }
+      
+      print('Making delete account API request to: $_baseUrl/user');
+      
+      final response = await _httpClient.delete(
+        Uri.parse('$_baseUrl/user'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          print('❌ Delete account request timed out after 30 seconds');
+          throw Exception('Request timed out');
+        },
+      );
+      
+      print('✅ Delete account API response received!');
+      print('Response status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        print('🎉 SUCCESS: Account deleted successfully!');
+        
+        final data = jsonDecode(response.body);
+        final message = data['message'] ?? 'Account deleted successfully';
+        
+        // Remove local data after successful deletion
+        await removeAuthData();
+        print('✅ Local data cleared after account deletion');
+        
+        return message;
+      } else {
+        print('❌ Account deletion failed!');
+        print('Status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        
+        final data = jsonDecode(response.body);
+        final errorMessage = data['message'] ?? 'Failed to delete account';
+        throw Exception(errorMessage);
+      }
+    } on TimeoutException catch (e) {
+      print('❌ Network timeout error: $e');
+      throw Exception('Network timeout: Please check your internet connection');
+    } catch (e) {
+      print('❌ Unexpected error deleting account: $e');
+      print('Error type: ${e.runtimeType}');
+      
+      // Check if it's a socket exception (network connectivity issue)
+      if (e.toString().contains('SocketException') || 
+          e.toString().contains('Connection')) {
+        throw Exception('Network connection error: Please check your internet connection and try again');
+      }
+      
+      throw Exception('Failed to delete account: $e');
+    }
+  }
 }

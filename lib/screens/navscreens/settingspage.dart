@@ -116,6 +116,143 @@ void openPrivacyPolicy() async {
   }
 }
 
+  /// Show delete account confirmation dialog
+  void _showDeleteAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2D3037),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Align(
+                  alignment: Alignment.topRight,
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: const Icon(Icons.close_rounded, color: Colors.grey, size: 20),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Confirm Account Deletion',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text('Type ‘ Delete’ to fully delete your account',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),SizedBox(height: 10,),
+                const Text(
+                  'This will include all your data, personal information & created posts. This action cannot be reversed.',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton( 
+                    onPressed: () {
+                      Navigator.of(context).pop(); 
+                      _performDeleteAccount();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEE5776),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
+                    child: const Text(
+                      'Delete',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Perform delete account operation
+  Future<void> _performDeleteAccount() async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          );
+        },
+      );
+
+      // Trigger delete account with API call
+      context.read<AuthBloc>().add(
+        DeleteUser(
+          onSuccess: (message) {
+            Navigator.of(context).pop(); // Remove loading dialog
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(message),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+            print('Account deletion successful: $message');
+            context.go('/splashscreen');
+          },
+          onError: (error) {
+            Navigator.of(context).pop(); // Remove loading dialog
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Delete account error: $error'),
+                backgroundColor: Color(0xFFEE5776),
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          },
+        ),
+      );
+    } catch (e) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Delete account error: $e'),
+          backgroundColor: Colors.redAccent,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
   /// Perform logout operation
   Future<void> _performLogout() async {
     try {
@@ -326,7 +463,7 @@ void openPrivacyPolicy() async {
                       ),
 
                       onTap: () {
-                        // Navigate to About page
+                        _showDeleteAccountDialog();
                       },
                     ),
                   ],
