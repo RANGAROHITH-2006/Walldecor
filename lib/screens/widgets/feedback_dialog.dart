@@ -253,7 +253,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF25272F),
+                    color: const Color(0xFF40424E),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
@@ -329,7 +329,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF2C3E50),
+                            color: Color(0xFFFFFFFF),
                           ),
                         ),
                       ),
@@ -339,17 +339,19 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.grey[100],
+                          color: Color.fromARGB(255, 89, 91, 107),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey[300]!),
+                          border: Border.all(color: Color.fromARGB(255, 89, 91, 107)),
                         ),
                         child: TextField(
                           controller: _commentController,
                           maxLines: 4,
                           decoration: const InputDecoration(
+                            fillColor: Color.fromARGB(255, 89, 91, 107),
+                            filled: true,
                             hintText: 'Enter here...',
                             border: InputBorder.none,
-                            hintStyle: TextStyle(color: Colors.grey),
+                            hintStyle: TextStyle(color: Colors.white),
                           ),
                           style: const TextStyle(fontSize: 14),
                           onChanged: (value) {
@@ -373,7 +375,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                                   context.pop();
                                 },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2C3E50),
+                            backgroundColor: const Color(0xFFEE5776),
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
@@ -429,7 +431,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
             height: 20,
             decoration: BoxDecoration(
               border: Border.all(
-                color: isSelected ? const Color(0xFF2C3E50) : Colors.grey,
+                color: isSelected ? const Color(0xFF2C3E50) : const Color(0xFFB6B8BB),
                 width: 2,
               ),
               borderRadius: BorderRadius.circular(4),
@@ -443,7 +445,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              style: const TextStyle(fontSize: 14, color: Color(0xFFB6B8BB)),
             ),
           ),
         ],
@@ -464,7 +466,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
       case 5:
         return 'assets/svg/emoj5.svg';
       default:
-        return 'assets/svg/emoj3.svg'; // Default neutral emoji
+        return 'assets/svg/emoj5.svg'; // Default neutral emoji
     }
   }
 }

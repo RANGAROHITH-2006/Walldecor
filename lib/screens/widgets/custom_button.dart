@@ -105,6 +105,7 @@ class _CustomButtonState extends State<CustomButton> {
         if (widget.text == 'Login With Google') {
           await googleSignIn();
           await _handleGoogleSignIn(context);
+          context.pop();
         } else {
           context.push(widget.screen);
         }

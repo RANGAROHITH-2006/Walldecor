@@ -12,7 +12,7 @@ class PremiumScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         titleSpacing: 0,
         elevation: 0,
-        leading: Icon(Icons.arrow_back_ios, color: Colors.white),
+        leading: Icon(Icons.arrow_back_ios, color: Colors.white,size: 16,),
         title: const Text(
           "Our App Premium",
           style: TextStyle(color: Colors.white, fontSize: 18),

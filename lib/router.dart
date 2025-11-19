@@ -8,12 +8,8 @@ import 'package:walldecor/screens/startscreens/splashscreen.dart';
 import 'package:go_router/go_router.dart';
 
 final route = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/splashscreen',
   routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const SplashScreen(),
-    ),
     GoRoute(
       path: '/splashscreen',
       builder: (context, state) => const SplashScreen(),

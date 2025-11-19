@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../models/feedback_model.dart';
+import '../models/feedback_model.dart';
 
 class FeedbackService {
   static final FeedbackService _instance = FeedbackService._internal();

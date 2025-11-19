@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
-import '../../repositories/services/feedback_service.dart';
+import '../../repositories/feedback_repository.dart';
 import 'feedback_event.dart';
 import 'feedback_state.dart';
 

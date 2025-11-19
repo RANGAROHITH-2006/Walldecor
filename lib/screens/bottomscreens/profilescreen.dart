@@ -79,7 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(height: 12),
             ProfileCustomButton(image: 'assets/navbaricons/images.png', text: 'Library Image', color: '0xFF2C2E36', screen: '/downloadscreen'),
             SizedBox(height: 12),
-            ProfileCustomButton(image: 'assets/navbaricons/downloadimage.png', text: 'Download Image : 10 Img', color: '0xFFEE5776', screen: '/downloadscreen'),
+            ProfileCustomButton(image: 'assets/navbaricons/downloadimage.png', text: 'Download Image', color: '0xFFEE5776', screen: '/downloadscreen'),
           ],
         ),
       ),

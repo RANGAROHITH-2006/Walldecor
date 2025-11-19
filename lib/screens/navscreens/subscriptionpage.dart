@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:walldecor/repositories/services/in_app_purchase_service.dart';
+import 'package:walldecor/repositories/in_app_purchase_repository.dart';
 import 'package:walldecor/screens/startscreens/loginscreen.dart';
 import 'package:walldecor/screens/startscreens/mainscreen.dart';
 import 'package:walldecor/screens/widgets/success_popup.dart';

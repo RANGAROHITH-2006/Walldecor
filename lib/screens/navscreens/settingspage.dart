@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:share_plus/share_plus.dart';
-// import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:walldecor/screens/bottomscreens/premiumscreen.dart';
 import 'package:walldecor/screens/widgets/modeicon.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -67,6 +68,27 @@ class _SettingspageState extends State<Settingspage> {
       },
     );
   }
+
+  ///share app function
+  void shareApp() {
+    const String packageName = "com.zooq.ai.photo.art.image.generator"; // change this
+    final String playStoreLink =
+        "https://play.google.com/store/apps/details?id=$packageName";
+
+    Share.share("Check out this amazing app! Download now:\n$playStoreLink");
+  }
+
+
+///privacy policy function  
+void openPrivacyPolicy() async {
+  final url = Uri.parse("https://google.com");
+
+  if (await canLaunchUrl(url)) {
+    await launchUrl(url, mode: LaunchMode.externalApplication);
+  }else{
+    throw('Could not launch privacy policy URL');
+  }
+}
 
   /// Perform logout operation
   Future<void> _performLogout() async {
@@ -208,7 +230,7 @@ class _SettingspageState extends State<Settingspage> {
                       ),
 
                       onTap: () {
-                       
+                        shareApp();
                       },
                     ),
                     ListTile(
@@ -236,7 +258,12 @@ class _SettingspageState extends State<Settingspage> {
                       ),
 
                       onTap: () {
-                        // Navigate to About page
+                       Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PremiumScreen(),
+                        ),
+                      );
                       },
                     ),
                     ListTile(
@@ -250,23 +277,10 @@ class _SettingspageState extends State<Settingspage> {
                       ),
 
                       onTap: () {
-                        // Navigate to About page
+                        openPrivacyPolicy();
                       },
                     ),
-                    ListTile(
-                      leading: const Icon(
-                        Icons.phone_outlined,
-                        color: Colors.white,
-                      ),
-                      title: const Text(
-                        'Phone',
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
-
-                      onTap: () {
-                        // Navigate to About page
-                      },
-                    ),
+                    
                     ListTile(
                       leading: const Icon(Icons.logout, color: Colors.white),
                       title: const Text(
