@@ -90,8 +90,6 @@ class DownloadRepository {
 
     // Try multiple possible endpoints
     final endpoints = [
-      '$baseUrl/user/downloads',
-      '$baseUrl/user/download', 
       '$baseUrl/user',
     ];
     
