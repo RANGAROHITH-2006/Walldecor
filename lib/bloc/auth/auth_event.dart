@@ -108,3 +108,12 @@ class SetLoginInitial extends AuthEvent {
   @override
   List<Object?> get props => [];
 }
+
+class UpdateUserSubscription extends AuthEvent {
+  final bool isProUser;
+  
+  const UpdateUserSubscription({required this.isProUser});
+
+  @override
+  List<Object?> get props => [isProUser];
+}

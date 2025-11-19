@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:walldecor/repositories/in_app_purchase_repository.dart';
 import 'package:walldecor/screens/startscreens/loginscreen.dart';
 import 'package:walldecor/screens/startscreens/mainscreen.dart';
@@ -98,6 +100,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     });
 
     if (success) {
+      // Update the user's subscription status in the auth bloc
+      context.read<AuthBloc>().add(const UpdateUserSubscription(isProUser: true));
+      
       SuccessPopup.show(
         context,
         title: 'Purchase Successful!',

@@ -25,10 +25,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LogOutRequest>(_onLogOutRequest);
     on<SetLoginInitial>(_setLoginInitial);
     on<DeleteUser>(_onDeleteUser);
+    on<UpdateUserSubscription>(_onUpdateUserSubscription);
   }
 
   _setLoginInitial(SetLoginInitial event, Emitter<AuthState> emit) {
     emit(state.copyWith(status: AuthStatus.initial));
+  }
+
+  _onUpdateUserSubscription(UpdateUserSubscription event, Emitter<AuthState> emit) async {
+    if (state.user != null) {
+      User updatedUser = state.user!.copyWith(isProUser: event.isProUser);
+      
+      // Update shared preferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isProUser', event.isProUser);
+      
+      emit(state.copyWith(user: updatedUser));
+    }
   }
 
   Future<void> _onSessionRequest(
@@ -77,13 +90,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
       
       if (resp.statusCode == 200) {
-        print(resp.body);
+        print('📡 Server Response: ${resp.body}');
         var data = jsonDecode(resp.body);
         User user = User.fromJson(data);
-        bool isProUser = data['isProUser'];
+        
+        print('🔍 AUTH DEBUG:');
+        print('   Server isProUser: ${data['isProUser']}');
+        print('   Server expireTime: ${data['expireTime']}');
+        print('   User isSubscriptionExpired: ${user.isSubscriptionExpired}');
+        print('   User hasActiveSubscription: ${user.hasActiveSubscription}');
+        
+        bool isProUser = data['isProUser'] && !user.isSubscriptionExpired;
 
         await prefs.setString('user_data', jsonEncode(data));
         await prefs.setBool('isProUser', isProUser);
+
+        // If subscription expired, update the user object
+        if (data['isProUser'] && user.isSubscriptionExpired) {
+          user = user.copyWith(isProUser: false);
+        }
 
         event.onSuccess(user);
 

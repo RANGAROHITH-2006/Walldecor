@@ -1,10 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:walldecor/screens/navscreens/notificationpage.dart';
 import 'package:walldecor/screens/navscreens/searchpage.dart';
-import 'package:walldecor/screens/navscreens/subscriptionpage.dart';
 import 'package:walldecor/screens/pages/categoriespage.dart';
 import 'package:walldecor/screens/pages/collectionpage.dart';
 import 'package:walldecor/screens/pages/homepage.dart';
-import 'package:flutter/material.dart';
+import 'package:walldecor/screens/widgets/pro_indicator.dart';
 
 class Homescreen extends StatefulWidget {
   final Function(int)? onTabChange;
@@ -61,19 +61,7 @@ class _HomescreenState extends State<Homescreen> {
               height: 24,
             ),
           ),
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SubscriptionPage()),
-              );
-            },
-            icon: Image.asset(
-              'assets/navbaricons/crown.png',
-              width: 24,
-              height: 24,
-            ),
-          ),
+          const ProIndicator(),
         ],
       ),
       body: Column(

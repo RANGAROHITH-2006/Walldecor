@@ -53,6 +53,78 @@ class User {
         required this.autoRenew,
     });
 
+    /// Check if the user's subscription has expired
+    bool get isSubscriptionExpired {
+        if (!isProUser || expireTime.isEmpty) return true;
+        
+        try {
+            DateTime expiredAt;
+            
+            // Handle GMT format: "Fri Dec 19 2025 09:48:04 GMT+0000"
+            if (expireTime.contains('GMT')) {
+                // Split the string and extract components
+                final parts = expireTime.split(' ');
+                if (parts.length >= 5) {
+                    // parts = ["Fri", "Dec", "19", "2025", "09:48:04", "GMT+0000"]
+                    final monthName = parts[1]; // Dec
+                    final day = int.parse(parts[2]); // 19
+                    final year = int.parse(parts[3]); // 2025
+                    final timePart = parts[4]; // 09:48:04
+                    
+                    // Convert month name to number
+                    final months = {
+                        'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4,
+                        'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8,
+                        'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
+                    };
+                    
+                    final month = months[monthName];
+                    if (month != null) {
+                        // Parse time components
+                        final timeComponents = timePart.split(':');
+                        if (timeComponents.length >= 3) {
+                            final hour = int.parse(timeComponents[0]);
+                            final minute = int.parse(timeComponents[1]);
+                            final second = int.parse(timeComponents[2]);
+                            
+                            // Create DateTime in UTC
+                            expiredAt = DateTime.utc(year, month, day, hour, minute, second);
+                        } else {
+                            throw FormatException('Invalid time format: $timePart');
+                        }
+                    } else {
+                        throw FormatException('Unknown month: $monthName');
+                    }
+                } else {
+                    throw FormatException('Unexpected date format: $expireTime');
+                }
+            } else {
+                // Try direct parsing for ISO format
+                expiredAt = DateTime.parse(expireTime);
+            }
+            
+            final now = DateTime.now().toUtc(); // Compare in UTC
+            final isExpired = now.isAfter(expiredAt);
+            
+            print('🔍 DEBUG Date Parsing:');
+            print('   Original expireTime: $expireTime');
+            print('   Parsed expiredAt: $expiredAt');
+            print('   Current time (UTC): $now');
+            print('   Is expired: $isExpired');
+            
+            return isExpired;
+        } catch (e) {
+            print('❌ DEBUG Date parsing error: $e');
+            print('   Original expireTime: $expireTime');
+            return true; // If we can't parse the date, consider it expired
+        }
+    }
+
+    /// Check if the user has an active subscription
+    bool get hasActiveSubscription {
+        return isProUser && !isSubscriptionExpired;
+    }
+
     User copyWith({
         String? id,
         String? firstName,
