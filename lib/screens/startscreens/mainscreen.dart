@@ -18,23 +18,24 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int currentIndex = 0;
-  List<Widget> bottomScreens = [
-    const Homescreen(),
-    const LibrarypageData(),
-    const PremiumScreen(),
-    const ProfileScreen(),
-  ];
+  late List<Widget> bottomScreens;
+  
+  @override
+  void initState() {
+    super.initState();
+    getFcmToken();
+    bottomScreens = [
+      Homescreen(onTabChange: (index) => setState(() => currentIndex = index)),
+      const LibrarypageData(),
+      const PremiumScreen(),
+      ProfileScreen(onTabChange: (index) => setState(() => currentIndex = index)),
+    ];
+  }
 
   void getFcmToken() async {
     String? token = await FirebaseMessaging.instance.getToken();
     print('🔥 FCM Token: $token');
     // loginWithGoogle();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    getFcmToken();
   }
 
   @override

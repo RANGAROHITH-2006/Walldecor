@@ -152,19 +152,25 @@ class ProfileCustomButton extends StatelessWidget {
   final String image;
   final String text;
   final String screen;
+  final VoidCallback? onTap;
   const ProfileCustomButton({
     super.key,
     required this.image,
     required this.text,
     required this.color,
     required this.screen,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.push(screen);
+        if (onTap != null) {
+          onTap!();
+        } else if (screen.isNotEmpty) {
+          context.push(screen);
+        }
       },
       child: Container(
         height: 56,

@@ -6,7 +6,8 @@ import 'package:walldecor/screens/navscreens/settingspage.dart';
 import 'package:walldecor/screens/widgets/custom_button.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final Function(int)? onTabChange;
+  const ProfileScreen({super.key, this.onTabChange});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -75,7 +76,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
             ),
             const SizedBox(height: 16),
-            ProfileCustomButton(image: 'assets/navbaricons/downloadlimit.png', text: 'Download Limit : 10 Img', color: '0xFF2C2E36', screen: ''),
+            ProfileCustomButton(
+              image: 'assets/navbaricons/downloadlimit.png', 
+              text: 'Download Limit : 10 Img', 
+              color: '0xFF2C2E36', 
+              screen: '',
+              onTap: () {
+                if (widget.onTabChange != null) {
+                  widget.onTabChange!(1); // Navigate to library tab (index 1)
+                }
+              },
+            ),
             SizedBox(height: 12),
             ProfileCustomButton(image: 'assets/navbaricons/images.png', text: 'Library Image', color: '0xFF2C2E36', screen: '/downloadscreen'),
             SizedBox(height: 12),

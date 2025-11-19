@@ -7,7 +7,8 @@ import 'package:walldecor/screens/pages/homepage.dart';
 import 'package:flutter/material.dart';
 
 class Homescreen extends StatefulWidget {
-  const Homescreen({super.key});
+  final Function(int)? onTabChange;
+  const Homescreen({super.key, this.onTabChange});
 
   @override
   State<Homescreen> createState() => _HomescreenState();
@@ -132,21 +133,13 @@ class _HomescreenState extends State<Homescreen> {
   Widget _buildTabContent() {
     switch (selectedTabIndex) {
       case 0:
-        return Homepage(onTabChange: (int index) {
-          setState(() {
-            selectedTabIndex = index;
-          });
-        });
+        return Homepage(onTabChange: widget.onTabChange);
       case 1:
         return const Categorypage();
       case 2:
         return const CollectionPage();
       default:
-        return Homepage(onTabChange: (int index) {
-          setState(() {
-            selectedTabIndex = index;
-          });
-        });
+        return Homepage(onTabChange: widget.onTabChange);
     }
   }
 }

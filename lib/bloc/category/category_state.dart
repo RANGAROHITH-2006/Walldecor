@@ -12,9 +12,15 @@ class CategoryLoaded extends CategoryState {
   CategoryLoaded(this.data);
 }
 
+class CategoryDetailsLoading extends CategoryState {
+  final List<CategoryModel> categories;
+  CategoryDetailsLoading(this.categories);
+}
+
 class CategoryDetailsLoaded extends CategoryState {
+  final List<CategoryModel> categories;
   final List<CategorydetailesModel> data;
-  CategoryDetailsLoaded(this.data);
+  CategoryDetailsLoaded(this.categories, this.data);
 }
 
 class CategoryError extends CategoryState {

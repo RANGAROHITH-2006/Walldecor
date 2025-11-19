@@ -1,11 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:walldecor/bloc/category/category_event.dart';
 import 'package:walldecor/bloc/category/category_state.dart';
+import 'package:walldecor/models/category_model.dart';
 import 'package:walldecor/repositories/category_repository.dart';
 
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final CategoryRepository repository;
+  List<CategoryModel> _cachedCategories = [];
 
   CategoryBloc(this.repository) : super(CategoryInitial()) {
     on<FetchCategoryEvent>(_onFetchCategory);
@@ -19,6 +21,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     emit(CategoryLoading());
     try {
       final data = await repository.fetchCategoryData();
+      _cachedCategories = data;
       emit(CategoryLoaded(data));
     } catch (e) {
       emit(CategoryError(e.toString()));
@@ -30,10 +33,12 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     FetchCategoryDetailsEvent event,
     Emitter<CategoryState> emit,
   ) async {
-    emit(CategoryLoading());
+    if (_cachedCategories.isNotEmpty) {
+      emit(CategoryDetailsLoading(_cachedCategories));
+    }
     try {
       final data = await repository.fetchCategoryDetailedData(event.categoryId);
-      emit(CategoryDetailsLoaded(data));
+      emit(CategoryDetailsLoaded(_cachedCategories, data));
     } catch (e) {
       emit(CategoryError(e.toString()));
     }

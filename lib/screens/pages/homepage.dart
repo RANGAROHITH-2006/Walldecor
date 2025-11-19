@@ -12,6 +12,7 @@ import 'package:walldecor/bloc/download/download_event.dart';
 import 'package:walldecor/bloc/download/download_state.dart';
 import 'package:walldecor/repositories/category_repository.dart';
 import 'package:walldecor/repositories/collection_repository.dart';
+import 'package:walldecor/models/category_model.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
 
 class Homepage extends StatefulWidget {
@@ -246,8 +247,17 @@ class _HomepageState extends State<Homepage> {
             return const Center(
               child: CircularProgressIndicator(color: Color(0xFFEE5776)),
             );
-          } else if (state is CategoryLoaded) {
-            final categories = state.data;
+          } else if (state is CategoryLoaded || state is CategoryDetailsLoading || state is CategoryDetailsLoaded) {
+            List<CategoryModel> categories = [];
+            
+            if (state is CategoryLoaded) {
+              categories = state.data;
+            } else if (state is CategoryDetailsLoading) {
+              categories = state.categories;
+            } else if (state is CategoryDetailsLoaded) {
+              categories = state.categories;
+            }
+            
             return ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: categories.length,
