@@ -90,8 +90,6 @@ class FavoriteRepository {
 
     // Try multiple possible endpoints
     final endpoints = [
-      '$baseUrl/user/favorites',
-      '$baseUrl/user/favorite', 
       '$baseUrl/user',
     ];
     
