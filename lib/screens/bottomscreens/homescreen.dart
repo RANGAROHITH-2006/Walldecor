@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:walldecor/screens/navscreens/notificationpage.dart';
 import 'package:walldecor/screens/navscreens/searchpage.dart';
-import 'package:walldecor/screens/pages/categoriespage.dart';
-import 'package:walldecor/screens/pages/collectionpage.dart';
-import 'package:walldecor/screens/pages/homepage.dart';
+import 'package:walldecor/screens/homescreenpages/categoriespage.dart';
+import 'package:walldecor/screens/homescreenpages/collectionpage.dart';
+import 'package:walldecor/screens/homescreenpages/homepage.dart';
 import 'package:walldecor/screens/widgets/pro_indicator.dart';
 
 class Homescreen extends StatefulWidget {
