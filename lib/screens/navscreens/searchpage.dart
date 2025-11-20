@@ -12,6 +12,7 @@ import 'package:walldecor/bloc/search/search_bloc.dart';
 import 'package:walldecor/bloc/search/search_state.dart';
 import 'package:walldecor/bloc/search/search_event.dart';
 import 'package:walldecor/screens/widgets/no_internet_widget.dart';
+import 'package:walldecor/screens/widgets/noresult.dart';
 
 
 class Searchpage extends StatefulWidget {
@@ -211,19 +212,7 @@ class _SearchpageState extends State<Searchpage> {
             child: Column(
               children: [
                 const SizedBox(height: 50),
-                const Icon(
-                  Icons.wifi_off,
-                  color: Color(0xFF868EAE),
-                  size: 48,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Unable to search',
-                  style: TextStyle(
-                    color: Color(0xFF868EAE),
-                    fontSize: 16,
-                  ),
-                ),
+               Noresult(),
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
