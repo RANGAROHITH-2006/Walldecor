@@ -46,7 +46,57 @@ flutter:
     - assets/navbaricons/
     - assets/trending/
     - assets/svg/
-    
+  fonts:
+    - family: MonaSans
+      fonts:
+        - asset: assets/fonts/Mona-Sans.ttf
+        - asset: assets/fonts/Mona-Sans-Black.ttf
+        - asset: assets/fonts/Mona-Sans-BlackItalic.ttf
+        - asset: assets/fonts/Mona-Sans-BlackNarrow.ttf
+        - asset: assets/fonts/Mona-Sans-BlackWide.ttf
+        - asset: assets/fonts/Mona-Sans-BlackWideItalic.ttf
+        - asset: assets/fonts/Mona-Sans-Bold.ttf
+        - asset: assets/fonts/Mona-Sans-BoldItalic.ttf
+        - asset: assets/fonts/Mona-Sans-BoldNarrow.ttf
+        - asset: assets/fonts/Mona-Sans-BoldNarrowItalic.ttf
+        - asset: assets/fonts/Mona-Sans-BoldWide.ttf
+        - asset: assets/fonts/Mona-Sans-BoldWideItalic.ttf
+        - asset: assets/fonts/Mona-Sans-ExtraBold.ttf
+        - asset: assets/fonts/Mona-Sans-ExtraBoldItalic.ttf
+        - asset: assets/fonts/Mona-Sans-ExtraBoldNarrow.ttf
+        - asset: assets/fonts/Mona-Sans-ExtraBoldNarrowItalic.ttf
+        - asset: assets/fonts/Mona-Sans-ExtraBoldWide.ttf
+        - asset: assets/fonts/Mona-Sans-ExtraBoldWideItalic.ttf
+        - asset: assets/fonts/Mona-Sans-Light.ttf
+        - asset: assets/fonts/Mona-Sans-LightItalic.ttf
+        - asset: assets/fonts/Mona-Sans-LightNarrow.ttf
+        - asset: assets/fonts/Mona-Sans-LightNarrowItalic.ttf
+        - asset: assets/fonts/Mona-Sans-LightWide.ttf
+        - asset: assets/fonts/Mona-Sans-LightWideItalic.ttf
+        - asset: assets/fonts/Mona-Sans-Medium.ttf
+        - asset: assets/fonts/Mona-Sans-MediumItalic.ttf
+        - asset: assets/fonts/Mona-Sans-MediumNarrow.ttf
+        - asset: assets/fonts/Mona-Sans-MediumNarrowItalic.ttf
+        - asset: assets/fonts/Mona-Sans-MediumWide.ttf
+        - asset: assets/fonts/Mona-Sans-MediumWideItalic.ttf
+        - asset: assets/fonts/Mona-Sans-Regular.ttf
+        - asset: assets/fonts/Mona-Sans-RegularItalic.ttf
+        - asset: assets/fonts/Mona-Sans-RegularNarrow.ttf
+        - asset: assets/fonts/Mona-Sans-RegularNarrowItalic.ttf
+        - asset: assets/fonts/Mona-Sans-RegularWide.ttf
+        - asset: assets/fonts/Mona-Sans-RegularWideItalic.ttf
+        - asset: assets/fonts/Mona-Sans-SemiBold.ttf
+        - asset: assets/fonts/Mona-Sans-SemiBoldItalic.ttf
+        - asset: assets/fonts/Mona-Sans-SemiBoldNarrow.ttf
+        - asset: assets/fonts/Mona-Sans-SemiBoldNarrowItalic.ttf
+        - asset: assets/fonts/Mona-Sans-SemiBoldWide.ttf
+        - asset: assets/fonts/Mona-Sans-SemiBoldWideItalic.ttf
+        - asset: assets/fonts/Mona-Sans-UltraLight.ttf
+        - asset: assets/fonts/Mona-Sans-UltraLightItalic.ttf
+        - asset: assets/fonts/Mona-Sans-UltraLightNarrow.ttf
+        - asset: assets/fonts/Mona-Sans-UltraLightNarrowItalic.ttf
+        - asset: assets/fonts/Mona-Sans-UltraLightWide.ttf
+        - asset: assets/fonts/Mona-Sans-UltraLightWideItalic.ttf  
   uses-material-design: true
 
   
