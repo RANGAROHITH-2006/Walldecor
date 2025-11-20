@@ -24,6 +24,7 @@ class Searchpage extends StatefulWidget {
 class _SearchpageState extends State<Searchpage> {
   int _currentIndex = 0;
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   bool _isSearching = false;
   Timer? _debounceTimer;
 
@@ -43,6 +44,7 @@ class _SearchpageState extends State<Searchpage> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     _debounceTimer?.cancel();
     super.dispose();
   }
@@ -69,6 +71,7 @@ class _SearchpageState extends State<Searchpage> {
 
   void _clearSearch() {
     _searchController.clear();
+    _searchFocusNode.unfocus();
     _debounceTimer?.cancel();
     setState(() {
       _isSearching = false;
@@ -110,9 +113,13 @@ class _SearchpageState extends State<Searchpage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xFF25272F),
-      body: BlocBuilder<ConnectivityBloc, ConnectivityState>(
+      body: GestureDetector(
+        onTap: () {
+          // Dismiss keyboard when tapping outside
+          FocusScope.of(context).unfocus();
+        },
+        child: BlocBuilder<ConnectivityBloc, ConnectivityState>(
         builder: (context, connectivityState) {
           if (connectivityState is ConnectivityOffline) {
             return NoInternetWidget(
@@ -123,54 +130,68 @@ class _SearchpageState extends State<Searchpage> {
           }
           
           return SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (scrollNotification) {
+                if (scrollNotification is ScrollStartNotification) {
+                  // Dismiss keyboard when scrolling starts
+                  FocusScope.of(context).unfocus();
+                }
+                return false;
+              },
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ---------------- Search Bar ----------------
                   Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: (value) {
-                        _onSearchChanged(value);
-                        setState(() {}); // Rebuild to update suffix icon
-                      },
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: 'Search here',
-                        hintStyle: const TextStyle(color: Color(0xFF646770)),
-                        prefixIcon: const Icon(
-                          Icons.search,
-                          color: Color(0xFF646770),
-                          size: 22,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: TextField(
+                            controller: _searchController,
+                            focusNode: _searchFocusNode,
+                            onChanged: (value) {
+                              _onSearchChanged(value);
+                              setState(() {}); // Rebuild to update suffix icon
+                            },
+                            style: const TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            hintText: 'Search here',
+                            hintStyle: const TextStyle(color: Color(0xFF646770)),
+                            prefixIcon: const Icon(
+                              Icons.search,
+                              color: Color(0xFF646770),
+                              size: 22,
+                            ),
+                            suffixIcon:
+                                _searchController.text.isNotEmpty
+                                    ? IconButton(
+                                      icon: const Icon(
+                                        Icons.close,
+                                        color: Colors.white70,
+                                      ),
+                                      onPressed: _clearSearch,
+                                    )
+                                    : const Icon(Icons.close, color: Colors.white70),
+                            border: InputBorder.none,
+                          ),
                         ),
-                        suffixIcon:
-                            _searchController.text.isNotEmpty
-                                ? IconButton(
-                                  icon: const Icon(
-                                    Icons.close,
-                                    color: Colors.white70,
-                                  ),
-                                  onPressed: _clearSearch,
-                                )
-                                : const Icon(Icons.close, color: Colors.white70),
-                        border: InputBorder.none,
                       ),
+                      const SizedBox(height: 10),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                        _isSearching ? _buildSearchResults() : _buildOriginalContent(),
+                      ],
                     ),
+                                ),
                   ),
-                  const SizedBox(height: 10),
-
-                  // Show search results if searching, otherwise show original content
-                  _isSearching ? _buildSearchResults() : _buildOriginalContent(),
                 ],
               ),
             ),
           );
         },
+        ),
       ),
     );
   }

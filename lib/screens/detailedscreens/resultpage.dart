@@ -256,7 +256,7 @@ Future<void> shareImage(String imageUrl) async {
                           showModalBottomSheet(
                             context: context,
                             isScrollControlled: true,
-                            backgroundColor: const Color(0xFF25272F).withValues(alpha: 0.9),
+                            backgroundColor: const Color(0xFF25272F),
                             shape: const RoundedRectangleBorder(
                               borderRadius:
                                   BorderRadius.vertical(top: Radius.circular(20)),
