@@ -10,11 +10,8 @@ class PremiumScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xff1E1E1E),
         automaticallyImplyLeading: false,
-        titleSpacing: 0,
-        elevation: 0,
-        leading: Icon(Icons.arrow_back_ios, color: Colors.white,size: 16,),
         title: const Text(
-          "Our App Premium",
+          "Our Premium App",
           style: TextStyle(color: Colors.white, fontSize: 18),
         ),
       ),

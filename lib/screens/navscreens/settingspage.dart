@@ -4,7 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:walldecor/screens/bottomscreens/premiumscreen.dart';
-import 'package:walldecor/screens/widgets/modeicon.dart';
+// import 'package:walldecor/screens/widgets/modeicon.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -368,17 +368,17 @@ class _SettingspageState extends State<Settingspage> {
               Expanded(
                 child: ListView(
                   children: [
-                    ListTile(
-                      leading: SvgPicture.asset('assets/svg/Mode.svg'),
-                      title: const Text(
-                        'Mode',
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
-                      trailing: ToggleExample(),
-                      onTap: () {
-                        // Navigate to Notification settings
-                      },
-                    ),
+                    // ListTile(
+                    //   leading: SvgPicture.asset('assets/svg/Mode.svg'),
+                    //   title: const Text(
+                    //     'Mode',
+                    //     style: TextStyle(color: Colors.white, fontSize: 18),
+                    //   ),
+                    //   trailing: ToggleExample(),
+                    //   onTap: () {
+                    //     // Navigate to Notification settings
+                    //   },
+                    // ),
                     ListTile(
                       leading: SvgPicture.asset('assets/svg/share1.svg'),
                       title: const Text(

@@ -11,7 +11,6 @@ import 'package:walldecor/bloc/download/download_event.dart';
 import 'package:walldecor/bloc/download/download_state.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
-import 'package:walldecor/screens/navscreens/notificationpage.dart';
 import 'package:walldecor/screens/navscreens/searchpage.dart';
 import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 
@@ -55,19 +54,6 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               height: 24,
             ),
           ),
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Notificationpage()),
-              );
-            },
-            icon: Image.asset(
-              'assets/navbaricons/notification.png',
-              width: 24,
-              height: 24,
-            ),
-          ),
         ],
       ),
       body: BlocBuilder<ConnectivityBloc, ConnectivityState>(
@@ -79,7 +65,6 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               },
             );
           }
-          
           return BlocListener<DownloadBloc, DownloadState>(
             listener: (context, state) {
               if (state is DownloadAddSuccess) {
@@ -101,144 +86,154 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               }
             },
             child: BlocBuilder<CategoryBloc, CategoryState>(
-            builder: (context, state) {
-              if (state is CategoryLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(color: Color(0xFFEE5776)),
-                );
-              } else if (state is CategoryDetailsLoaded) {
-            final List<CategorydetailesModel> details = state.data;
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                  childAspectRatio: 0.81,
-                ),
-                itemCount: details.length,
-                itemBuilder: (context, index) {
-                  final item = details[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) =>
-                                  Resultpage(urls: item.urls, user: item.user),
-                        ),
-                      );
-                      debugPrint('image $index tapped');
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black,
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
+              builder: (context, state) {
+                if (state is CategoryLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+                  );
+                } else if (state is CategoryDetailsLoaded) {
+                  final List<CategorydetailesModel> details = state.data;
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 8,
+                            childAspectRatio: 0.81,
                           ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16.0),
-                        child: Stack(
-                          children: [
-                            Positioned.fill(
-                              child: Image.network(
-                                item.urls.small,
-                                fit: BoxFit.cover,
-                                errorBuilder:
-                                    (_, __, ___) => Container(
-                                      color: Colors.grey[800],
-                                      child: const Icon(
-                                        Icons.image_not_supported,
-                                        color: Colors.white,
+                      itemCount: details.length,
+                      itemBuilder: (context, index) {
+                        final item = details[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => Resultpage(
+                                      urls: item.urls,
+                                      user: item.user,
+                                    ),
+                              ),
+                            );
+                            debugPrint('image $index tapped');
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black,
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16.0),
+                              child: Stack(
+                                children: [
+                                  Positioned.fill(
+                                    child: Image.network(
+                                      item.urls.small,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (_, __, ___) => Container(
+                                            color: Colors.grey[800],
+                                            child: const Icon(
+                                              Icons.image_not_supported,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                    ),
+                                  ),
+
+                                  Positioned(
+                                    bottom: 8,
+                                    right: 8,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        debugPrint(
+                                          'Downloading wallpaper $index',
+                                        );
+
+                                        // Add to downloads using DownloadBloc
+                                        // Use only the actual image ID without timestamp for consistency
+                                        final imageId = item.id;
+                                        context.read<DownloadBloc>().add(
+                                          AddToDownloadEvent(
+                                            id: imageId,
+                                            urls: item.urls.toJson(),
+                                            user: item.user.toJson(),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Color(0x33000000),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                        ),
+                                        child: Image.asset(
+                                          'assets/navbaricons/download.png',
+                                          width: 16,
+                                          height: 16,
+                                        ),
                                       ),
                                     ),
+                                  ),
+                                ],
                               ),
                             ),
-
-                            Positioned(
-                              bottom: 8,
-                              right: 8,
-                              child: GestureDetector(
-                                onTap: () {
-                                  debugPrint('Downloading wallpaper $index');
-                                  
-                                  // Add to downloads using DownloadBloc
-                                  // Use only the actual image ID without timestamp for consistency
-                                  final imageId = item.id;
-                                  context.read<DownloadBloc>().add(
-                                    AddToDownloadEvent(
-                                      id: imageId,
-                                      urls: item.urls.toJson(),
-                                      user: item.user.toJson(),
-                                    ),
-                                  );
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Color(0x33000000),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Image.asset(
-                                    'assets/navbaricons/download.png',
-                                    width: 16,
-                                    height: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      },
                     ),
                   );
-                },
-              ),
-            );
-            } else if (state is CategoryError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.wifi_off,
-                      color: Color(0xFF868EAE),
-                      size: 48,
+                } else if (state is CategoryError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.wifi_off,
+                          color: Color(0xFF868EAE),
+                          size: 48,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Unable to load category details',
+                          style: TextStyle(
+                            color: Color(0xFF868EAE),
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            context.read<CategoryBloc>().add(
+                              FetchCategoryDetailsEvent(widget.id),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFEE5776),
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Retry'),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Unable to load category details',
-                      style: TextStyle(
-                        color: Color(0xFF868EAE),
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<CategoryBloc>().add(FetchCategoryDetailsEvent(widget.id));
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEE5776),
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            } else {
-              return const SizedBox.shrink();
-            }
-          },
-          ));
+                  );
+                } else {
+                  return const SizedBox.shrink();
+                }
+              },
+            ),
+          );
         },
       ),
     );

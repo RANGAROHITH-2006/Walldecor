@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:walldecor/screens/navscreens/notificationpage.dart';
 import 'package:walldecor/screens/navscreens/searchpage.dart';
 import 'package:walldecor/screens/homescreenpages/categoriespage.dart';
 import 'package:walldecor/screens/homescreenpages/collectionpage.dart';
@@ -48,19 +47,7 @@ class _HomescreenState extends State<Homescreen> {
               height: 24,
             ),
           ),
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Notificationpage()),
-              );
-            },
-            icon: Image.asset(
-              'assets/navbaricons/notification.png',
-              width: 24,
-              height: 24,
-            ),
-          ),
+          
           const ProIndicator(),
         ],
       ),

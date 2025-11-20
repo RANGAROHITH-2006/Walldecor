@@ -28,12 +28,11 @@ class CustomButton extends StatefulWidget {
 class _CustomButtonState extends State<CustomButton> {
   bool isLoading = false;
 
-
- Future<void> _handleGoogleSignIn(BuildContext context) async {
+  Future<void> _handleGoogleSignIn(BuildContext context) async {
     try {
       final googleAuthService = GoogleAuthService();
       final userData = await googleAuthService.signInWithGoogle();
-      
+
       if (userData != null) {
         if (context.mounted) {
           context.read<AuthBloc>().add(
@@ -67,11 +66,11 @@ class _CustomButtonState extends State<CustomButton> {
     }
   }
 
- Future<void> _handleAppleSignIn(BuildContext context) async {
+  Future<void> _handleAppleSignIn(BuildContext context) async {
     try {
       setState(() => isLoading = true);
-      
-     // Check if Apple Sign In is available
+
+      // Check if Apple Sign In is available
       if (!Platform.isIOS && !Platform.isMacOS) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -85,7 +84,7 @@ class _CustomButtonState extends State<CustomButton> {
       }
 
       final appleAuthService = AppleAuthService();
-      
+
       // Check availability
       final isAvailable = await appleAuthService.isAppleSignInAvailable();
       if (!isAvailable) {
@@ -101,7 +100,7 @@ class _CustomButtonState extends State<CustomButton> {
       }
 
       final userData = await appleAuthService.signInWithApple();
-      
+
       if (userData != null) {
         if (context.mounted) {
           context.read<AuthBloc>().add(
@@ -145,7 +144,6 @@ class _CustomButtonState extends State<CustomButton> {
       if (mounted) setState(() => isLoading = false);
     }
   }
-
 
   Future<void> googleSignIn() async {
     try {
@@ -255,6 +253,48 @@ class ProfileCustomButton extends StatelessWidget {
           context.push(screen);
         }
       },
+      child: Container(
+        height: 56,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Color(int.parse(color)),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Image.asset(image),
+              const SizedBox(width: 8),
+              Text(
+                text,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ProfileCustomButton1 extends StatelessWidget {
+  final String color;
+  final String image;
+  final String text;
+  final VoidCallback? onTap;
+  const ProfileCustomButton1({
+    super.key,
+    required this.image,
+    required this.text,
+    required this.color,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
       child: Container(
         height: 56,
         width: double.infinity,

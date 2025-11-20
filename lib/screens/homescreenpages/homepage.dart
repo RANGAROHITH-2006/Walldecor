@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:walldecor/screens/detailedscreens/collectiondetailspage.dart';
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/bloc/category/category_bloc.dart';
 import 'package:walldecor/bloc/category/category_event.dart';
@@ -30,8 +31,8 @@ class Homepage extends StatefulWidget {
 class _HomepageState extends State<Homepage> {
   late CategoryBloc _categoryBloc;
   late CollectionBloc _collectionBloc;
-  
-  String? selectedCategoryId ;
+
+  String? selectedCategoryId;
   String selectedCategoryTitle = 'All';
   List<CategorydetailesModel> categoryImages = [];
 
@@ -40,7 +41,7 @@ class _HomepageState extends State<Homepage> {
     super.initState();
     _categoryBloc = CategoryBloc(CategoryRepository());
     _collectionBloc = CollectionBloc(CollectionRepository());
-    
+
     // Fetch initial data
     _categoryBloc.add(FetchCategoryEvent());
     print('INIT: created _categoryBloc = $_categoryBloc');
@@ -67,7 +68,7 @@ class _HomepageState extends State<Homepage> {
               },
             );
           }
-          
+
           return MultiBlocListener(
             listeners: [
               BlocListener<CategoryBloc, CategoryState>(
@@ -77,7 +78,8 @@ class _HomepageState extends State<Homepage> {
                     setState(() {
                       categoryImages = state.data;
                     });
-                  } else if (state is CategoryLoaded && selectedCategoryId == null) {
+                  } else if (state is CategoryLoaded &&
+                      selectedCategoryId == null) {
                     // Auto-select first category by default
                     final categories = state.data;
                     if (categories.isNotEmpty) {
@@ -85,7 +87,9 @@ class _HomepageState extends State<Homepage> {
                         selectedCategoryId = categories.first.id;
                         selectedCategoryTitle = categories.first.title;
                       });
-                      _categoryBloc.add(FetchCategoryDetailsEvent(categories.first.id));
+                      _categoryBloc.add(
+                        FetchCategoryDetailsEvent(categories.first.id),
+                      );
                     }
                   }
                 },
@@ -146,7 +150,7 @@ class _HomepageState extends State<Homepage> {
               'Featured Collection',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -179,32 +183,47 @@ class _HomepageState extends State<Homepage> {
                 );
               } else if (state is CollectionLoaded) {
                 final collections = state.data;
-                final displayCount = collections.length > 5 ? 5 : collections.length;
+                final displayCount =
+                    collections.length > 4 ? 4 : collections.length;
                 return ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: displayCount,
                   itemBuilder: (context, index) {
-                    return Container(
-                      margin: const EdgeInsets.only(right: 12.0),
-                      width: 106,
-                      height: 146,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12.0),
-                        child: Image.network(
-                          collections[index].coverPhoto.urls.regular,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: const Color(0xFF3A3D47),
-                              child: const Icon(
-                                Icons.image_not_supported,
-                                color: Color(0xFF868EAE),
-                              ),
-                            );
-                          },
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => CollectionDetailsPage(
+                                  title: collections[index + 1].title,
+                                  id: collections[index + 1].id,
+                                ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 12.0),
+                        width: 106,
+                        height: 146,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12.0),
+                          child: Image.network(
+                            collections[index + 1].coverPhoto.urls.regular,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: const Color(0xFF3A3D47),
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                  color: Color(0xFF868EAE),
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     );
@@ -292,9 +311,11 @@ class _HomepageState extends State<Homepage> {
             return const Center(
               child: CircularProgressIndicator(color: Color(0xFFEE5776)),
             );
-          } else if (state is CategoryLoaded || state is CategoryDetailsLoading || state is CategoryDetailsLoaded) {
+          } else if (state is CategoryLoaded ||
+              state is CategoryDetailsLoading ||
+              state is CategoryDetailsLoaded) {
             List<CategoryModel> categories = [];
-            
+
             if (state is CategoryLoaded) {
               categories = state.data;
             } else if (state is CategoryDetailsLoading) {
@@ -302,7 +323,7 @@ class _HomepageState extends State<Homepage> {
             } else if (state is CategoryDetailsLoaded) {
               categories = state.categories;
             }
-            
+
             return ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: categories.length,
@@ -316,7 +337,7 @@ class _HomepageState extends State<Homepage> {
                       selectedCategoryId = category.id;
                       selectedCategoryTitle = category.title;
                     });
-                    
+
                     _categoryBloc.add(FetchCategoryDetailsEvent(category.id));
                   },
                   child: Container(
@@ -327,19 +348,27 @@ class _HomepageState extends State<Homepage> {
                     ),
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: isSelected ? Color(0xFFEE5776) : const Color(0xFF868EAE),
+                        color:
+                            isSelected
+                                ? Color(0xFFEE5776)
+                                : const Color(0xFF868EAE),
                         width: 1.0,
                       ),
                       borderRadius: BorderRadius.circular(18.0),
-                      color: isSelected ? Color(0xFFEE5776) : Colors.transparent,
+                      color:
+                          isSelected ? Color(0xFFEE5776) : Colors.transparent,
                     ),
                     child: Center(
                       child: Text(
                         category.title,
                         style: TextStyle(
-                          color: isSelected ? Colors.white : const Color(0xFF868EAE),
+                          color:
+                              isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF868EAE),
                           fontSize: 14,
-                          fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+                          fontWeight:
+                              isSelected ? FontWeight.w500 : FontWeight.w400,
                         ),
                       ),
                     ),
@@ -362,10 +391,7 @@ class _HomepageState extends State<Homepage> {
                     const SizedBox(width: 8),
                     const Text(
                       'Unable to load categories',
-                      style: TextStyle(
-                        color: Color(0xFF868EAE),
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: Color(0xFF868EAE), fontSize: 12),
                     ),
                     const SizedBox(width: 8),
                     TextButton(
@@ -385,7 +411,7 @@ class _HomepageState extends State<Homepage> {
               ),
             );
           }
-          
+
           return const SizedBox.shrink();
         },
       ),
@@ -393,7 +419,9 @@ class _HomepageState extends State<Homepage> {
   }
 
   Widget _buildWallpapersGrid() {
-    if (categoryImages.isEmpty && selectedCategoryId != null && selectedCategoryId!.isNotEmpty) {
+    if (categoryImages.isEmpty &&
+        selectedCategoryId != null &&
+        selectedCategoryId!.isNotEmpty) {
       return Container(
         height: 200,
         alignment: Alignment.center,
@@ -429,10 +457,8 @@ class _HomepageState extends State<Homepage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => Resultpage(
-                  urls: image.urls,
-                  user: image.user,
-                ),
+                builder:
+                    (context) => Resultpage(urls: image.urls, user: image.user),
               ),
             );
             debugPrint('Wallpaper $index tapped');
@@ -469,13 +495,13 @@ class _HomepageState extends State<Homepage> {
                         // Add to downloads using DownloadBloc
                         // Use only the actual image ID without timestamp for consistency
                         final imageId = image.id;
-                        
+
                         final urlsJson = {
                           "full": image.urls.full,
                           "regular": image.urls.regular,
                           "small": image.urls.small,
                         };
-                        
+
                         final userJson = {
                           "id": image.user.id,
                           "username": image.user.username,
@@ -485,7 +511,7 @@ class _HomepageState extends State<Homepage> {
                           "profile_link": image.user.profileLink,
                           "profile_image": image.user.profileImage,
                         };
-                        
+
                         context.read<DownloadBloc>().add(
                           AddToDownloadEvent(
                             id: imageId,
@@ -493,8 +519,10 @@ class _HomepageState extends State<Homepage> {
                             user: userJson,
                           ),
                         );
-                        
-                        debugPrint('Downloading wallpaper $index with ID: $imageId');
+
+                        debugPrint(
+                          'Downloading wallpaper $index with ID: $imageId',
+                        );
                       },
                       child: Container(
                         padding: const EdgeInsets.all(8),

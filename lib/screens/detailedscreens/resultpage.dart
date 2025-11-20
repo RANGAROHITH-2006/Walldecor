@@ -105,7 +105,7 @@ class _ResultpageState extends State<Resultpage> {
             backgroundColor: const Color(0xFF25272F),
             title: const Text(
               'Show Result',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.white,fontSize: 18),
             ),
             actions: [
               GestureDetector(
@@ -135,27 +135,22 @@ class _ResultpageState extends State<Resultpage> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(20.0),
-                  child: Image.network(
-                    image,
-                    fit: BoxFit.cover,
-                    height: 544,
-                    errorBuilder:
-                        (_, __, ___) => Container(
-                          color: Colors.grey[800],
-                          child: const Icon(
-                            Icons.image_not_supported,
-                            color: Colors.white,
+                  child: Center(
+                    child: Image.network(
+                      image,
+                      fit: BoxFit.fill,
+                      errorBuilder:
+                          (_, __, ___) => Container(
+                            color: Colors.grey[800],
+                            child: const Icon(
+                              Icons.image_not_supported,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Unsplash In Collaboration with Danial Miralev',
-                  style: TextStyle(color: Color(0xFF4A4D57), fontSize: 12),
-                ),
-                const SizedBox(height: 16),
-
                 // Bottom Action Container
                 Container(
                   width: 311,
@@ -213,7 +208,7 @@ class _ResultpageState extends State<Resultpage> {
                           child: GestureDetector(
                             onTap: () => shareImage(widget.urls.regular),
                             child: SvgPicture.asset(
-                              'assets/svg/share.svg',
+                              'assets/svg/share2.svg',
                               width: 28,
                               height: 28,
                             ),

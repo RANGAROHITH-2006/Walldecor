@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -38,13 +39,7 @@ class _LibrarypageDataState extends State<LibrarypageData> {
       backgroundColor: const Color(0xFF25272F),
       appBar: AppBar(
         backgroundColor: const Color(0xFF25272F),
-        elevation: 0,
-        leading: const Icon(
-          Icons.arrow_back_ios,
-          color: Colors.white,
-          size: 16,
-        ),
-        titleSpacing: 0,
+        automaticallyImplyLeading: false,
         title: const Text(
           'Image Library',
           style: TextStyle(
