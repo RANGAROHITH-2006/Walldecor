@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:walldecor/bloc/library/library_bloc.dart';
 import 'package:walldecor/bloc/favorite/favorite_bloc.dart';
 import 'package:walldecor/bloc/favorite/favorite_event.dart';
@@ -32,68 +37,117 @@ class _ResultpageState extends State<Resultpage> {
     }
   }
 
-  void _showPopup() {
-    final overlay = Overlay.of(context);
-    _popup = OverlayEntry(
-      builder: (context) => Positioned(
-        width: 180,
-        child: CompositedTransformFollower(
-          link: _layerLink,
-          offset: const Offset(-80, -120),
-          showWhenUnlinked: false,
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFF25272F).withOpacity(0.3),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      _removePopup();
-                      context.read<FavoriteBloc>().add(AddToFavoriteEvent(
-                        id: widget.user.id,
-                        urls: widget.urls.toJson(),
-                        user: widget.user.toJson(),
-                      ));
-                    },
-                    child: Row(
-                      children: const [
-                        Icon(Icons.favorite_border, color: Colors.white),
-                        SizedBox(width: 8),
-                        Text("Add to Favorites",
-                            style: TextStyle(color: Colors.white, fontSize: 15)),
-                      ],
+
+Future<void> shareImage(String imageUrl) async {
+  try {
+    // 1. Download the image
+    final response = await http.get(Uri.parse(imageUrl));
+
+    // 2. Save to temporary directory
+    final tempDir = await getTemporaryDirectory();
+    final filePath = '${tempDir.path}/shared_image.jpg';
+    File file = File(filePath);
+    await file.writeAsBytes(response.bodyBytes);
+
+    // 3. Share the image
+    await Share.shareXFiles([XFile(filePath)], text: "Check this image!");
+  } catch (e) {
+    print("❌ Error sharing image: $e");
+  }
+}
+
+ void _showPopup() {
+  final overlay = Overlay.of(context);
+
+  _popup = OverlayEntry(
+    builder: (context) => Stack(
+      children: [
+        // FULL SCREEN BACKGROUND TAP AREA
+        Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () {
+              _removePopup(); // close when tapped outside
+            },
+            child: Container(), // transparent background
+          ),
+        ),
+
+        // POPUP
+        Positioned(
+          width: 180,
+          child: CompositedTransformFollower(
+            link: _layerLink,
+            offset: const Offset(-80, -120),
+            showWhenUnlinked: false,
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF25272F).withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     ),
-                  ),
-                  Divider(color: Colors.white54, thickness: 1),
-                  Row(
-                    children: const [
-                      Icon(Icons.share, color: Colors.white),
-                      SizedBox(width: 8),
-                      Text("Share",
-                          style: TextStyle(color: Colors.white, fontSize: 15)),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        _removePopup();
+                        context.read<FavoriteBloc>().add(
+                          AddToFavoriteEvent(
+                            id: widget.user.id,
+                            urls: widget.urls.toJson(),
+                            user: widget.user.toJson(),
+                          ),
+                        );
+                      },
+                      child: Row(
+                        children: const [
+                          Icon(Icons.favorite_border, color: Colors.white),
+                          SizedBox(width: 8),
+                          Text(
+                            "Add to Favorites",
+                            style: TextStyle(color: Colors.white, fontSize: 15),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(color: Colors.white54),
+                    GestureDetector(
+                      onTap: () {
+                        shareImage(widget.urls.regular);
+                        _removePopup();
+                      },
+                      child: Row(
+                        children: [
+                          SvgPicture.asset('assets/svg/share2.svg'),
+                          const SizedBox(width: 8),
+                          const Text(
+                            "Share",
+                            style: TextStyle(color: Colors.white, fontSize: 15),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-    overlay.insert(_popup!);
-  }
+      ],
+    ),
+  );
+
+  overlay.insert(_popup!);
+}
 
   void _removePopup() {
     _popup?.remove();
@@ -143,10 +197,7 @@ class _ResultpageState extends State<Resultpage> {
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
           ),
           backgroundColor: const Color(0xFF25272F),
-          title: const Text('Show Result', style: TextStyle(color: Colors.white)),
-          actions: const [
-            Icon(Icons.favorite_border, color: Colors.white),
-          ],
+          title: const Text('Show Result', style: TextStyle(color: Colors.white))
         ),
 
         body: Padding(
@@ -205,7 +256,7 @@ class _ResultpageState extends State<Resultpage> {
                           showModalBottomSheet(
                             context: context,
                             isScrollControlled: true,
-                            backgroundColor: const Color(0xFF25272F).withOpacity(0.8),
+                            backgroundColor: const Color(0xFF25272F).withValues(alpha: 0.9),
                             shape: const RoundedRectangleBorder(
                               borderRadius:
                                   BorderRadius.vertical(top: Radius.circular(20)),
