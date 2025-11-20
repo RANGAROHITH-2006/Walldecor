@@ -20,11 +20,15 @@ class LibrarypageData extends StatefulWidget {
 }
 
 class _LibrarypageDataState extends State<LibrarypageData> {
-
   @override
   void initState() {
     super.initState();
     print('🔥 LibrarypageData: Triggering GetAllLibraryEvent');
+    context.read<LibraryBloc>().add(GetAllLibraryEvent());
+  }
+
+  void _refreshLibraryData() {
+    print('🔥 LibrarypageData: Refreshing library data');
     context.read<LibraryBloc>().add(GetAllLibraryEvent());
   }
 
@@ -120,8 +124,8 @@ class _LibrarypageDataState extends State<LibrarypageData> {
                 }
 
                 return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () async {
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => LibraryDetailsPage(
@@ -130,6 +134,8 @@ class _LibrarypageDataState extends State<LibrarypageData> {
                         ),
                       ),
                     );
+                    // Refresh data when returning from details page
+                    _refreshLibraryData();
                   },
                   child: Container(
                     decoration: BoxDecoration(

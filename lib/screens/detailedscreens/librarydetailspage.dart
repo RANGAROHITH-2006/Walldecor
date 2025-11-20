@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:walldecor/bloc/library/library_bloc.dart';
 import 'package:walldecor/bloc/library/library_event.dart';
 import 'package:walldecor/bloc/library/libray_state.dart';
@@ -27,6 +28,12 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
   void initState() {
     super.initState();
     context.read<LibraryBloc>().add(GetAllLibraryDetailsEvent(widget.id));
+  }
+
+  Future<bool> _onWillPop() async {
+    // Refresh library data before popping, regardless of how we navigate back
+    context.read<LibraryBloc>().add(GetAllLibraryEvent());
+    return true; // Allow the pop
   }
 
   void _showDeleteConfirmationDialog(BuildContext context) {
@@ -78,14 +85,14 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
       backgroundColor: const Color(0xFF25272F),
       appBar: AppBar(
         leading: GestureDetector(
-          onTap: () {
-            // Refresh library data before popping
-            context.read<LibraryBloc>().add(GetAllLibraryEvent());
-            Navigator.pop(context);
+          onTap: (){
+            context.pop();
           },
           child: const Icon(
             Icons.arrow_back_ios,
@@ -93,7 +100,7 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
             size: 16,
           ),
         ),
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         backgroundColor: const Color(0xFF25272F),
         titleSpacing: 0,
         title: Text(widget.name, style: TextStyle(color: Colors.white)),
@@ -119,8 +126,7 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
                     duration: Duration(seconds: 2),
                   ),
                 );
-                // Refresh library data and go back
-                context.read<LibraryBloc>().add(GetAllLibraryEvent());
+                // Navigate back - _onWillPop will handle the refresh
                 Navigator.pop(context);
               } else if (state is LibraryDeleteError) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -337,6 +343,7 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
         },
         ),
       ),
+      ), // WillPopScope
     );
   }
 }

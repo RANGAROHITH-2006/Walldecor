@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:walldecor/screens/bottomscreens/premiumscreen.dart';
@@ -20,58 +21,59 @@ class _SettingspageState extends State<Settingspage> {
   /// Show logout confirmation dialog
   void _showLogoutDialog() {
     showDialog(
-  context: context,
-  builder: (BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: const Color(0xFF2D3037),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Align(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2D3037),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Align(
                   alignment: Alignment.topRight,
                   child: GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(Icons.close_rounded, color: Colors.grey, size: 20),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
-            const Text(
-              'Logout',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Are you sure you want to logout?',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-              ),
-            ),
+                const Text(
+                  'Logout',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Are you sure you want to logout?',
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
 
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton( 
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).pop(); 
+                      Navigator.of(context).pop();
                       _performLogout();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFEE5776),
-                       padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25),
                       ),
@@ -85,36 +87,35 @@ class _SettingspageState extends State<Settingspage> {
                       ),
                     ),
                   ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
-  },
-);
-
   }
 
   ///share app function
   void shareApp() {
-    const String packageName = "com.zooq.ai.photo.art.image.generator"; // change this
+    const String packageName =
+        "com.zooq.ai.photo.art.image.generator"; // change this
     final String playStoreLink =
         "https://play.google.com/store/apps/details?id=$packageName";
 
     Share.share("Check out this amazing app! Download now:\n$playStoreLink");
   }
 
+  ///privacy policy function
+  void openPrivacyPolicy() async {
+    final url = Uri.parse("https://google.com");
 
-///privacy policy function  
-void openPrivacyPolicy() async {
-  final url = Uri.parse("https://google.com");
-
-  if (await canLaunchUrl(url)) {
-    await launchUrl(url, mode: LaunchMode.externalApplication);
-  }else{
-    throw('Could not launch privacy policy URL');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      throw ('Could not launch privacy policy URL');
+    }
   }
-}
 
   /// Show delete account confirmation dialog
   void _showDeleteAccountDialog() {
@@ -139,7 +140,11 @@ void openPrivacyPolicy() async {
                   alignment: Alignment.topRight,
                   child: GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(Icons.close_rounded, color: Colors.grey, size: 20),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -152,26 +157,22 @@ void openPrivacyPolicy() async {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Text('Type ‘ Delete’ to fully delete your account',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
-                ),SizedBox(height: 10,),
+                Text(
+                  'Type ‘ Delete’ to fully delete your account',
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+                SizedBox(height: 10),
                 const Text(
                   'This will include all your data, personal information & created posts. This action cannot be reversed.',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton( 
+                  child: ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).pop(); 
+                      Navigator.of(context).pop();
                       _performDeleteAccount();
                     },
                     style: ElevatedButton.styleFrom(
@@ -190,7 +191,6 @@ void openPrivacyPolicy() async {
                       ),
                     ),
                   ),
-                  
                 ),
                 const SizedBox(height: 10),
               ],
@@ -369,10 +369,7 @@ void openPrivacyPolicy() async {
                 child: ListView(
                   children: [
                     ListTile(
-                      leading: const Icon(
-                        Icons.brightness_7_outlined,
-                        color: Colors.white,
-                      ),
+                      leading: SvgPicture.asset('assets/svg/Mode.svg'),
                       title: const Text(
                         'Mode',
                         style: TextStyle(color: Colors.white, fontSize: 18),
@@ -383,10 +380,7 @@ void openPrivacyPolicy() async {
                       },
                     ),
                     ListTile(
-                      leading: const Icon(
-                        Icons.share_outlined,
-                        color: Colors.white,
-                      ),
+                      leading: SvgPicture.asset('assets/svg/share1.svg'),
                       title: const Text(
                         'Share App',
                         style: TextStyle(color: Colors.white, fontSize: 18),
@@ -397,10 +391,7 @@ void openPrivacyPolicy() async {
                       },
                     ),
                     ListTile(
-                      leading: const Icon(
-                        Icons.edit_document,
-                        color: Colors.white,
-                      ),
+                      leading: SvgPicture.asset('assets/svg/feedback.svg'),
                       title: const Text(
                         'Feedback & Suggestion',
                         style: TextStyle(color: Colors.white, fontSize: 18),
@@ -411,29 +402,23 @@ void openPrivacyPolicy() async {
                       },
                     ),
                     ListTile(
-                      leading: const Icon(
-                        Icons.widgets_rounded,
-                        color: Colors.white,
-                      ),
+                      leading: SvgPicture.asset('assets/svg/more.svg'),
                       title: const Text(
                         'More App',
                         style: TextStyle(color: Colors.white, fontSize: 18),
                       ),
 
                       onTap: () {
-                       Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const PremiumScreen(),
-                        ),
-                      );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const PremiumScreen(),
+                          ),
+                        );
                       },
                     ),
                     ListTile(
-                      leading: const Icon(
-                        Icons.lock_outline,
-                        color: Colors.white,
-                      ),
+                      leading: SvgPicture.asset('assets/svg/privacy.svg'),
                       title: const Text(
                         'Privacy Policy',
                         style: TextStyle(color: Colors.white, fontSize: 18),
@@ -443,9 +428,9 @@ void openPrivacyPolicy() async {
                         openPrivacyPolicy();
                       },
                     ),
-                    
+
                     ListTile(
-                      leading: const Icon(Icons.logout, color: Colors.white),
+                      leading: SvgPicture.asset('assets/svg/logout.svg'),
                       title: const Text(
                         'Log out',
                         style: TextStyle(color: Colors.white, fontSize: 18),
@@ -456,7 +441,7 @@ void openPrivacyPolicy() async {
                       },
                     ),
                     ListTile(
-                      leading: const Icon(Icons.person, color: Colors.white),
+                      leading: SvgPicture.asset('assets/svg/delete.svg'),
                       title: const Text(
                         'Delete Account',
                         style: TextStyle(color: Colors.white, fontSize: 18),
