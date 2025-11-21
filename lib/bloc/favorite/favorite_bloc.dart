@@ -10,6 +10,7 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
   FavoriteBloc({required this.favoriteRepository}) : super(FavoriteInitial()) {
     on<AddToFavoriteEvent>(_onAddToFavorite);
     on<GetAllFavoritesEvent>(_onGetAllFavorites);
+    on<CheckIfFavoritedEvent>(_onCheckIfFavorited);
     on<RemoveFromFavoriteEvent>(_onRemoveFromFavorite);
   }
 
@@ -32,6 +33,13 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
       if (result['success'] == true || result.containsKey('message')) {
         emit(FavoriteAddSuccess(
           message: result['message'] ?? 'Image added to favorites successfully',
+        ));
+        
+        // Refresh the favorite status after adding
+        add(GetAllFavoritesEvent());
+      } else if (result['success'] == false) {
+        emit(FavoriteAddError(
+          message: result['message'] ?? 'Image is already in favorites',
         ));
       } else {
         emit(FavoriteAddError(
@@ -59,6 +67,26 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
       emit(FavoritesLoaded(favorites: favorites));
     } catch (e) {
       print('🔥 FavoriteBloc: Fetch favorites error - $e');
+      emit(FavoriteError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onCheckIfFavorited(
+    CheckIfFavoritedEvent event,
+    Emitter<FavoriteState> emit,
+  ) async {
+    try {
+      print('🔥 FavoriteBloc: Checking if ${event.imageId} is favorited');
+      
+      final favorites = await favoriteRepository.fetchFavorites();
+      final isFavorited = favorites.any((fav) => fav.favoriteImageId == event.imageId);
+      
+      print('🔥 FavoriteBloc: Image ${event.imageId} favorited: $isFavorited');
+      
+      emit(FavoriteStatusChecked(isFavorited: isFavorited));
+      print('🔥 FavoriteBloc: Emitted FavoriteStatusChecked with isFavorited: $isFavorited');
+    } catch (e) {
+      print('🔥 FavoriteBloc: Check favorite status error - $e');
       emit(FavoriteError(message: e.toString()));
     }
   }

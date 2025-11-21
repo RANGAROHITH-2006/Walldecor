@@ -28,6 +28,8 @@ class Resultpage extends StatefulWidget {
 class _ResultpageState extends State<Resultpage> {
   OverlayEntry? _popup;
   final LayerLink _layerLink = LayerLink();
+  bool _isFavorited = false;
+  late final FavoriteBloc _favoriteBloc;
 
   Future<void> shareImage(String imageUrl) async {
     try {
@@ -54,36 +56,82 @@ class _ResultpageState extends State<Resultpage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    print('🔥 ResultPage: Initializing with user ID: ${widget.user.id}');
+    
+    // Initialize the FavoriteBloc
+    _favoriteBloc = FavoriteBloc(favoriteRepository: FavoriteRepository());
+    
+    // Check if current image is favorited
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      print('🔥 ResultPage: Dispatching GetAllFavoritesEvent');
+      _favoriteBloc.add(GetAllFavoritesEvent());
+    });
+  }
+
+  @override
+  void dispose() {
+    _favoriteBloc.close();
+    super.dispose();
+  }  void _checkIfFavorited(List favorites) {
+    
+    bool isFav = favorites.any((fav) {
+      return fav.favoriteImageId == widget.user.id;
+    });
+    
+    if (mounted && _isFavorited != isFav) {
+      setState(() {
+        _isFavorited = isFav;
+      });
+    } else {
+      print('🔥 ResultPage: No state change needed - already $_isFavorited');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final image = widget.urls.regular;
 
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => LibraryBloc(LibraryRepository())),
-        BlocProvider(
-          create:
-              (context) =>
-                  FavoriteBloc(favoriteRepository: FavoriteRepository()),
+        BlocProvider<FavoriteBloc>.value(
+          value: _favoriteBloc,
         ),
       ],
       child: MultiBlocListener(
         listeners: [
           BlocListener<FavoriteBloc, FavoriteState>(
             listener: (context, state) {
+              print('🔥 ResultPage: Received FavoriteBloc state: ${state.runtimeType}');
+              
               if (state is FavoriteAddSuccess) {
+                print('🔥 ResultPage: Favorite add success - ${state.message}');
+                setState(() {
+                  _isFavorited = true;
+                });
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state.message),
                     backgroundColor: Colors.green,
+                    duration: const Duration(seconds: 2),
                   ),
                 );
               } else if (state is FavoriteAddError) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state.message),
-                    backgroundColor: const Color(0xFFEE5776),
+                    backgroundColor: Colors.orange, 
+                    duration: const Duration(seconds: 2),
                   ),
                 );
+              } else if (state is FavoriteStatusChecked) {
+                setState(() {
+                  _isFavorited = state.isFavorited;
+                });
+              } else if (state is FavoritesLoaded) {
+                _checkIfFavorited(state.favorites);
               }
             },
           ),
@@ -111,7 +159,8 @@ class _ResultpageState extends State<Resultpage> {
               GestureDetector(
                 onTap: () {
                   _removePopup();
-                  context.read<FavoriteBloc>().add(
+                  // Always try to add to favorites - let the API handle duplicates
+                  _favoriteBloc.add(
                     AddToFavoriteEvent(
                       id: widget.user.id,
                       urls: widget.urls.toJson(),
@@ -120,9 +169,12 @@ class _ResultpageState extends State<Resultpage> {
                   );
                 },
                 child: Row(
-                  children: const [
-                    Icon(Icons.favorite_border, color: Colors.white),
-                    SizedBox(width: 16),
+                  children: [
+                    Icon(
+                      _isFavorited ? Icons.favorite : Icons.favorite_border,
+                      color: _isFavorited ? const Color(0xFFEE5776) : Colors.white,
+                    ),
+                    const SizedBox(width: 16),
                   ],
                 ),
               ),

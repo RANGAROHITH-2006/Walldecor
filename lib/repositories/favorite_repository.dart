@@ -18,19 +18,6 @@ class FavoriteRepository {
     required Map<String, dynamic> urls,
     required Map<String, dynamic> user,
   }) async {
-    // First check if already exists in favorites
-    try {
-      final existingFavorites = await fetchFavorites();
-      final isAlreadyFavorited = existingFavorites.any((favorite) => favorite.id == id);
-      
-      if (isAlreadyFavorited) {
-        return {"success": false, "message": "Image is already in favorites"};
-      }
-    } catch (e) {
-      print("🔥 Error checking existing favorites: $e");
-      // Continue with add operation if check fails
-    }
-
     final url = Uri.parse("$baseUrl/user/favorite");
     final token = await _getSavedToken();
 
@@ -64,13 +51,32 @@ class FavoriteRepository {
         }
 
         try {
-          return jsonDecode(response.body);
+          final responseData = jsonDecode(response.body);
+          // Check if the API returns a specific message about already being in favorites
+          if (responseData is Map && responseData.containsKey('message')) {
+            return {"success": true, "message": responseData['message']};
+          }
+          return responseData;
         } catch (jsonError) {
           print("🔥 JSON decode error: $jsonError");
           return {"success": true, "message": "Image added to favorites successfully"};
         }
       } else {
         print("🔥 Favorite API Error: ${response.statusCode} - ${response.body}");
+        
+        // Check if it's a 400 error indicating already exists
+        if (response.statusCode == 400) {
+          try {
+            final errorData = jsonDecode(response.body);
+            if (errorData is Map && errorData.containsKey('message')) {
+              return {"success": false, "message": errorData['message']};
+            }
+          } catch (e) {
+            print("🔥 Error parsing 400 response: $e");
+          }
+          return {"success": false, "message": "Image is already in favorites"};
+        }
+        
         throw Exception("Failed to add to favorites: ${response.statusCode} → ${response.body}");
       }
     } catch (e) {

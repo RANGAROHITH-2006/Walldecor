@@ -14,6 +14,12 @@ class AddToFavoriteEvent extends FavoriteEvent {
 
 class GetAllFavoritesEvent extends FavoriteEvent {}
 
+class CheckIfFavoritedEvent extends FavoriteEvent {
+  final String imageId;
+
+  CheckIfFavoritedEvent({required this.imageId});
+}
+
 class RemoveFromFavoriteEvent extends FavoriteEvent {
   final String imageId;
 

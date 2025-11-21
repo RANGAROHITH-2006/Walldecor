@@ -24,6 +24,12 @@ class FavoritesLoaded extends FavoriteState {
   FavoritesLoaded({required this.favorites});
 }
 
+class FavoriteStatusChecked extends FavoriteState {
+  final bool isFavorited;
+
+  FavoriteStatusChecked({required this.isFavorited});
+}
+
 class FavoriteError extends FavoriteState {
   final String message;
 
