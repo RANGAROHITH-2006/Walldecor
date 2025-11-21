@@ -246,7 +246,7 @@ class _ResultpageState extends State<Resultpage> {
                             );
                           },
                           child: SvgPicture.asset(
-                            'assets/svg/download.svg',
+                            'assets/svg/savelibrary.svg',
                             width: 36,
                             height: 36,
                           ),
