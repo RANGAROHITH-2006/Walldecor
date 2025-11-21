@@ -351,10 +351,11 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                             fillColor: Color.fromARGB(255, 89, 91, 107),
                             filled: true,
                             hintText: 'Enter here...',
+                        
                             border: InputBorder.none,
                             hintStyle: TextStyle(color: Colors.white),
                           ),
-                          style: const TextStyle(fontSize: 14),
+                          style: const TextStyle(fontSize: 16 ,color: Colors.white),
                           onChanged: (value) {
                             context.read<FeedbackBloc>().add(UpdateCommentEvent(value));
                           },

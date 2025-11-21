@@ -32,6 +32,7 @@ class GoogleAuthHelper {
           email: result['email']!,
           firebaseUserId: result['firebaseUserId']!,
           pushToken: result['pushToken']!,
+          profileImageUrl: result['profileImageUrl']!,
           onSuccess: onSuccess,
           onError: onError,
         ),

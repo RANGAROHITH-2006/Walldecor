@@ -51,6 +51,7 @@ class GoogleAuthService {
       final nameParts = displayName.split(' ');
       final firstName = nameParts.isNotEmpty ? nameParts.first : '';
       final lastName = nameParts.length > 1 ? nameParts.skip(1).join(' ') : '';
+      final profileImageUrl = user.photoURL ?? '';
 
       return {
         'firstName': firstName,
@@ -60,6 +61,7 @@ class GoogleAuthService {
         'idToken': idToken,
         'deviceId': deviceId,
         'pushToken': pushToken,
+        'profileImageUrl': profileImageUrl,
       };
     } catch (e) {
       print('Error signing in with Google: $e');

@@ -9,6 +9,7 @@ import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:walldecor/screens/widgets/feedback_dialog.dart';
+import 'package:walldecor/repositories/auth_repository.dart';
 
 class Settingspage extends StatefulWidget {
   const Settingspage({super.key});
@@ -18,6 +19,29 @@ class Settingspage extends StatefulWidget {
 }
 
 class _SettingspageState extends State<Settingspage> {
+  final AuthRepository _authRepository = AuthRepository();
+  bool _isAuthenticatedUser = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkUserType();
+  }
+
+  /// Check if the current user is authenticated (Google/Apple) or guest
+  Future<void> _checkUserType() async {
+    try {
+      final isAuthenticated = await _authRepository.isAuthenticatedUser();
+      setState(() {
+        _isAuthenticatedUser = isAuthenticated;
+      });
+    } catch (e) {
+      print('Error checking user type: $e');
+      setState(() {
+        _isAuthenticatedUser = false;
+      });
+    }
+  }
   /// Show logout confirmation dialog
   void _showLogoutDialog() {
     showDialog(
@@ -108,7 +132,7 @@ class _SettingspageState extends State<Settingspage> {
 
   ///privacy policy function
   void openPrivacyPolicy() async {
-    final url = Uri.parse("https://google.com");
+    final url = Uri.parse("https://privacy.freephotos.wibes.co.in/privacy_policy");
 
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -429,17 +453,20 @@ class _SettingspageState extends State<Settingspage> {
                       },
                     ),
 
-                    ListTile(
-                      leading: SvgPicture.asset('assets/svg/logout.svg'),
-                      title: const Text(
-                        'Log out',
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
+                    // Show logout option only for authenticated users (Google/Apple), not for guest users
+                    if (_isAuthenticatedUser)
+                      ListTile(
+                        leading: SvgPicture.asset('assets/svg/logout.svg'),
+                        title: const Text(
+                          'Log out',
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
 
-                      onTap: () {
-                        _showLogoutDialog();
-                      },
-                    ),
+                        onTap: () {
+                          _showLogoutDialog();
+                        },
+                      ),
+                      if (_isAuthenticatedUser)
                     ListTile(
                       leading: SvgPicture.asset('assets/svg/delete.svg'),
                       title: const Text(

@@ -44,6 +44,7 @@ class _CustomButtonState extends State<CustomButton> {
               email: userData['email']!,
               firebaseUserId: userData['firebaseUserId']!,
               pushToken: userData['pushToken']!,
+              profileImageUrl: userData['profileImageUrl']!,
               onSuccess: (user) {
                 print('Login successful: ${user.id}');
               },

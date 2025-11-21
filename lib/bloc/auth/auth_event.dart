@@ -46,6 +46,7 @@ class LoginWithGoogle extends AuthEvent {
   final String email;
   final String firebaseUserId;
   final String pushToken;
+  final String profileImageUrl;
   final Function(User) onSuccess;
   final Function(String) onError;
 
@@ -57,6 +58,7 @@ class LoginWithGoogle extends AuthEvent {
     required this.email,
     required this.firebaseUserId,
     required this.pushToken,
+    required this.profileImageUrl,
     required this.onSuccess,
     required this.onError,
   });
@@ -69,6 +71,7 @@ class LoginWithGoogle extends AuthEvent {
         deviceId,
         firebaseUserId,
         pushToken,
+        profileImageUrl,
         onSuccess,
         googleIdToken,
         onError,

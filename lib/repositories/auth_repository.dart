@@ -104,8 +104,8 @@ class AuthRepository {
       print('Push Token: $pushToken');
 
       final requestBody = {
-        'firstName': 'Guest',
-        'lastName': 'User',
+        'firstName': '',
+        'lastName': '',
         'pushToken': pushToken,
         'deviceId': deviceId,
       };
@@ -135,8 +135,6 @@ class AuthRepository {
         final guestId = data['_id'];
         final xAuthToken = response.headers['x-auth-token'];
 
-        print('Extracted data:');
-        print('- Guest ID: $guestId');
         print('x-auth-token: $xAuthToken');
 
         if (guestId == null) {
@@ -146,8 +144,6 @@ class AuthRepository {
         if (xAuthToken == null) {
           throw Exception('x-auth-token not found in response headers');
         }
-
-        print('💾 Saving authentication data...');
         
         // Save authentication data
         await saveAuthData(
@@ -155,9 +151,7 @@ class AuthRepository {
           authToken: xAuthToken,
           userType: 'guest',
         );
-
         print('✅ Authentication data saved successfully!');
-        print('🎯 Guest account creation completed successfully!');
 
         return {
           'guestId': guestId,
@@ -172,8 +166,7 @@ class AuthRepository {
         );
       }
     } on TimeoutException catch (e) {
-      print('❌ Network timeout error: $e');
-      throw Exception('Network timeout: Please check your internet connection');
+      throw Exception('Network timeout: $e Please check your internet connection');
     } catch (e) {
       print('❌ Unexpected error creating guest account: $e');
       print('Error type: ${e.runtimeType}');
@@ -197,6 +190,7 @@ class AuthRepository {
     required String pushToken,
     required String deviceId,
     required String idToken,
+    String? profileImageUrl,
   }) async {
     try {
       print('Logging in with Google:');
@@ -230,7 +224,6 @@ class AuthRepository {
 
       print('✅ Google login response received!');
       print('Response status code: ${response.statusCode}');
-      print('Response headers: ${response.headers}');
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
@@ -264,6 +257,7 @@ class AuthRepository {
             'firstName': firstName,
             'lastName': lastName,
             'firebaseUserId': firebaseUserId,
+            'profileImageUrl': profileImageUrl ?? '',
           },
         );
 
@@ -331,7 +325,6 @@ class AuthRepository {
 
       print('✅ Apple login response received!');
       print('Response status code: ${response.statusCode}');
-      print('Response headers: ${response.headers}');
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
@@ -484,6 +477,50 @@ class AuthRepository {
       final userDataJson = prefs.getString(_userDataKey);
       if (userDataJson != null) {
         return jsonDecode(userDataJson);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Get current user type from SharedPreferences
+  Future<String?> getCurrentUserType() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(_userTypeKey);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Check if current user is guest
+  Future<bool> isGuestUser() async {
+    try {
+      final userType = await getCurrentUserType();
+      return userType == 'guest';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Check if current user is authenticated (Google or Apple)
+  Future<bool> isAuthenticatedUser() async {
+    try {
+      final userType = await getCurrentUserType();
+      return userType == 'google' || userType == 'apple';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Get profile image URL from stored user data
+  Future<String?> getProfileImageUrl() async {
+    try {
+      final userData = await getStoredUserData();
+      if (userData != null && userData['profileImageUrl'] != null) {
+        final profileUrl = userData['profileImageUrl'] as String;
+        return profileUrl.isNotEmpty ? profileUrl : null;
       }
       return null;
     } catch (e) {
