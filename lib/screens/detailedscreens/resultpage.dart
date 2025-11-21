@@ -225,11 +225,7 @@ class _ResultpageState extends State<Resultpage> {
                               onCreate: (libraryName) {},
                             );
                           },
-                          child: SvgPicture.asset(
-                            'assets/svg/library.svg',
-                            width: 28,
-                            height: 28,
-                          ),
+                          child: Icon( Icons.library_add, color: Colors.white, size: 28)
                         ),
                         GestureDetector(
                           onTap: () {

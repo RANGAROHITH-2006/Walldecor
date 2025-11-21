@@ -118,11 +118,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         print('📡 Server Response: ${resp.body}');
         var data = jsonDecode(resp.body);
         User user = User.fromJson(data);
-        
-        print('🔍 AUTH DEBUG:');
-        print('   Server isProUser: ${data['isProUser']}');
-        print('   Server expireTime: ${data['expireTime']}');
-        print('   User isSubscriptionExpired: ${user.isSubscriptionExpired}');
         print('   User hasActiveSubscription: ${user.hasActiveSubscription}');
         
         bool isProUser = data['isProUser'] && !user.isSubscriptionExpired;

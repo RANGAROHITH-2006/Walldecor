@@ -11,12 +11,6 @@ class ProIndicator extends StatelessWidget {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         bool isProUser = state.user?.hasActiveSubscription ?? false;
-        print('🔍 DEBUG Pro Status:');
-        print('   User: ${state.user != null ? 'exists' : 'null'}');
-        print('   isProUser (raw): ${state.user?.isProUser}');
-        print('   expireTime: ${state.user?.expireTime}');
-        print('   isSubscriptionExpired: ${state.user?.isSubscriptionExpired}');
-        print('   hasActiveSubscription: ${state.user?.hasActiveSubscription}');
         print('   Final isProUser: $isProUser');
         return GestureDetector(
           onTap: () {
