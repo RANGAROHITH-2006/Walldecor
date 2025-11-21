@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
+import 'package:walldecor/repositories/services/image_service.dart';
 import 'package:walldecor/screens/detailedscreens/collectiondetailspage.dart';
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/bloc/category/category_bloc.dart';
@@ -547,6 +548,8 @@ class _HomepageState extends State<Homepage> {
                         );
 
                         if (confirmed == true) {
+
+                          await downloadImageToGallery( image.urls.regular);
                           final imageId = image.id;
 
                           final urlsJson = {

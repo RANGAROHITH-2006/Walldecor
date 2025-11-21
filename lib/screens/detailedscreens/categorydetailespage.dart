@@ -156,26 +156,27 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                     right: 8,
                                     child: GestureDetector(
                                       onTap: () async {
-                                        final confirmed = await showDownloadConfirmationDialog(
-                          context: context,
-                        );
+                                        final confirmed =
+                                            await showDownloadConfirmationDialog(
+                                              context: context,
+                                            );
+                                        if (confirmed == true) {
+                                          debugPrint(
+                                            'Downloading wallpaper $index',
+                                          );
 
-                        if (confirmed == true) {
-                                        debugPrint(
-                                          'Downloading wallpaper $index',
-                                        );
-
-                                        // Add to downloads using DownloadBloc
-                                        // Use only the actual image ID without timestamp for consistency
-                                        final imageId = item.id;
-                                        context.read<DownloadBloc>().add(
-                                          AddToDownloadEvent(
-                                            id: imageId,
-                                            urls: item.urls.toJson(),
-                                            user: item.user.toJson(),
-                                          ),
-                                        );
-                                      }},
+                                          // Add to downloads using DownloadBloc
+                                          // Use only the actual image ID without timestamp for consistency
+                                          final imageId = item.id;
+                                          context.read<DownloadBloc>().add(
+                                            AddToDownloadEvent(
+                                              id: imageId,
+                                              urls: item.urls.toJson(),
+                                              user: item.user.toJson(),
+                                            ),
+                                          );
+                                        }
+                                      },
                                       child: Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
