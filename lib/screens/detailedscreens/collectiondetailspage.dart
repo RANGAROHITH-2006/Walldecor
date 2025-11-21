@@ -11,6 +11,7 @@ import 'package:walldecor/bloc/download/download_event.dart';
 import 'package:walldecor/bloc/download/download_state.dart';
 import 'package:walldecor/models/collectiondetailes_model.dart';
 import 'package:walldecor/models/categorydetailes_model.dart' as CategoryModel;
+import 'package:walldecor/repositories/services/image_service.dart';
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/screens/navscreens/searchpage.dart';
 import 'package:walldecor/screens/widgets/diolog.dart';
@@ -181,48 +182,51 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
                                     bottom: 8,
                                     right: 8,
                                     child: GestureDetector(
-                                      onTap: () async{
-
+                                      onTap: () async {
                                         final confirmed =
-                                           await showDownloadConfirmationDialog(
+                                            await showDownloadConfirmationDialog(
                                               context: context,
                                             );
 
                                         if (confirmed == true) {
-                                        debugPrint(
-                                          'Downloading wallpaper $index',
-                                        );
+                                          debugPrint(
+                                            'Downloading wallpaper $index',
+                                          );
+                                          await downloadImageToGallery(
+                                            item.urls.regular,
+                                          );
+                                          // Add to downloads using DownloadBloc
+                                          // Use only the actual image ID without timestamp for consistency
+                                          final imageId = item.id;
 
-                                        // Add to downloads using DownloadBloc
-                                        // Use only the actual image ID without timestamp for consistency
-                                        final imageId = item.id;
+                                          // Convert collection model to compatible format
+                                          final urlsJson = {
+                                            "full": item.urls.full,
+                                            "regular": item.urls.regular,
+                                            "small": item.urls.small,
+                                          };
 
-                                        // Convert collection model to compatible format
-                                        final urlsJson = {
-                                          "full": item.urls.full,
-                                          "regular": item.urls.regular,
-                                          "small": item.urls.small,
-                                        };
+                                          final userJson = {
+                                            "id": item.user.id,
+                                            "username": item.user.username,
+                                            "name": item.user.name,
+                                            "first_name": item.user.firstName,
+                                            "last_name": item.user.lastName,
+                                            "profile_link":
+                                                item.user.profileLink,
+                                            "profile_image":
+                                                item.user.profileImage,
+                                          };
 
-                                        final userJson = {
-                                          "id": item.user.id,
-                                          "username": item.user.username,
-                                          "name": item.user.name,
-                                          "first_name": item.user.firstName,
-                                          "last_name": item.user.lastName,
-                                          "profile_link": item.user.profileLink,
-                                          "profile_image":
-                                              item.user.profileImage,
-                                        };
-
-                                        context.read<DownloadBloc>().add(
-                                          AddToDownloadEvent(
-                                            id: imageId,
-                                            urls: urlsJson,
-                                            user: userJson,
-                                          ),
-                                        );
-                                      }},
+                                          context.read<DownloadBloc>().add(
+                                            AddToDownloadEvent(
+                                              id: imageId,
+                                              urls: urlsJson,
+                                              user: userJson,
+                                            ),
+                                          );
+                                        }
+                                      },
                                       child: Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(

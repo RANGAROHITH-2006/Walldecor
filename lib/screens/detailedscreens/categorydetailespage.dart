@@ -10,6 +10,7 @@ import 'package:walldecor/bloc/download/download_bloc.dart';
 import 'package:walldecor/bloc/download/download_event.dart';
 import 'package:walldecor/bloc/download/download_state.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
+import 'package:walldecor/repositories/services/image_service.dart';
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/screens/navscreens/searchpage.dart';
 import 'package:walldecor/screens/widgets/diolog.dart';
@@ -164,7 +165,9 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                           debugPrint(
                                             'Downloading wallpaper $index',
                                           );
-
+                                          await downloadImageToGallery(
+                                            item.urls.regular,
+                                          );
                                           // Add to downloads using DownloadBloc
                                           // Use only the actual image ID without timestamp for consistency
                                           final imageId = item.id;
