@@ -1,5 +1,7 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:walldecor/screens/detailedscreens/collectiondetailspage.dart';
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/bloc/category/category_bloc.dart';
@@ -20,6 +22,7 @@ import 'package:walldecor/repositories/category_repository.dart';
 import 'package:walldecor/repositories/collection_repository.dart';
 import 'package:walldecor/models/category_model.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
+import 'package:walldecor/repositories/services/google_auth_service.dart';
 
 class Homepage extends StatefulWidget {
   final Function(int)? onTabChange;
@@ -42,10 +45,8 @@ class _HomepageState extends State<Homepage> {
     super.initState();
     _categoryBloc = CategoryBloc(CategoryRepository());
     _collectionBloc = CollectionBloc(CollectionRepository());
-
     // Fetch initial data
     _categoryBloc.add(FetchCategoryEvent());
-    print('INIT: created _categoryBloc = $_categoryBloc');
     _collectionBloc.add(FetchCollectionEvent());
   }
 
@@ -54,6 +55,67 @@ class _HomepageState extends State<Homepage> {
     _categoryBloc.close();
     _collectionBloc.close();
     super.dispose();
+  }
+
+  Future<void> _checkUserAuthentication() async {
+    try {
+      // Check if user is logged in
+      if (mounted) {
+        context.read<AuthBloc>().add(
+          SessionRequest(
+            onSuccess: (user) {
+              print(
+                '✅ User session valid: ${user.email.isNotEmpty ? user.email : user.id}',
+              );
+              print('User type: ${user.userType}');
+            },
+            onError: (error) {
+              print('❌ Session check failed in main screen: $error');
+              print('🔄 Creating new guest session in main screen...');
+              // If no session or session expired, create guest login
+              _initializeGuestLogin();
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error checking user authentication in main screen: $e');
+      _initializeGuestLogin();
+    }
+  }
+
+  Future<void> _initializeGuestLogin() async {
+    try {
+      final googleAuthService = GoogleAuthService();
+      final deviceId = await googleAuthService.getDeviceId();
+
+      // Get FCM token
+      String pushToken = '';
+      try {
+        final fcmToken = await FirebaseMessaging.instance.getToken();
+        pushToken = fcmToken ?? '';
+      } catch (e) {
+        print('Failed to get FCM token: $e');
+      }
+
+      if (mounted) {
+        context.read<AuthBloc>().add(
+          GuestLogin(
+            deviceId: deviceId,
+            pushToken: pushToken,
+            onSuccess: (user) {
+              print('✅ Guest login successful in main screen: ${user.id}');
+              print('Guest name: ${user.firstName} ${user.lastName}');
+            },
+            onError: (error) {
+              print('❌ Guest login failed in main screen: $error');
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error initializing guest login in main screen: $e');
+    }
   }
 
   @override
@@ -68,6 +130,11 @@ class _HomepageState extends State<Homepage> {
                 context.read<ConnectivityBloc>().add(CheckConnectivity());
               },
             );
+          }
+          if (connectivityState is ConnectivityOnline) {
+            print('🌐 Internet restored - Rechecking session...');
+            _checkUserAuthentication();
+            
           }
 
           return MultiBlocListener(
@@ -251,18 +318,6 @@ class _HomepageState extends State<Homepage> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        TextButton(
-                          onPressed: () {
-                            _collectionBloc.add(FetchCollectionEvent());
-                          },
-                          child: const Text(
-                            'Retry',
-                            style: TextStyle(
-                              color: Color(0xFFEE5776),
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -384,25 +439,19 @@ class _HomepageState extends State<Homepage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.wifi_off,
-                      color: Color(0xFF868EAE),
-                      size: 16,
-                    ),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Unable to load categories',
-                      style: TextStyle(color: Color(0xFF868EAE), fontSize: 12),
-                    ),
-                    const SizedBox(width: 8),
-                    TextButton(
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFEE5776),
+                      ),
                       onPressed: () {
+                        _collectionBloc.add(FetchCollectionEvent());
                         _categoryBloc.add(FetchCategoryEvent());
                       },
                       child: const Text(
                         'Retry',
                         style: TextStyle(
-                          color: Color(0xFFEE5776),
+                          color:Colors.white,
                           fontSize: 12,
                         ),
                       ),
