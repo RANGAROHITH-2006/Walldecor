@@ -262,6 +262,16 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                         subscriptionPlans[1]['title'],
                         subscriptionPlans[1]['price'],
                       ),
+                      const SizedBox(height: 16),
+                      Text(
+                        '${subscriptionPlans[selectedPlan]['price']} / ${subscriptionPlans[selectedPlan]['title']}, Cancel Anytime',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                       const SizedBox(height: 25),
                     ],
                   ),

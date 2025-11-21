@@ -14,7 +14,6 @@ import 'package:walldecor/bloc/search/search_event.dart';
 import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 import 'package:walldecor/screens/widgets/noresult.dart';
 
-
 class Searchpage extends StatefulWidget {
   const Searchpage({super.key});
 
@@ -121,77 +120,102 @@ class _SearchpageState extends State<Searchpage> {
           FocusScope.of(context).unfocus();
         },
         child: BlocBuilder<ConnectivityBloc, ConnectivityState>(
-        builder: (context, connectivityState) {
-          if (connectivityState is ConnectivityOffline) {
-            return NoInternetWidget(
-              onRetry: () {
-                context.read<ConnectivityBloc>().add(CheckConnectivity());
-              },
-            );
-          }
-          
-          return SafeArea(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (scrollNotification) {
-                if (scrollNotification is ScrollStartNotification) {
-                  // Dismiss keyboard when scrolling starts
-                  FocusScope.of(context).unfocus();
-                }
-                return false;
-              },
-              child: Column(
-                children: [
-                  Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: TextField(
-                            controller: _searchController,
-                            focusNode: _searchFocusNode,
-                            onChanged: (value) {
-                              _onSearchChanged(value);
-                              setState(() {}); // Rebuild to update suffix icon
+          builder: (context, connectivityState) {
+            if (connectivityState is ConnectivityOffline) {
+              return NoInternetWidget(
+                onRetry: () {
+                  context.read<ConnectivityBloc>().add(CheckConnectivity());
+                },
+              );
+            }
+
+            return SafeArea(
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (scrollNotification) {
+                  if (scrollNotification is ScrollStartNotification) {
+                    // Dismiss keyboard when scrolling starts
+                    FocusScope.of(context).unfocus();
+                  }
+                  return false;
+                },
+                child: Column(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              Navigator.pop(context);
                             },
-                            style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            hintText: 'Search here',
-                            hintStyle: const TextStyle(color: Color(0xFF646770)),
-                            prefixIcon: const Icon(
-                              Icons.search,
+                            icon: const Icon(
+                              Icons.arrow_back_ios,
                               color: Color(0xFF646770),
-                              size: 22,
+                              size: 18,
                             ),
-                            suffixIcon:
-                                _searchController.text.isNotEmpty
-                                    ? IconButton(
-                                      icon: const Icon(
-                                        Icons.close,
-                                        color: Colors.white70,
-                                      ),
-                                      onPressed: _clearSearch,
-                                    )
-                                    : const Icon(Icons.close, color: Colors.white70),
-                            border: InputBorder.none,
                           ),
+
+                          Expanded(
+                            child: TextField(
+                              controller: _searchController,
+                              focusNode: _searchFocusNode,
+                              onChanged: (value) {
+                                _onSearchChanged(value);
+                                setState(() {}); // update close icon
+                              },
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                hintText: 'Search here',
+                                hintStyle: const TextStyle(
+                                  color: Color(0xFF646770),
+                                ),
+                                prefixIcon: const Icon(
+                                  Icons.search,
+                                  color: Color(0xFF646770),
+                                  size: 22,
+                                ),
+                                suffixIcon:
+                                    _searchController.text.isNotEmpty
+                                        ? IconButton(
+                                          icon: const Icon(
+                                            Icons.close,
+                                            color: Colors.white70,
+                                          ),
+                                          onPressed: _clearSearch,
+                                        )
+                                        : null,
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _isSearching
+                                ? _buildSearchResults()
+                                : _buildOriginalContent(),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 10),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                        _isSearching ? _buildSearchResults() : _buildOriginalContent(),
-                      ],
                     ),
-                                ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
         ),
       ),
     );
@@ -212,20 +236,19 @@ class _SearchpageState extends State<Searchpage> {
             child: Column(
               children: [
                 const SizedBox(height: 50),
-               Noresult(),
+                Noresult(),
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
                     if (_searchController.text.isNotEmpty) {
-                      context.read<SearchBloc>().add(CreateSearchEvent(text: _searchController.text));
+                      context.read<SearchBloc>().add(
+                        CreateSearchEvent(text: _searchController.text),
+                      );
                     }
                   },
                   child: const Text(
                     'Retry',
-                    style: TextStyle(
-                      color: Color(0xFFEE5776),
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Color(0xFFEE5776), fontSize: 14),
                   ),
                 ),
               ],
@@ -277,52 +300,54 @@ class _SearchpageState extends State<Searchpage> {
                 ),
                 itemBuilder: (context, index) {
                   final item = results[index] as Map<String, dynamic>? ?? {};
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Image.network(
-                          _getImageUrl(item),
-                          fit: BoxFit.cover,
-                          errorBuilder:
-                              (_, __, ___) => Container(
-                                color: Colors.grey[800],
-                                child: const Icon(
-                                  Icons.image_not_supported,
-                                  color: Colors.white,
+                  return GestureDetector(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.network(
+                            _getImageUrl(item),
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (_, __, ___) => Container(
+                                  color: Colors.grey[800],
+                                  child: const Icon(
+                                    Icons.image_not_supported,
+                                    color: Colors.white,
+                                  ),
                                 ),
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withOpacity(0.7),
+                                ],
                               ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Colors.black.withOpacity(0.7),
-                              ],
                             ),
                           ),
-                        ),
-                        if (_getImageDescription(item).isNotEmpty)
-                          Positioned(
-                            bottom: 8,
-                            left: 8,
-                            right: 8,
-                            child: Text(
-                              _getImageDescription(item),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
+                          if (_getImageDescription(item).isNotEmpty)
+                            Positioned(
+                              bottom: 8,
+                              left: 8,
+                              right: 8,
+                              child: Text(
+                                _getImageDescription(item),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -351,12 +376,11 @@ class _SearchpageState extends State<Searchpage> {
   }
 
   Widget _buildNoResultsScreen() {
-    return
-      Image.asset(
-        'assets/images/noresult.png',
-        width: double.infinity,
-        height: 200,
-      );
+    return Image.asset(
+      'assets/images/noresult.png',
+      width: double.infinity,
+      height: 200,
+    );
   }
 
   Widget _buildOriginalContent() {
@@ -450,15 +474,14 @@ class _SearchpageState extends State<Searchpage> {
                     const SizedBox(height: 16),
                     const Text(
                       'Unable to load trending',
-                      style: TextStyle(
-                        color: Color(0xFF868EAE),
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Color(0xFF868EAE), fontSize: 14),
                     ),
                     const SizedBox(height: 16),
                     TextButton(
                       onPressed: () {
-                        context.read<TrendingBloc>().add(FetchSearchTrendingEvent());
+                        context.read<TrendingBloc>().add(
+                          FetchSearchTrendingEvent(),
+                        );
                       },
                       child: const Text(
                         'Retry',
