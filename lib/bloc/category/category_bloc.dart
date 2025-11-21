@@ -12,6 +12,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   CategoryBloc(this.repository) : super(CategoryInitial()) {
     on<FetchCategoryEvent>(_onFetchCategory);
     on<FetchCategoryDetailsEvent>(_onFetchCategoryDetails);
+    on<FetchCarouselWallpapersEvent>(_onFetchCarouselWallpapers);
   }
 
   Future<void> _onFetchCategory(
@@ -39,6 +40,22 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     try {
       final data = await repository.fetchCategoryDetailedData(event.categoryId);
       emit(CategoryDetailsLoaded(_cachedCategories, data));
+    } catch (e) {
+      emit(CategoryError(e.toString()));
+    }
+  }
+
+  Future<void> _onFetchCarouselWallpapers(
+    FetchCarouselWallpapersEvent event,
+    Emitter<CategoryState> emit,
+  ) async {
+    emit(CarouselWallpapersLoading());
+    try {
+      final wallpapers = await repository.fetchCarouselWallpapers(
+        event.categorySlug, 
+        limit: event.limit
+      );
+      emit(CarouselWallpapersLoaded(wallpapers));
     } catch (e) {
       emit(CategoryError(e.toString()));
     }

@@ -11,6 +11,10 @@ import 'package:walldecor/bloc/connectivity/connectivity_state.dart';
 import 'package:walldecor/bloc/search/search_bloc.dart';
 import 'package:walldecor/bloc/search/search_state.dart';
 import 'package:walldecor/bloc/search/search_event.dart';
+import 'package:walldecor/bloc/category/category_bloc.dart';
+import 'package:walldecor/bloc/category/category_state.dart';
+import 'package:walldecor/bloc/category/category_event.dart';
+import 'package:walldecor/repositories/category_repository.dart';
 import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 import 'package:walldecor/screens/widgets/noresult.dart';
 
@@ -27,18 +31,14 @@ class _SearchpageState extends State<Searchpage> {
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearching = false;
   Timer? _debounceTimer;
-
-  final List<String> carouselImages = [
-    "assets/trending/trending1.png",
-    "assets/trending/trending6.png",
-    "assets/trending/trending4.png",
-    "assets/trending/trending3.png",
-  ];
+  late CategoryBloc _categoryBloc;
 
   @override
   void initState() {
     super.initState();
+    _categoryBloc = CategoryBloc(CategoryRepository());
     context.read<TrendingBloc>().add(FetchSearchTrendingEvent());
+    _categoryBloc.add(FetchCarouselWallpapersEvent('wallpaper'));
   }
 
   @override
@@ -46,6 +46,7 @@ class _SearchpageState extends State<Searchpage> {
     _searchController.dispose();
     _searchFocusNode.dispose();
     _debounceTimer?.cancel();
+    _categoryBloc.close();
     super.dispose();
   }
 
@@ -388,53 +389,139 @@ class _SearchpageState extends State<Searchpage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // ---------------- Carousel ----------------
-        CarouselSlider(
-          items:
-              carouselImages.map((image) {
-                return ClipRRect(
+        BlocBuilder<CategoryBloc, CategoryState>(
+          bloc: _categoryBloc,
+          builder: (context, state) {
+            if (state is CarouselWallpapersLoading) {
+              return Container(
+                height: 170,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
-                  child: Image.asset(
-                    image,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                  ),
-                );
-              }).toList(),
-          options: CarouselOptions(
-            height: 170,
-            enlargeCenterPage: true,
-            viewportFraction: 0.9,
-            autoPlay: true,
-            autoPlayInterval: const Duration(seconds: 3),
-            onPageChanged: (index, reason) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-          ),
-        ),
+                  color: Colors.grey[800],
+                ),
+                child: const Center(
+                  child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+                ),
+              );
+            }
 
-        // ---------------- Carousel Dots ----------------
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children:
-              carouselImages.asMap().entries.map((entry) {
-                return Container(
-                  width: 8.0,
-                  height: 8.0,
-                  margin: const EdgeInsets.symmetric(
-                    vertical: 10.0,
-                    horizontal: 4.0,
+            if (state is CarouselWallpapersLoaded) {
+              final wallpapers = state.wallpapers;
+              return Column(
+                children: [
+                  CarouselSlider(
+                    items: wallpapers.map((wallpaper) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: Image.network(
+                          wallpaper.urls.regular,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          errorBuilder: (_, __, ___) => Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: Colors.grey[800],
+                            ),
+                            child: const Center(
+                              child: Icon(
+                                Icons.image_not_supported,
+                                color: Colors.white,
+                                size: 40,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    options: CarouselOptions(
+                      height: 170,
+                      enlargeCenterPage: true,
+                      viewportFraction: 0.9,
+                      autoPlay: true,
+                      autoPlayInterval: const Duration(seconds: 3),
+                      onPageChanged: (index, reason) {
+                        setState(() {
+                          _currentIndex = index;
+                        });
+                      },
+                    ),
                   ),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color:
-                        _currentIndex == entry.key
-                            ? Colors.white
-                            : Colors.grey[600],
+                  // ---------------- Carousel Dots ----------------
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: wallpapers.asMap().entries.map((entry) {
+                      return Container(
+                        width: 8.0,
+                        height: 8.0,
+                        margin: const EdgeInsets.symmetric(
+                          vertical: 10.0,
+                          horizontal: 4.0,
+                        ),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _currentIndex == entry.key
+                              ? Colors.white
+                              : Colors.grey[600],
+                        ),
+                      );
+                    }).toList(),
                   ),
-                );
-              }).toList(),
+                ],
+              );
+            }
+
+            if (state is CategoryError) {
+              return Container(
+                height: 170,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: Colors.grey[800],
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.wifi_off,
+                        color: Color(0xFF868EAE),
+                        size: 32,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Unable to load carousel',
+                        style: TextStyle(color: Color(0xFF868EAE), fontSize: 12),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () {
+                          _categoryBloc.add(FetchCarouselWallpapersEvent('wallpaper'));
+                        },
+                        child: const Text(
+                          'Retry',
+                          style: TextStyle(color: Color(0xFFEE5776), fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            // Default/loading state - show placeholder
+            return Container(
+              height: 170,
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                color: Colors.grey[800],
+              ),
+              child: const Center(
+                child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+              ),
+            );
+          },
         ),
 
         // ---------------- Trending Title ----------------

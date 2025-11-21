@@ -23,6 +23,13 @@ class CategoryDetailsLoaded extends CategoryState {
   CategoryDetailsLoaded(this.categories, this.data);
 }
 
+class CarouselWallpapersLoading extends CategoryState {}
+
+class CarouselWallpapersLoaded extends CategoryState {
+  final List<CategorydetailesModel> wallpapers;
+  CarouselWallpapersLoaded(this.wallpapers);
+}
+
 class CategoryError extends CategoryState {
   final String message;
   CategoryError(this.message);

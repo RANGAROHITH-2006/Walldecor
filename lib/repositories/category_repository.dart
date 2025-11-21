@@ -58,4 +58,51 @@ class CategoryRepository {
         throw Exception('Failed to fetch data: ${response.statusCode} → ${response.body}');
     }
   }
+
+  Future<List<CategorydetailesModel>> fetchCarouselWallpapers(String categorySlug, {int limit = 4}) async {
+    final token = await _getSavedToken();
+    print('🔥 Using token: $token');
+    if (token == null || token.isEmpty) {
+      throw Exception('Guest token not found in SharedPreferences');
+    }
+
+    // First get all categories to find the wallpapers category ID
+    final categoriesResponse = await http.get(Uri.parse('$baseUrl/unsplashImage/category'),
+     headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token, 
+        },
+    );
+
+    if (categoriesResponse.statusCode != 200) {
+      throw Exception('Failed to fetch categories');
+    }
+
+    final List categoriesData = jsonDecode(categoriesResponse.body);
+    final categories = categoriesData.map((e) => CategoryModel.fromJson(e)).toList();
+    
+    // Find the wallpapers category
+    final wallpapersCategory = categories.firstWhere(
+      (category) => category.slug.toLowerCase().contains(categorySlug.toLowerCase()) || 
+                   category.title.toLowerCase().contains(categorySlug.toLowerCase()),
+      orElse: () => throw Exception('Wallpapers category not found'),
+    );
+
+    // Now fetch wallpapers from that category
+    final response = await http.get(Uri.parse('$baseUrl/unsplashImage/category/${wallpapersCategory.id}'),
+     headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token, 
+        },
+    );
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      final wallpapers = data.map((e) => CategorydetailesModel.fromJson(e)).toList();
+      // Return only the first 'limit' wallpapers
+      return wallpapers.take(limit).toList();
+    } else {
+        throw Exception('Failed to fetch wallpapers: ${response.statusCode} → ${response.body}');
+    }
+  }
 }
