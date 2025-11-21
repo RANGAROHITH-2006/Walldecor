@@ -372,7 +372,6 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                               : () {
                                   context.read<FeedbackBloc>().add(
                                     const SubmitFeedbackEvent(),
-
                                   );
                                   context.pop();
                                 },

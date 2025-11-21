@@ -17,6 +17,8 @@ import 'package:walldecor/bloc/category/category_event.dart';
 import 'package:walldecor/repositories/category_repository.dart';
 import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 import 'package:walldecor/screens/widgets/noresult.dart';
+import 'package:walldecor/screens/detailedscreens/resultpage.dart';
+import 'package:walldecor/models/categorydetailes_model.dart';
 
 class Searchpage extends StatefulWidget {
   const Searchpage({super.key});
@@ -302,6 +304,45 @@ class _SearchpageState extends State<Searchpage> {
                 itemBuilder: (context, index) {
                   final item = results[index] as Map<String, dynamic>? ?? {};
                   return GestureDetector(
+                    onTap: () {
+                      try {
+                        // Convert search result to expected format for Resultpage
+                        final urls = Urls(
+                          full: _getImageUrl(item),
+                          regular: _getImageUrl(item),
+                          small: _getImageUrl(item),
+                        );
+                        
+                        final user = User(
+                          id: item['id'] ?? '',
+                          username: item['user']?['username'] ?? 'Unknown',
+                          name: item['user']?['name'] ?? 'Unknown',
+                          firstName: item['user']?['first_name'] ?? '',
+                          lastName: item['user']?['last_name'] ?? '',
+                          profileLink: item['user']?['profile_link'] ?? '',
+                          profileImage: item['user']?['profile_image'] ?? '',
+                        );
+                        
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Resultpage(
+                              urls: urls,
+                              user: user,
+                            ),
+                          ),
+                        );
+                      } catch (e) {
+                        print('Error navigating to result page: $e');
+                        // Show error snackbar
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Unable to open image details'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    },
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: Stack(
