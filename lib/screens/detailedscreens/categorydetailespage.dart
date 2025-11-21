@@ -12,6 +12,7 @@ import 'package:walldecor/bloc/download/download_state.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/screens/navscreens/searchpage.dart';
+import 'package:walldecor/screens/widgets/diolog.dart';
 import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 
 class CategoryDetailsPage extends StatefulWidget {
@@ -154,7 +155,12 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                     bottom: 8,
                                     right: 8,
                                     child: GestureDetector(
-                                      onTap: () {
+                                      onTap: () async {
+                                        final confirmed = await showDownloadConfirmationDialog(
+                          context: context,
+                        );
+
+                        if (confirmed == true) {
                                         debugPrint(
                                           'Downloading wallpaper $index',
                                         );
@@ -169,7 +175,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                             user: item.user.toJson(),
                                           ),
                                         );
-                                      },
+                                      }},
                                       child: Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(

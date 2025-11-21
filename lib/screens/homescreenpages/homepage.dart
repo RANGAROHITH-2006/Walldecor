@@ -14,6 +14,7 @@ import 'package:walldecor/bloc/connectivity/connectivity_state.dart';
 import 'package:walldecor/bloc/download/download_bloc.dart';
 import 'package:walldecor/bloc/download/download_event.dart';
 import 'package:walldecor/bloc/download/download_state.dart';
+import 'package:walldecor/screens/widgets/diolog.dart';
 import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 import 'package:walldecor/repositories/category_repository.dart';
 import 'package:walldecor/repositories/collection_repository.dart';
@@ -491,38 +492,42 @@ class _HomepageState extends State<Homepage> {
                     bottom: 8,
                     right: 8,
                     child: GestureDetector(
-                      onTap: () {
-                        // Add to downloads using DownloadBloc
-                        // Use only the actual image ID without timestamp for consistency
-                        final imageId = image.id;
-
-                        final urlsJson = {
-                          "full": image.urls.full,
-                          "regular": image.urls.regular,
-                          "small": image.urls.small,
-                        };
-
-                        final userJson = {
-                          "id": image.user.id,
-                          "username": image.user.username,
-                          "name": image.user.name,
-                          "first_name": image.user.firstName,
-                          "last_name": image.user.lastName,
-                          "profile_link": image.user.profileLink,
-                          "profile_image": image.user.profileImage,
-                        };
-
-                        context.read<DownloadBloc>().add(
-                          AddToDownloadEvent(
-                            id: imageId,
-                            urls: urlsJson,
-                            user: userJson,
-                          ),
+                      onTap: () async {
+                        final confirmed = await showDownloadConfirmationDialog(
+                          context: context,
                         );
 
-                        debugPrint(
-                          'Downloading wallpaper $index with ID: $imageId',
-                        );
+                        if (confirmed == true) {
+                          final imageId = image.id;
+
+                          final urlsJson = {
+                            "full": image.urls.full,
+                            "regular": image.urls.regular,
+                            "small": image.urls.small,
+                          };
+
+                          final userJson = {
+                            "id": image.user.id,
+                            "username": image.user.username,
+                            "name": image.user.name,
+                            "first_name": image.user.firstName,
+                            "last_name": image.user.lastName,
+                            "profile_link": image.user.profileLink,
+                            "profile_image": image.user.profileImage,
+                          };
+
+                          context.read<DownloadBloc>().add(
+                            AddToDownloadEvent(
+                              id: imageId,
+                              urls: urlsJson,
+                              user: userJson,
+                            ),
+                          );
+
+                          debugPrint(
+                            'Downloading wallpaper $index with ID: $imageId',
+                          );
+                        }
                       },
                       child: Container(
                         padding: const EdgeInsets.all(8),

@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_print
+import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:walldecor/bloc/download/download_event.dart';
 import 'package:walldecor/bloc/download/download_state.dart';
 import 'package:walldecor/repositories/download_repository.dart';
@@ -12,6 +14,7 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
     on<GetAllDownloadsEvent>(_onGetAllDownloads);
     on<RemoveFromDownloadEvent>(_onRemoveFromDownload);
     on<CheckDownloadStatusEvent>(_onCheckDownloadStatus);
+    on<CheckDownloadLimitEvent>(_onCheckDownloadLimit);
   }
 
   Future<void> _onAddToDownload(
@@ -108,6 +111,55 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
       ));
     } catch (e) {
       print('🔥 DownloadBloc: Check download status error - $e');
+      emit(DownloadError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onCheckDownloadLimit(
+    CheckDownloadLimitEvent event,
+    Emitter<DownloadState> emit,
+  ) async {
+    try {
+      print('🔥 DownloadBloc: Checking download limit');
+      
+      // Get user's pro status from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final userDataString = prefs.getString('user_data');
+      bool isProUser = false;
+      
+      if (userDataString != null) {
+        try {
+          // Parse user data to check pro status
+          final userData = jsonDecode(userDataString);
+          isProUser = (userData['isProUser'] == true) || 
+                     (userData['hasActiveSubscription'] == true) ||
+                     (userData['userType'] == 'premium');
+        } catch (e) {
+          // Fallback to string checking if JSON parsing fails
+          isProUser = userDataString.contains('"isProUser":true') || 
+                     userDataString.contains('"hasActiveSubscription":true') ||
+                     userDataString.contains('"userType":"premium"');
+        }
+      }
+      
+      // Get current download count
+      final downloads = await downloadRepository.fetchDownloads();
+      final currentCount = downloads.length;
+      
+      // Set limits: 10 for normal users, unlimited for pro users
+      final maxLimit = isProUser ? -1 : 10; // -1 means unlimited
+      final canDownload = isProUser || currentCount < 10;
+      
+      print('🔥 DownloadBloc: User is pro: $isProUser, current downloads: $currentCount, can download: $canDownload');
+      
+      emit(DownloadLimitChecked(
+        currentCount: currentCount,
+        maxLimit: maxLimit,
+        canDownload: canDownload,
+        isProUser: isProUser,
+      ));
+    } catch (e) {
+      print('🔥 DownloadBloc: Check download limit error - $e');
       emit(DownloadError(message: e.toString()));
     }
   }

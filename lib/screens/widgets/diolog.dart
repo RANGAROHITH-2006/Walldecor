@@ -6,6 +6,173 @@ import 'package:walldecor/bloc/library/library_event.dart';
 import 'package:walldecor/bloc/library/libray_state.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
 import 'package:walldecor/models/all_library_model.dart';
+import 'package:walldecor/screens/navscreens/subscriptionpage.dart';
+
+Future<bool?> showDownloadConfirmationDialog({
+  required BuildContext context,
+  // required String imageUrl,
+}) async {
+  return await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      bool isLoading = false;
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFF40424E),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Text(
+                  'Download Wallpaper',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ClipRRect(
+                //   borderRadius: BorderRadius.circular(12),
+                //   child: Image.network(
+                //     imageUrl,
+                //     height: 150,
+                //     width: double.infinity,
+                //     fit: BoxFit.cover,
+                //   ),
+                // ),
+                // const SizedBox(height: 15),
+                const Text(
+                  'Are you sure you want to download this wallpaper?',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+              ],
+            ),
+            actions: [
+              ElevatedButton(
+                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.white54),
+                ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEE5776),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed:
+                    isLoading
+                        ? null
+                        : () {
+                          setState(() => isLoading = true);
+                          Navigator.of(context).pop(true);
+                        },
+                child:
+                    isLoading
+                        ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                        : const Text(
+                          'Download',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+Future<void> showDownloadLimitDialog({
+  required BuildContext context,
+  required int currentCount,
+  required int maxLimit,
+}) async {
+  await showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: const Color(0xFF40424E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Download Limit Reached',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Text(
+          'You have reached your download limit of $maxLimit images. Upgrade to Pro for unlimited downloads.',
+          style: const TextStyle(color: Colors.white70, fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'OK',
+              style: TextStyle(color: Colors.white54, fontSize: 14),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEE5776),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Navigate to subscription page
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SubscriptionPage(),
+                ),
+              );
+            },
+            child: const Text(
+              'Upgrade to Pro',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
 
 Future<void> showAddFloorDialog({
   required BuildContext context,
@@ -112,8 +279,6 @@ Future<void> showAddFloorDialog({
   );
 }
 
-
-
 Future<void> AddLibraryDialog({
   required BuildContext context,
   required Urls urls,
@@ -157,7 +322,9 @@ Future<void> AddLibraryDialog({
           },
           child: Dialog(
             backgroundColor: const Color(0xFF40424E),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -225,48 +392,57 @@ Future<void> AddLibraryDialog({
                               vertical: 12,
                             ),
                           ),
-                          onPressed: isLoading ? null : () {
-                            final libraryName = controller.text.trim();
-                            if (libraryName.isNotEmpty) {
-                              onCreate(libraryName);
-                              context.read<LibraryBloc>().add(
-                                CreateLibraryEvent(
-                                  token: "",
-                                  libraryName: libraryName,
-                                  id: "lib_${DateTime.now().millisecondsSinceEpoch}",
-                                  urls: urls,
-                                  user: user,
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Please enter a library name',
-                                    style: TextStyle(color: Colors.white),
+                          onPressed:
+                              isLoading
+                                  ? null
+                                  : () {
+                                    final libraryName = controller.text.trim();
+                                    if (libraryName.isNotEmpty) {
+                                      onCreate(libraryName);
+                                      context.read<LibraryBloc>().add(
+                                        CreateLibraryEvent(
+                                          token: "",
+                                          libraryName: libraryName,
+                                          id:
+                                              "lib_${DateTime.now().millisecondsSinceEpoch}",
+                                          urls: urls,
+                                          user: user,
+                                        ),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Please enter a library name',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          backgroundColor: Colors.orange,
+                                        ),
+                                      );
+                                    }
+                                  },
+                          child:
+                              isLoading
+                                  ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : const Text(
+                                    'Save',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
+                                    ),
                                   ),
-                                  backgroundColor: Colors.orange,
-                                ),
-                              );
-                            }
-                          },
-                          child: isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text(
-                                  'Save',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 16,
-                                  ),
-                                ),
                         ),
                       );
                     },
@@ -280,9 +456,6 @@ Future<void> AddLibraryDialog({
     },
   );
 }
-
-
-
 
 Future<void> EditlibraryDialog({
   required BuildContext context,
@@ -329,7 +502,9 @@ Future<void> EditlibraryDialog({
           },
           child: Dialog(
             backgroundColor: const Color(0xFF40424E),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -397,47 +572,57 @@ Future<void> EditlibraryDialog({
                               vertical: 12,
                             ),
                           ),
-                          onPressed: isLoading ? null : () {
-                            final newLibraryName = controller.text.trim();
-                            if (newLibraryName.isNotEmpty && newLibraryName != currentName) {
-                              onCreate(newLibraryName);
-                              context.read<LibraryBloc>().add(
-                                RenameLibraryEvent(
-                                  libraryId: libraryId,
-                                  libraryName: newLibraryName,
-                                ),
-                              );
-                            } else if (newLibraryName.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Please enter a library name',
-                                    style: TextStyle(color: Colors.white),
+                          onPressed:
+                              isLoading
+                                  ? null
+                                  : () {
+                                    final newLibraryName =
+                                        controller.text.trim();
+                                    if (newLibraryName.isNotEmpty &&
+                                        newLibraryName != currentName) {
+                                      onCreate(newLibraryName);
+                                      context.read<LibraryBloc>().add(
+                                        RenameLibraryEvent(
+                                          libraryId: libraryId,
+                                          libraryName: newLibraryName,
+                                        ),
+                                      );
+                                    } else if (newLibraryName.isEmpty) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Please enter a library name',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          backgroundColor: Colors.orange,
+                                        ),
+                                      );
+                                    } else {
+                                      Navigator.pop(dialogContext);
+                                    }
+                                  },
+                          child:
+                              isLoading
+                                  ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : const Text(
+                                    'Save',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
+                                    ),
                                   ),
-                                  backgroundColor: Colors.orange,
-                                ),
-                              );
-                            } else {
-                              Navigator.pop(dialogContext);
-                            }
-                          },
-                          child: isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text(
-                                  'Save',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 16,
-                                  ),
-                                ),
                         ),
                       );
                     },
@@ -456,11 +641,7 @@ class SaveLibrarySheet extends StatefulWidget {
   final Urls urls;
   final User user;
 
-  const SaveLibrarySheet({
-    super.key,
-    required this.urls,
-    required this.user,
-  });
+  const SaveLibrarySheet({super.key, required this.urls, required this.user});
 
   @override
   State<SaveLibrarySheet> createState() => _SaveLibrarySheetState();
@@ -547,11 +728,13 @@ class _SaveLibrarySheetState extends State<SaveLibrarySheet> {
                 return Column(
                   children: [
                     // Show dynamic library list
-                    ...libraries.map((library) => _DynamicLibraryItem(
-                      library: library,
-                      urls: widget.urls,
-                      user: widget.user,
-                    )),
+                    ...libraries.map(
+                      (library) => _DynamicLibraryItem(
+                        library: library,
+                        urls: widget.urls,
+                        user: widget.user,
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     // Create new library button
                     ListTile(
@@ -631,43 +814,42 @@ class _DynamicLibraryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: library.savedImage.isNotEmpty
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: Image.network(
-                library.savedImage.first.url.small,
-                width: 30,
-                height: 48,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
+      leading:
+          library.savedImage.isNotEmpty
+              ? ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: Image.network(
+                  library.savedImage.first.url.small,
                   width: 30,
                   height: 48,
+                  fit: BoxFit.cover,
+                  errorBuilder:
+                      (context, error, stackTrace) => Container(
+                        width: 30,
+                        height: 48,
+                        color: const Color(0xFF3A3D47),
+                        child: const Icon(
+                          Icons.image_not_supported,
+                          color: Color(0xFF868EAE),
+                          size: 20,
+                        ),
+                      ),
+                ),
+              )
+              : Container(
+                width: 30,
+                height: 48,
+                decoration: BoxDecoration(
                   color: const Color(0xFF3A3D47),
-                  child: const Icon(
-                    Icons.image_not_supported,
-                    color: Color(0xFF868EAE),
-                    size: 20,
-                  ),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Icon(
+                  Icons.photo_library_outlined,
+                  color: Color(0xFF868EAE),
+                  size: 20,
                 ),
               ),
-            )
-          : Container(
-              width: 30,
-              height: 48,
-              decoration: BoxDecoration(
-                color: const Color(0xFF3A3D47),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: const Icon(
-                Icons.photo_library_outlined,
-                color: Color(0xFF868EAE),
-                size: 20,
-              ),
-            ),
-      title: Text(
-        library.name,
-        style: const TextStyle(color: Colors.white),
-      ),
+      title: Text(library.name, style: const TextStyle(color: Colors.white)),
       subtitle: Text(
         '${library.totalImage} images',
         style: const TextStyle(color: Colors.white54, fontSize: 12),
@@ -675,11 +857,7 @@ class _DynamicLibraryItem extends StatelessWidget {
       onTap: () {
         // Add image to this library
         context.read<LibraryBloc>().add(
-          UpdateLibraryEvent(
-            libraryId: library.id,
-            urls: urls,
-            user: user,
-          ),
+          UpdateLibraryEvent(libraryId: library.id, urls: urls, user: user),
         );
       },
     );

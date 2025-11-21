@@ -25,3 +25,7 @@ class CheckDownloadStatusEvent extends DownloadEvent {
 
   CheckDownloadStatusEvent({required this.imageId});
 }
+
+class CheckDownloadLimitEvent extends DownloadEvent {
+  CheckDownloadLimitEvent();
+}

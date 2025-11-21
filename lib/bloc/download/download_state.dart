@@ -51,3 +51,17 @@ class DownloadStatusChecked extends DownloadState {
     required this.isDownloaded
   });
 }
+
+class DownloadLimitChecked extends DownloadState {
+  final int currentCount;
+  final int maxLimit;
+  final bool canDownload;
+  final bool isProUser;
+
+  DownloadLimitChecked({
+    required this.currentCount,
+    required this.maxLimit,
+    required this.canDownload,
+    required this.isProUser,
+  });
+}

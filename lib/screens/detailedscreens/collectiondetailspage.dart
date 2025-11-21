@@ -13,6 +13,7 @@ import 'package:walldecor/models/collectiondetailes_model.dart';
 import 'package:walldecor/models/categorydetailes_model.dart' as CategoryModel;
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/screens/navscreens/searchpage.dart';
+import 'package:walldecor/screens/widgets/diolog.dart';
 import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 
 // Converter functions to convert collection models to category models
@@ -180,7 +181,14 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
                                     bottom: 8,
                                     right: 8,
                                     child: GestureDetector(
-                                      onTap: () {
+                                      onTap: () async{
+
+                                        final confirmed =
+                                           await showDownloadConfirmationDialog(
+                                              context: context,
+                                            );
+
+                                        if (confirmed == true) {
                                         debugPrint(
                                           'Downloading wallpaper $index',
                                         );
@@ -214,7 +222,7 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
                                             user: userJson,
                                           ),
                                         );
-                                      },
+                                      }},
                                       child: Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
