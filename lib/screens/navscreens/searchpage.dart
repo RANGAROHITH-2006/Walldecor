@@ -327,6 +327,7 @@ class _SearchpageState extends State<Searchpage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => Resultpage(
+                              id: item['id'] ?? '',
                               urls: urls,
                               user: user,
                             ),

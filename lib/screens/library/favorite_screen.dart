@@ -73,7 +73,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                         context,
                         MaterialPageRoute(
                           builder:
-                              (context) => Resultpage(urls: urls, user: user),
+                              (context) => Resultpage(id: item.id ?? '', urls: urls, user: user),
                         ),
                       );
                     },

@@ -72,7 +72,7 @@ class _DownloadScreenState extends State<DownloadScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Resultpage(urls: urls, user: user),
+                            builder: (context) => Resultpage(id: item.id ?? '', urls: urls, user: user),
                           ),
                         );
                       },

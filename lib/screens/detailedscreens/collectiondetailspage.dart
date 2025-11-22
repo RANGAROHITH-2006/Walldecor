@@ -142,6 +142,7 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
                               MaterialPageRoute(
                                 builder:
                                     (context) => Resultpage(
+                                      id: item.id,
                                       urls: convertUrls(item.urls),
                                       user: convertUser(item.user),
                                     ),

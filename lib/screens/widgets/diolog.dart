@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:walldecor/bloc/download/download_bloc.dart';
+import 'package:walldecor/bloc/download/download_event.dart';
 import 'package:walldecor/bloc/library/library_bloc.dart';
 import 'package:walldecor/bloc/library/library_event.dart';
 import 'package:walldecor/bloc/library/libray_state.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
 import 'package:walldecor/models/all_library_model.dart';
+import 'package:walldecor/repositories/download_image_repository.dart';
 import 'package:walldecor/screens/navscreens/subscriptionpage.dart';
 
 Future<bool?> showDownloadConfirmationDialog({
@@ -638,11 +641,11 @@ Future<void> EditlibraryDialog({
 }
 
 class SaveLibrarySheet extends StatefulWidget {
+  final String id;
   final Urls urls;
   final User user;
 
-  const SaveLibrarySheet({super.key, required this.urls, required this.user});
-
+  const SaveLibrarySheet({super.key, required this.id, required this.urls, required this.user});
   @override
   State<SaveLibrarySheet> createState() => _SaveLibrarySheetState();
 }
@@ -736,26 +739,53 @@ class _SaveLibrarySheetState extends State<SaveLibrarySheet> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    // Create new library button
+                    // Download to Gallery option
                     ListTile(
-                      leading: SvgPicture.asset(
-                        'assets/svg/library.svg',
-                        width: 24,
-                        height: 24,
-                        color: Colors.white,
-                      ),
+                      leading: Image.asset('assets/navbaricons/download.png', height: 24, width: 24, color: Colors.white),
                       title: const Text(
-                        'Create new library',
+                        'Download to Gallery',
                         style: TextStyle(color: Colors.white),
                       ),
-                      onTap: () {
-                        Navigator.pop(context);
-                        AddLibraryDialog(
+                      onTap: () async{
+                        
+                         final confirmed = await showDownloadConfirmationDialog(
                           context: context,
-                          urls: widget.urls,
-                          user: widget.user,
-                          onCreate: (libraryName) {},
                         );
+
+                        if (confirmed == true) {
+
+                          await downloadImageToGallery(widget.urls.regular);
+                          final imageId = widget.id;
+
+                          final urlsJson = {
+                            "full": widget.urls.full,
+                            "regular": widget.urls.regular,
+                            "small": widget.urls.small,
+                          };
+
+                          final userJson = {
+                            "id": widget.user.id,
+                            "username": widget.user.username,
+                            "name": widget.user.name,
+                            "first_name": widget.user.firstName,
+                            "last_name": widget.user.lastName,
+                            "profile_link": widget.user.profileLink,
+                            "profile_image": widget.user.profileImage,
+                          };
+
+                          context.read<DownloadBloc>().add(
+                            AddToDownloadEvent(
+                              id: imageId,
+                              urls: urlsJson,
+                              user: userJson,
+                            ),
+                          );
+
+                          debugPrint(
+                            'Downloading  with ID: $imageId',
+                          );
+                          Navigator.pop(context);
+                        }
                       },
                     ),
                   ],

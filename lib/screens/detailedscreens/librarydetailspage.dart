@@ -237,7 +237,7 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
                             MaterialPageRoute(
                               builder:
                                   (context) =>
-                                      Resultpage(urls: urls, user: user),
+                                      Resultpage(id: item.id, urls: urls, user: user),
                             ),
                           );
                           debugPrint('Library image $index tapped');

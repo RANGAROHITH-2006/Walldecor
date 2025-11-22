@@ -115,6 +115,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                               MaterialPageRoute(
                                 builder:
                                     (context) => Resultpage(
+                                      id: item.id,
                                       urls: item.urls,
                                       user: item.user,
                                     ),

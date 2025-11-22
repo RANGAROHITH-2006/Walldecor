@@ -51,7 +51,6 @@ class _HomepageState extends State<Homepage> {
     // Fetch initial data
     _categoryBloc.add(FetchCategoryEvent());
     _collectionBloc.add(FetchCollectionEvent());
-    
   }
 
   @override
@@ -62,7 +61,7 @@ class _HomepageState extends State<Homepage> {
   }
 
   void printprefs() async {
-     SharedPreferences prefs = await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     for (String key in prefs.getKeys()) {
       print('$key : ${prefs.get(key)}');
     }
@@ -145,7 +144,6 @@ class _HomepageState extends State<Homepage> {
           if (connectivityState is ConnectivityOnline) {
             print('🌐 Internet restored - Rechecking session...');
             _checkUserAuthentication();
-            
           }
 
           return MultiBlocListener(
@@ -461,10 +459,7 @@ class _HomepageState extends State<Homepage> {
                       },
                       child: const Text(
                         'Retry',
-                        style: TextStyle(
-                          color:Colors.white,
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     ),
                   ],
@@ -519,7 +514,11 @@ class _HomepageState extends State<Homepage> {
               context,
               MaterialPageRoute(
                 builder:
-                    (context) => Resultpage(urls: image.urls, user: image.user),
+                    (context) => Resultpage(
+                      id: image.id,
+                      urls: image.urls,
+                      user: image.user,
+                    ),
               ),
             );
             debugPrint('Wallpaper $index tapped');
@@ -558,8 +557,7 @@ class _HomepageState extends State<Homepage> {
                         );
 
                         if (confirmed == true) {
-
-                          await downloadImageToGallery( image.urls.regular);
+                          await downloadImageToGallery(image.urls.regular);
                           final imageId = image.id;
 
                           final urlsJson = {

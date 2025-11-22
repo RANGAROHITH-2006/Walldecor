@@ -16,11 +16,11 @@ import 'package:walldecor/repositories/favorite_repository.dart';
 import 'package:walldecor/screens/widgets/diolog.dart';
 
 class Resultpage extends StatefulWidget {
+  final String id;
   final Urls urls;
   final User user;
 
-  const Resultpage({super.key, required this.urls, required this.user});
-
+  const Resultpage({super.key, required this.id, required this.urls, required this.user});
   @override
   State<Resultpage> createState() => _ResultpageState();
 }
@@ -240,6 +240,7 @@ class _ResultpageState extends State<Resultpage> {
                               ),
                               builder:
                                   (context) => SaveLibrarySheet(
+                                    id: widget.id,
                                     urls: widget.urls,
                                     user: widget.user,
                                   ),
