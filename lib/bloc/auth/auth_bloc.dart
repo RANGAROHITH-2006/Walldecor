@@ -17,6 +17,7 @@ part 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   static const String _baseUrl = 'http://172.168.17.2:13024';
   final AuthRepository _authRepository = AuthRepository();
+  static const String _guestIdKey = 'user_id';
   
   AuthBloc() : super(const AuthInitial()) {
     on<AuthEvent>((event, emit) {});
@@ -50,7 +51,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       SessionRequest event, Emitter<AuthState> emit) async {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
-      
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('auth_token');
       String? userType = prefs.getString('user_type');
@@ -69,7 +69,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (!isFirebaseValid) {
           print('Firebase session expired, clearing stored data');
           await prefs.remove('auth_token');
-          await prefs.remove('user_id');
           await prefs.remove('user_data');
           await prefs.remove('user_type');
           await prefs.remove('isProUser');
@@ -90,7 +89,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (!isFirebaseValid) {
           print('Apple Firebase session expired, clearing stored data');
           await prefs.remove('auth_token');
-          await prefs.remove('user_id');
           await prefs.remove('user_data');
           await prefs.remove('user_type');
           await prefs.remove('isProUser');
@@ -135,7 +133,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       } else {
         // Token is invalid/expired, clear all stored data
         await prefs.remove('auth_token');
-        await prefs.remove('user_id');
         await prefs.remove('user_data');
         await prefs.remove('user_type');
         await prefs.remove('isProUser');
@@ -159,7 +156,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       // Clear stored data on any session error
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.remove('auth_token');
-      await prefs.remove('user_id');
       await prefs.remove('user_data');
       await prefs.remove('user_type');
       await prefs.remove('isProUser');
@@ -222,7 +218,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onLoginWithGoogle(
+    
       LoginWithGoogle event, Emitter<AuthState> emit) async {
+      final prefs = await SharedPreferences.getInstance();
+      final guestUserId = prefs.getString(_guestIdKey);
+      print('Guest User ID from prefs: $guestUserId');
     try {
       emit(state.copyWith(status: AuthStatus.loading));
       var resp = await http.post(
@@ -237,11 +237,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           "email": event.email,
           "firebaseUserId": event.firebaseUserId,
           "deviceId": event.deviceId,
+          'userId': guestUserId ?? '',
           if (event.pushToken.isNotEmpty) "pushToken": event.pushToken,
         }),
+        
       );
-
+      
+    print('request body : ${jsonEncode({
+          if (event.firstName.isNotEmpty) "firstName": event.firstName,
+          if (event.lastName.isNotEmpty) "lastName": event.lastName,
+          "email": event.email,
+          "firebaseUserId": event.firebaseUserId,
+          "deviceId": event.deviceId,
+          'userId': guestUserId ?? '',
+          if (event.pushToken.isNotEmpty) "pushToken": event.pushToken,
+        })}');
       if (resp.statusCode == 200) {
+        
         Map<String, dynamic> data = jsonDecode(resp.body);
         var token = resp.headers["x-auth-token"];
         var id = data["_id"];
@@ -364,7 +376,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (resp.statusCode == 200) {
           // Clear all stored data after successful logout
           await prefs.remove('auth_token');
-          await prefs.remove('user_id');
           await prefs.remove('user_data');
           await prefs.remove('user_type');
           await prefs.remove('isProUser');
@@ -386,7 +397,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       } else {
         // Even without token, clear any stored data
         await prefs.remove('auth_token');
-        await prefs.remove('user_id');
         await prefs.remove('user_data');
         await prefs.remove('user_type');
         await prefs.remove('isProUser');

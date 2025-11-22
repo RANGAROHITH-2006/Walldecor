@@ -32,7 +32,7 @@ class _CustomButtonState extends State<CustomButton> {
     try {
       final googleAuthService = GoogleAuthService();
       final userData = await googleAuthService.signInWithGoogle();
-
+      print('Google user data: $userData');
       if (userData != null) {
         if (context.mounted) {
           context.read<AuthBloc>().add(
@@ -66,6 +66,12 @@ class _CustomButtonState extends State<CustomButton> {
       }
     }
   }
+
+
+
+
+
+
 
   Future<void> _handleAppleSignIn(BuildContext context) async {
     try {

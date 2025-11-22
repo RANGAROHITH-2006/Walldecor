@@ -11,7 +11,7 @@ import 'package:walldecor/bloc/download/download_event.dart';
 import 'package:walldecor/bloc/download/download_state.dart';
 import 'package:walldecor/models/collectiondetailes_model.dart';
 import 'package:walldecor/models/categorydetailes_model.dart' as CategoryModel;
-import 'package:walldecor/repositories/services/image_service.dart';
+import 'package:walldecor/repositories/download_image_repository.dart';
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/screens/navscreens/searchpage.dart';
 import 'package:walldecor/screens/widgets/diolog.dart';

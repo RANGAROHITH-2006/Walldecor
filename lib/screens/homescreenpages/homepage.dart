@@ -1,8 +1,9 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
-import 'package:walldecor/repositories/services/image_service.dart';
+import 'package:walldecor/repositories/download_image_repository.dart';
 import 'package:walldecor/screens/detailedscreens/collectiondetailspage.dart';
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/bloc/category/category_bloc.dart';
@@ -44,11 +45,13 @@ class _HomepageState extends State<Homepage> {
   @override
   void initState() {
     super.initState();
+    printprefs();
     _categoryBloc = CategoryBloc(CategoryRepository());
     _collectionBloc = CollectionBloc(CollectionRepository());
     // Fetch initial data
     _categoryBloc.add(FetchCategoryEvent());
     _collectionBloc.add(FetchCollectionEvent());
+    
   }
 
   @override
@@ -56,6 +59,13 @@ class _HomepageState extends State<Homepage> {
     _categoryBloc.close();
     _collectionBloc.close();
     super.dispose();
+  }
+
+  void printprefs() async {
+     SharedPreferences prefs = await SharedPreferences.getInstance();
+    for (String key in prefs.getKeys()) {
+      print('$key : ${prefs.get(key)}');
+    }
   }
 
   Future<void> _checkUserAuthentication() async {

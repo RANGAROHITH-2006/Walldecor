@@ -136,7 +136,7 @@ class AuthRepository {
         final xAuthToken = response.headers['x-auth-token'];
 
         print('x-auth-token: $xAuthToken');
-
+        print('Guest ID: $guestId');
         if (guestId == null) {
           throw Exception('Guest ID not found in API response');
         }
@@ -159,8 +159,7 @@ class AuthRepository {
         };
       } else {
         print('❌ Guest account creation failed!');
-        print('Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
+        print('Status code: ${response.statusCode}, Response body: ${response.body}');
         throw Exception(
           'Failed to create guest account. Status: ${response.statusCode}, Body: ${response.body}',
         );
@@ -196,13 +195,25 @@ class AuthRepository {
       print('Logging in with Google:');
       print('Email: $email');
       print('Firebase User ID: $firebaseUserId');
+     
 
+      // Get guest user ID from local storage for data transfer
+      final prefs = await SharedPreferences.getInstance();
+      final guestUserId = prefs.getString(_guestIdKey);
+       print('guestUserId: $guestUserId');
       final requestBody = {
         'email': email,
         'firebaseUserId': firebaseUserId,
         'pushToken': pushToken,
         'deviceId': deviceId,
+        'userId': guestUserId ?? '',
       };
+      
+      // If guest user ID exists, include it in the request body for data transfer
+      if (guestUserId != null && guestUserId.isNotEmpty) {
+        requestBody['guestUserId'] = guestUserId;
+        print('Including guest user ID for data transfer: $guestUserId');
+      }
 
       print('Request body: ${jsonEncode(requestBody)}');
       print('Making API request to: $_baseUrl/auth/loginWithGoogle');
@@ -298,12 +309,23 @@ class AuthRepository {
       print('Email: $email');
       print('Firebase User ID: $firebaseUserId');
 
+      // Get guest user ID from local storage for data transfer
+      final prefs = await SharedPreferences.getInstance();
+      final guestUserId = prefs.getString(_guestIdKey);
+      
       final requestBody = {
         'email': email,
         'firebaseUserId': firebaseUserId,
         'pushToken': pushToken,
         'deviceId': deviceId,
+        'userId': guestUserId ?? '',
       };
+      
+      // If guest user ID exists, include it in the request body for data transfer
+      if (guestUserId != null && guestUserId.isNotEmpty) {
+        requestBody['guestUserId'] = guestUserId;
+        print('Including guest user ID for data transfer: $guestUserId');
+      }
 
       print('Request body: ${jsonEncode(requestBody)}');
       print('Making API request to: $_baseUrl/auth/loginWithApple');
@@ -461,7 +483,6 @@ class AuthRepository {
   Future<void> removeAuthData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_guestIdKey);
       await prefs.remove(_authTokenKey);
       await prefs.remove(_userTypeKey);
       await prefs.remove(_userDataKey);
@@ -490,6 +511,17 @@ class AuthRepository {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getString(_userTypeKey);
     } catch (e) {
+      return null;
+    }
+  }
+
+  /// Get stored guest user ID from SharedPreferences
+  Future<String?> getGuestUserId() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(_guestIdKey);
+    } catch (e) {
+      print('Error getting guest user ID: $e');
       return null;
     }
   }
