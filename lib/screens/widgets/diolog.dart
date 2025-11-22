@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:walldecor/bloc/download/download_bloc.dart';
 import 'package:walldecor/bloc/download/download_event.dart';
 import 'package:walldecor/bloc/library/library_bloc.dart';

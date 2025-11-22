@@ -181,10 +181,6 @@ class _SettingspageState extends State<Settingspage> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Text(
-                  'Type ‘ Delete’ to fully delete your account',
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
-                ),
                 SizedBox(height: 10),
                 const Text(
                   'This will include all your data, personal information & created posts. This action cannot be reversed.',

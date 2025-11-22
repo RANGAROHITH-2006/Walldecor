@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               SizedBox(
                 height: 340,
@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 color: '0xFF31333C',
                 screen: '/mainscreen',
               ),
-              // const SizedBox(height: 12),
+              const SizedBox(height: 20),
               // CustomButton(
               //   image: 'assets/images/apple.png',
               //   text: 'Login With Apple',

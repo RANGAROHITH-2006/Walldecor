@@ -23,12 +23,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   List<Map<String, dynamic>> subscriptionPlans = [
     {
       'id': InAppPurchaseService.weeklyPlanId,
-      'title': '1 Week',
+      'title': 'Week',
       'price': 'Loading...',
     },
     {
       'id': InAppPurchaseService.yearlyPlanId,
-      'title': '1 Year',
+      'title': 'Year',
       'price': 'Loading...',
     },
   ];
@@ -127,7 +127,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   void openPrivacyPolicy() async {
-    final url = Uri.parse("https://google.com");
+    final url = Uri.parse("https://privacy.freephotos.wibes.co.in/privacy_policy");
 
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
