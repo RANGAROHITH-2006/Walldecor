@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:walldecor/bloc/category/category_bloc.dart';
 import 'package:walldecor/bloc/category/category_event.dart';
 import 'package:walldecor/bloc/category/category_state.dart';
@@ -158,7 +160,20 @@ class _CategoryViewState extends State<_CategoryView> {
                           children: state.data.map((category) {
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12.0),
-                              child: _buildCategoryCard(category),
+                              child: ParallaxCategoryItem(
+                                category: category,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CategoryDetailsPage(
+                                        title: category.title,
+                                        id: category.id,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                             );
                           }).toList(),
                         );
@@ -271,26 +286,28 @@ class _CategoryViewState extends State<_CategoryView> {
       ),
     );
   }
+}
 
-  // ---------------- Category Card UI ----------------
-  Widget _buildCategoryCard(CategoryModel category) {
+// ================= PARALLAX CATEGORY ITEM =================
+
+class ParallaxCategoryItem extends StatelessWidget {
+  const ParallaxCategoryItem({
+    super.key,
+    required this.category,
+    required this.onTap,
+  });
+
+  final CategoryModel category;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CategoryDetailsPage(
-              title: category.title,
-              id: category.id,
-            ),
-          ),
-        );
-      },
+      onTap: onTap,
       child: Container(
         height: 140,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: const Color(0xFF2E3138),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.5),
@@ -302,12 +319,23 @@ class _CategoryViewState extends State<_CategoryView> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: Stack(
+            fit: StackFit.expand,
             children: [
-              Positioned.fill(
-                child: Image.network(
-                  category.coverPhoto.urls.regular,
+              // Parallax background
+              CategoryParallax(
+                child: CachedNetworkImage(
+                  height: 250,
+                  imageUrl: category.coverPhoto.urls.regular,
                   fit: BoxFit.fill,
-                  errorBuilder: (context, error, stackTrace) => Container(
+                  placeholder: (context, url) => Container(
+                    color: const Color(0xFF3A3D47),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFFEE5776),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
                     color: const Color(0xFF3A3D47),
                     child: const Icon(
                       Icons.image_not_supported,
@@ -316,32 +344,174 @@ class _CategoryViewState extends State<_CategoryView> {
                   ),
                 ),
               ),
-              Positioned(
-                left: 16,
-                bottom: 14,
-                child: Text(
-                  category.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+              // Gradient overlay
+              // Container(
+              //   decoration: BoxDecoration(
+              //     gradient: LinearGradient(
+              //       begin: Alignment.topCenter,
+              //       end: Alignment.bottomCenter,
+              //       colors: [
+              //         Colors.transparent,
+              //         Colors.black.withOpacity(0.7),
+              //       ],
+              //       stops: const [0.5, 1.0],
+              //     ),
+              //   ),
+              // ),
+              // Content
+              Stack(
+                children: [
+                  Positioned(
+                    left: 16,
+                    bottom: 14,
+                    child: Text(
+                      category.title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              Positioned(
-                right: 12,
-                bottom: 8,
-                child: Image.asset(
-                  'assets/navbaricons/playicon.png',
-                  width: 42,
-                  height: 20,
-                  fit: BoxFit.contain,
-                ),
+                  Positioned(
+                    right: 12,
+                    bottom: 8,
+                    child: Image.asset(
+                      'assets/navbaricons/playicon.png',
+                      width: 42,
+                      height: 20,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
     );
+  }
+}
+
+// ================= CUSTOM PARALLAX WIDGET =================
+
+class CategoryParallax extends StatefulWidget {
+  const CategoryParallax({
+    super.key,
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  State<CategoryParallax> createState() => _CategoryParallaxState();
+}
+
+class _CategoryParallaxState extends State<CategoryParallax> {
+  late ScrollableState _scrollable;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollable = Scrollable.of(context);
+      _scrollable.position.addListener(_onScroll);
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollable.position.removeListener(_onScroll);
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scrollable = Scrollable.maybeOf(context);
+    if (scrollable == null) {
+      return widget.child;
+    }
+
+    return Flow(
+      delegate: ParallaxFlowDelegate(
+        scrollable: scrollable,
+        listItemContext: context,
+      ),
+      children: [
+        SizedBox(
+          width: double.infinity,
+          height: 180, // Make image taller for parallax effect
+          child: widget.child,
+        ),
+      ],
+    );
+  }
+}
+
+// ================= PARALLAX FLOW DELEGATE =================
+
+class ParallaxFlowDelegate extends FlowDelegate {
+  ParallaxFlowDelegate({
+    required this.scrollable,
+    required this.listItemContext,
+  }) : super(repaint: scrollable.position);
+
+  final ScrollableState scrollable;
+  final BuildContext listItemContext;
+
+  @override
+  BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) {
+    return BoxConstraints.tightFor(
+      width: constraints.maxWidth,
+    );
+  }
+
+  @override
+  void paintChildren(FlowPaintingContext context) {
+    // Calculate the position of this list item within the viewport
+    final scrollableBox = scrollable.context.findRenderObject() as RenderBox;
+    final listItemBox = listItemContext.findRenderObject() as RenderBox;
+    
+    if (listItemBox.attached) {
+      final listItemOffset = listItemBox.localToGlobal(
+        listItemBox.size.centerLeft(Offset.zero),
+        ancestor: scrollableBox,
+      );
+
+      // Determine the percent position of this list item within the scrollable area
+      final viewportDimension = scrollable.position.viewportDimension;
+      final scrollFraction =
+    ((listItemOffset.dy / viewportDimension)*1.8).clamp(-1.0, 2.0);
+
+
+      // Calculate the vertical alignment of the background based on the scroll percent
+      final verticalAlignment = Alignment(0.0, scrollFraction * 2 - 1);
+
+      // Convert the background alignment into a pixel offset for painting purposes
+      final backgroundSize = context.getChildSize(0)!;
+      final listItemSize = context.size;
+      final childRect = verticalAlignment.inscribe(backgroundSize, Offset.zero & listItemSize);
+
+      // Paint the background
+      context.paintChild(
+        0,
+        transform: Transform.translate(offset: Offset(0.0, childRect.top)).transform,
+      );
+    } else {
+      // Fallback if not attached
+      context.paintChild(0);
+    }
+  }
+
+  @override
+  bool shouldRepaint(ParallaxFlowDelegate oldDelegate) {
+    return scrollable != oldDelegate.scrollable ||
+        listItemContext != oldDelegate.listItemContext;
   }
 }
