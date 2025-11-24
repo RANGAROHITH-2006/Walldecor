@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:walldecor/bloc/category/category_bloc.dart';
 import 'package:walldecor/bloc/category/category_event.dart';
 import 'package:walldecor/bloc/category/category_state.dart';
@@ -15,6 +16,7 @@ import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/screens/navscreens/searchpage.dart';
 import 'package:walldecor/screens/widgets/diolog.dart';
 import 'package:walldecor/screens/widgets/no_internet_widget.dart';
+import 'package:walldecor/utils/download_restrictions.dart';
 
 class CategoryDetailsPage extends StatefulWidget {
   final String title;
@@ -158,6 +160,28 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                     right: 8,
                                     child: GestureDetector(
                                       onTap: () async {
+                                        // Get current user from AuthBloc
+                                        final authState = context.read<AuthBloc>().state;
+                                        final currentUser = authState.user;
+
+                                        // Check download restrictions
+                                        if (DownloadRestrictions.isCompletelyBlocked(user: currentUser)) {
+                                          await showDownloadBlockedDialog(
+                                            context: context,
+                                            message: DownloadRestrictions.getBlockedMessage(user: currentUser),
+                                          );
+                                          return;
+                                        }
+
+                                        if (!DownloadRestrictions.canDownload(user: currentUser)) {
+                                          await showDownloadLimitDialog(
+                                            context: context,
+                                            currentCount: currentUser?.downloadedImage.length ?? 0,
+                                            maxLimit: DownloadRestrictions.maxDownloadLimit,
+                                          );
+                                          return;
+                                        }
+
                                         final confirmed =
                                             await showDownloadConfirmationDialog(
                                               context: context,

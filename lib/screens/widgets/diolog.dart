@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:walldecor/bloc/download/download_bloc.dart';
 import 'package:walldecor/bloc/download/download_event.dart';
 import 'package:walldecor/bloc/library/library_bloc.dart';
@@ -9,6 +10,7 @@ import 'package:walldecor/models/categorydetailes_model.dart';
 import 'package:walldecor/models/all_library_model.dart';
 import 'package:walldecor/repositories/download_image_repository.dart';
 import 'package:walldecor/screens/navscreens/subscriptionpage.dart';
+import 'package:walldecor/utils/download_restrictions.dart';
 
 Future<bool?> showDownloadConfirmationDialog({
   required BuildContext context,
@@ -168,6 +170,42 @@ Future<void> showDownloadLimitDialog({
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<void> showDownloadBlockedDialog({
+  required BuildContext context,
+  required String message,
+}) async {
+  await showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: const Color(0xFF40424E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Download Not Available',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white70, fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'OK',
+              style: TextStyle(color: Colors.white54, fontSize: 14),
             ),
           ),
         ],
@@ -745,14 +783,36 @@ class _SaveLibrarySheetState extends State<SaveLibrarySheet> {
                         'Download to Gallery',
                         style: TextStyle(color: Colors.white),
                       ),
-                      onTap: () async{
-                        
-                         final confirmed = await showDownloadConfirmationDialog(
+                      onTap: () async {
+                        // Get current user from AuthBloc
+                        final authState = context.read<AuthBloc>().state;
+                        final currentUser = authState.user;
+
+                        // Check download restrictions
+                        if (DownloadRestrictions.isCompletelyBlocked(user: currentUser)) {
+                          Navigator.pop(context);
+                          await showDownloadBlockedDialog(
+                            context: context,
+                            message: DownloadRestrictions.getBlockedMessage(user: currentUser),
+                          );
+                          return;
+                        }
+
+                        if (!DownloadRestrictions.canDownload(user: currentUser)) {
+                          Navigator.pop(context);
+                          await showDownloadLimitDialog(
+                            context: context,
+                            currentCount: currentUser?.downloadedImage.length ?? 0,
+                            maxLimit: DownloadRestrictions.maxDownloadLimit,
+                          );
+                          return;
+                        }
+
+                        final confirmed = await showDownloadConfirmationDialog(
                           context: context,
                         );
 
                         if (confirmed == true) {
-
                           await downloadImageToGallery(widget.urls.regular);
                           final imageId = widget.id;
 
@@ -780,9 +840,7 @@ class _SaveLibrarySheetState extends State<SaveLibrarySheet> {
                             ),
                           );
 
-                          debugPrint(
-                            'Downloading  with ID: $imageId',
-                          );
+                          debugPrint('Downloading with ID: $imageId');
                           Navigator.pop(context);
                         }
                       },

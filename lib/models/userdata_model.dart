@@ -23,6 +23,8 @@ class User {
     final bool feedBackGiven;
     final bool isProUser;
     final bool isBlocked;
+    final bool isTransferred;
+    final bool isCreditEligible;
     final String expireTime;
     final bool autoRenew;
 
@@ -49,6 +51,8 @@ class User {
         required this.feedBackGiven,
         required this.isProUser,
         required this.isBlocked,
+        required this.isTransferred,
+        required this.isCreditEligible,
         required this.expireTime,
         required this.autoRenew,
     });
@@ -147,6 +151,8 @@ class User {
         bool? isGuestLogin,
         bool? feedBackGiven,
         bool? isProUser,
+        bool? isTransferred,
+        bool? isCreditEligible,
         bool? isBlocked,
         String? expireTime,
         bool? autoRenew,
@@ -173,6 +179,8 @@ class User {
             isGuestLogin: isGuestLogin ?? this.isGuestLogin,
             feedBackGiven: feedBackGiven ?? this.feedBackGiven,
             isProUser: isProUser ?? this.isProUser,
+            isTransferred: isTransferred ?? this.isTransferred,
+            isCreditEligible: isCreditEligible ?? this.isCreditEligible,
             isBlocked: isBlocked ?? this.isBlocked,
             expireTime: expireTime ?? this.expireTime,
             autoRenew: autoRenew ?? this.autoRenew,
@@ -204,6 +212,8 @@ class User {
         isGuestLogin: json["isGuestLogin"],
         feedBackGiven: json["feedBackGiven"],
         isProUser: json["isProUser"],
+        isTransferred: json["isTransferred"] ,
+        isCreditEligible: json["isCreditEligible"],
         isBlocked: json["isBlocked"],
         expireTime: json["expireTime"],
         autoRenew: json["autoRenew"],
@@ -231,6 +241,8 @@ class User {
         "isGuestLogin": isGuestLogin,
         "feedBackGiven": feedBackGiven,
         "isProUser": isProUser,
+        "isTransferred": isTransferred,
+        "isCreditEligible": isCreditEligible,
         "isBlocked": isBlocked,
         "expireTime": expireTime,
         "autoRenew": autoRenew,

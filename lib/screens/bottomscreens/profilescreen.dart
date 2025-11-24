@@ -28,9 +28,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _downloadBloc = DownloadBloc(downloadRepository: DownloadRepository());
-    // Check download limit when profile loads
     _downloadBloc.add(CheckDownloadLimitEvent());
-    // Load profile image URL
     _loadProfileImage();
   }
 
