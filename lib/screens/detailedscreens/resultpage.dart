@@ -29,9 +29,11 @@ class _ResultpageState extends State<Resultpage> {
   OverlayEntry? _popup;
   final LayerLink _layerLink = LayerLink();
   bool _isFavorited = false;
+  bool show = false;
   late final FavoriteBloc _favoriteBloc;
 
   Future<void> shareImage(String imageUrl) async {
+    final String link = "https://privacy.freephotos.wibes.co.in/privacy_policy";
     try {
       // 1. Download the image
       final response = await http.get(Uri.parse(imageUrl));
@@ -43,7 +45,9 @@ class _ResultpageState extends State<Resultpage> {
       await file.writeAsBytes(response.bodyBytes);
 
       // 3. Share the image
-      await Share.shareXFiles([XFile(filePath)], text: "Check this image!");
+      await Share.shareXFiles([XFile(filePath)], text: "check out this image!\nApp Name: WallDecor \nApp Link: $link");
+      
+      print("✅ Image shared successfully");
     } catch (e) {
       print("❌ Error sharing image: $e");
     }
@@ -54,6 +58,12 @@ class _ResultpageState extends State<Resultpage> {
     _popup?.remove();
     _popup = null;
   }
+
+void shareTap(){
+  setState(() {
+    show = !show;
+  });
+}
 
   @override
   void initState() {
@@ -229,6 +239,7 @@ class _ResultpageState extends State<Resultpage> {
                         ),
                         GestureDetector(
                           onTap: () {
+                            
                             showModalBottomSheet(
                               context: context,
                               isScrollControlled: true,
@@ -255,7 +266,12 @@ class _ResultpageState extends State<Resultpage> {
                         CompositedTransformTarget(
                           link: _layerLink,
                           child: GestureDetector(
-                            onTap: () => shareImage(widget.urls.regular),
+                            onTap: () {
+                                shareTap();
+                                if(show){
+                                  shareImage(widget.urls.full);
+                                }
+                            },
                             child: SvgPicture.asset(
                               'assets/svg/share2.svg',
                               width: 28,

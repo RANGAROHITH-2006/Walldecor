@@ -1,17 +1,22 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:walldecor/repositories/download_image_repository.dart';
-import 'package:walldecor/screens/detailedscreens/collectiondetailspage.dart';
+// import 'package:walldecor/screens/detailedscreens/collectiondetailspage.dart';
 import 'package:walldecor/screens/detailedscreens/resultpage.dart';
 import 'package:walldecor/bloc/category/category_bloc.dart';
 import 'package:walldecor/bloc/category/category_event.dart';
 import 'package:walldecor/bloc/category/category_state.dart';
+import 'package:walldecor/bloc/random_image/random_image_bloc.dart';
+import 'package:walldecor/bloc/random_image/random_image_event.dart';
+import 'package:walldecor/bloc/random_image/random_image_state.dart';
 import 'package:walldecor/bloc/collection/collection_bloc.dart';
 import 'package:walldecor/bloc/collection/collection_event.dart';
-import 'package:walldecor/bloc/collection/collection_state.dart';
+// import 'package:walldecor/bloc/collection/collection_state.dart';
 import 'package:walldecor/bloc/connectivity/connectivity_bloc.dart';
 import 'package:walldecor/bloc/connectivity/connectivity_event.dart';
 import 'package:walldecor/bloc/connectivity/connectivity_state.dart';
@@ -23,8 +28,10 @@ import 'package:walldecor/utils/download_restrictions.dart';
 import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 import 'package:walldecor/repositories/category_repository.dart';
 import 'package:walldecor/repositories/collection_repository.dart';
+import 'package:walldecor/repositories/random_image_repository.dart';
 import 'package:walldecor/models/category_model.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
+import 'package:walldecor/models/random_image_model.dart' as RandomModel;
 import 'package:walldecor/repositories/services/google_auth_service.dart';
 
 class Homepage extends StatefulWidget {
@@ -38,6 +45,7 @@ class Homepage extends StatefulWidget {
 class _HomepageState extends State<Homepage> {
   late CategoryBloc _categoryBloc;
   late CollectionBloc _collectionBloc;
+  late RandomImageBloc _randomImageBloc;
 
   String? selectedCategoryId;
   String selectedCategoryTitle = 'All';
@@ -49,6 +57,7 @@ class _HomepageState extends State<Homepage> {
     printprefs();
     _categoryBloc = CategoryBloc(CategoryRepository());
     _collectionBloc = CollectionBloc(CollectionRepository());
+    _randomImageBloc = RandomImageBloc(RandomImageRepository());
     // Fetch initial data
     _categoryBloc.add(FetchCategoryEvent());
     _collectionBloc.add(FetchCollectionEvent());
@@ -58,6 +67,7 @@ class _HomepageState extends State<Homepage> {
   void dispose() {
     _categoryBloc.close();
     _collectionBloc.close();
+    _randomImageBloc.close();
     super.dispose();
   }
 
@@ -129,6 +139,31 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
+  // Helper function to convert RandomImageModel to CategorydetailesModel
+  List<CategorydetailesModel> _convertRandomToCategory(
+    List<RandomModel.RandomImageModel> randomImages,
+  ) {
+    return randomImages.map((randomImage) {
+      return CategorydetailesModel(
+        id: randomImage.id,
+        urls: Urls(
+          full: randomImage.urls.full,
+          regular: randomImage.urls.regular,
+          small: randomImage.urls.small,
+        ),
+        user: User(
+          id: randomImage.user.id,
+          username: randomImage.user.username,
+          name: randomImage.user.name,
+          firstName: randomImage.user.firstName,
+          lastName: randomImage.user.lastName,
+          profileLink: randomImage.user.profileLink,
+          profileImage: randomImage.user.profileImage,
+        ),
+      );
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -152,12 +187,7 @@ class _HomepageState extends State<Homepage> {
               BlocListener<CategoryBloc, CategoryState>(
                 bloc: _categoryBloc,
                 listener: (context, state) {
-                  if (state is CategoryDetailsLoaded) {
-                    setState(() {
-                      categoryImages = state.data;
-                    });
-                  } else if (state is CategoryLoaded &&
-                      selectedCategoryId == null) {
+                  if (state is CategoryLoaded && selectedCategoryId == null) {
                     // Auto-select first category by default
                     final categories = state.data;
                     if (categories.isNotEmpty) {
@@ -165,10 +195,44 @@ class _HomepageState extends State<Homepage> {
                         selectedCategoryId = categories.first.id;
                         selectedCategoryTitle = categories.first.title;
                       });
-                      _categoryBloc.add(
-                        FetchCategoryDetailsEvent(categories.first.id),
+                      print(
+                        '🔥 Fetching random images for category: ${categories.first.id}',
+                      );
+                      _randomImageBloc.add(
+                        FetchRandomImagesEvent(categories.first.id),
                       );
                     }
+                  }
+                },
+              ),
+              BlocListener<RandomImageBloc, RandomImageState>(
+                bloc: _randomImageBloc,
+                listener: (context, state) {
+                  print('🔥 RandomImageBloc state: $state');
+                  if (state is RandomImageLoading) {
+                    print('🔥 RandomImageLoading - clearing images');
+                    setState(() {
+                      categoryImages = []; // Clear images when loading
+                    });
+                  } else if (state is RandomImageLoaded) {
+                    print(
+                      '🔥 RandomImageLoaded with ${state.data.length} images',
+                    );
+                    setState(() {
+                      categoryImages = _convertRandomToCategory(state.data);
+                    });
+                  } else if (state is RandomImageError) {
+                    print('🔥 RandomImageError: ${state.message}');
+                    // Keep current images or show error state
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Failed to load images: ${state.message}',
+                        ),
+                        backgroundColor: Colors.red,
+                        duration: const Duration(seconds: 3),
+                      ),
+                    );
                   }
                 },
               ),
@@ -200,8 +264,8 @@ class _HomepageState extends State<Homepage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    buildFeaturedCollectionSection(),
-                    const SizedBox(height: 16),
+                    // buildFeaturedCollectionSection(),
+                    // const SizedBox(height: 16),
                     _buildDiscoverMoreSection(),
                     const SizedBox(height: 16),
                     _buildCategoryFilterSection(),
@@ -214,130 +278,6 @@ class _HomepageState extends State<Homepage> {
           );
         },
       ),
-    );
-  }
-
-  Widget buildFeaturedCollectionSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Featured Collection',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                if (widget.onTabChange != null) {
-                  widget.onTabChange!(2); // Switch to Collection tab (index 2)
-                }
-              },
-              child: const Text(
-                'See more >',
-                style: TextStyle(
-                  color: Color(0xFF868EAE),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 146,
-          child: BlocBuilder<CollectionBloc, CollectionState>(
-            bloc: _collectionBloc,
-            builder: (context, state) {
-              if (state is CollectionLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(color: Color(0xFFEE5776)),
-                );
-              } else if (state is CollectionLoaded) {
-                final collections = state.data;
-                final displayCount =
-                    collections.length > 4 ? 4 : collections.length;
-                return ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: displayCount,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => CollectionDetailsPage(
-                                  title: collections[index + 1].title,
-                                  id: collections[index + 1].id,
-                                ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.only(right: 12.0),
-                        width: 106,
-                        height: 146,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12.0),
-                          child: Image.network(
-                            collections[index + 1].coverPhoto.urls.regular,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: const Color(0xFF3A3D47),
-                                child: const Icon(
-                                  Icons.image_not_supported,
-                                  color: Color(0xFF868EAE),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              } else if (state is CollectionError) {
-                return SizedBox(
-                  height: 146,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.wifi_off,
-                          color: Color(0xFF868EAE),
-                          size: 32,
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Unable to load collections',
-                          style: TextStyle(
-                            color: Color(0xFF868EAE),
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                    ),
-                  ),
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
-        ),
-      ],
     );
   }
 
@@ -377,18 +317,8 @@ class _HomepageState extends State<Homepage> {
             return const Center(
               child: CircularProgressIndicator(color: Color(0xFFEE5776)),
             );
-          } else if (state is CategoryLoaded ||
-              state is CategoryDetailsLoading ||
-              state is CategoryDetailsLoaded) {
-            List<CategoryModel> categories = [];
-
-            if (state is CategoryLoaded) {
-              categories = state.data;
-            } else if (state is CategoryDetailsLoading) {
-              categories = state.categories;
-            } else if (state is CategoryDetailsLoaded) {
-              categories = state.categories;
-            }
+          } else if (state is CategoryLoaded) {
+            List<CategoryModel> categories = state.data;
 
             return ListView.builder(
               scrollDirection: Axis.horizontal,
@@ -402,9 +332,12 @@ class _HomepageState extends State<Homepage> {
                     setState(() {
                       selectedCategoryId = category.id;
                       selectedCategoryTitle = category.title;
+                      categoryImages =
+                          []; // Clear current images to show loading
                     });
 
-                    _categoryBloc.add(FetchCategoryDetailsEvent(category.id));
+                    print('🔥 Manually selected category: ${category.id}');
+                    _randomImageBloc.add(FetchRandomImagesEvent(category.id));
                   },
                   child: Container(
                     margin: const EdgeInsets.only(right: 8.0),
@@ -497,141 +430,340 @@ class _HomepageState extends State<Homepage> {
       );
     }
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1,
-      ),
-      itemCount: categoryImages.length,
-      itemBuilder: (context, index) {
+    return StaggeredGrid.count(
+      crossAxisCount: 2,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      children: List.generate(categoryImages.length, (index) {
         final image = categoryImages[index];
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder:
-                    (context) => Resultpage(
-                      id: image.id,
-                      urls: image.urls,
-                      user: image.user,
-                    ),
+
+        // Define the quilted pattern
+        int crossAxisCount = 1;
+        int mainAxisCount = 1;
+
+        switch (index % 9) {
+          case 0:
+            crossAxisCount = 1;
+            mainAxisCount = 2;
+            break;
+          case 1:
+            crossAxisCount = 1;
+            mainAxisCount = 1;
+            break;
+          case 2:
+            crossAxisCount = 1;
+            mainAxisCount = 2;
+            break;
+          case 3:
+            crossAxisCount = 1;
+            mainAxisCount = 1;
+            break;
+          case 4:
+            crossAxisCount = 2;
+            mainAxisCount = 1;
+            break;
+          case 5:
+            crossAxisCount = 1;
+            mainAxisCount = 1;
+            break;
+          case 6:
+            crossAxisCount = 1;
+            mainAxisCount = 2;
+            break;
+          case 7:
+            crossAxisCount = 1;
+            mainAxisCount = 1;
+            break;
+          case 8:
+            crossAxisCount = 2;
+            mainAxisCount = 1;
+            break;
+          case 9:
+            crossAxisCount = 1;
+            mainAxisCount = 1;
+            break;
+        }
+
+        return StaggeredGridTile.count(
+          crossAxisCellCount: crossAxisCount,
+          mainAxisCellCount: mainAxisCount,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) => Resultpage(
+                        id: image.id,
+                        urls: image.urls,
+                        user: image.user,
+                      ),
+                ),
+              );
+              debugPrint('Wallpaper $index tapped');
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16.0),
               ),
-            );
-            debugPrint('Wallpaper $index tapped');
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.0),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16.0),
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: Image.network(
-                      image.urls.regular,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: const Color(0xFF3A3D47),
-                          child: const Icon(
-                            Icons.image_not_supported,
-                            color: Color(0xFF868EAE),
-                            size: 40,
-                          ),
-                        );
-                      },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16.0),
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child:
+                          (image.urls.regular.isEmpty)
+                              ? Container(
+                                color: const Color(0xFF3A3D47),
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                  color: Color(0xFF868EAE),
+                                  size: 40,
+                                ),
+                              )
+                              : CachedNetworkImage(
+                                imageUrl: image.urls.regular,
+                                placeholder:
+                                    (context, url) => Center(
+                                      child: SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                          color: Color(0xFFEE5776),
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                    ),
+                                fit: BoxFit.fill,
+                                errorWidget: (context, url, error) {
+                                  return Container(
+                                    color: const Color(0xFF3A3D47),
+                                    child: const Icon(
+                                      Icons.image_not_supported,
+                                      color: Color(0xFF868EAE),
+                                      size: 40,
+                                    ),
+                                  );
+                                },
+                              ),
                     ),
-                  ),
-                  Positioned(
-                    bottom: 8,
-                    right: 8,
-                    child: GestureDetector(
-                      onTap: () async {
-                        // Get current user from AuthBloc
-                        final authState = context.read<AuthBloc>().state;
-                        final currentUser = authState.user;
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: GestureDetector(
+                        onTap: () async {
+                          // Get current user from AuthBloc
+                          final authState = context.read<AuthBloc>().state;
+                          final currentUser = authState.user;
 
-                        // Check download restrictions
-                        if (DownloadRestrictions.isCompletelyBlocked(user: currentUser)) {
-                          await showDownloadBlockedDialog(
-                            context: context,
-                            message: DownloadRestrictions.getBlockedMessage(user: currentUser),
-                          );
-                          return;
-                        }
+                          // Check download restrictions
+                          if (DownloadRestrictions.isCompletelyBlocked(
+                            user: currentUser,
+                          )) {
+                            await showDownloadBlockedDialog(
+                              context: context,
+                              message: DownloadRestrictions.getBlockedMessage(
+                                user: currentUser,
+                              ),
+                            );
+                            return;
+                          }
 
-                        if (!DownloadRestrictions.canDownload(user: currentUser)) {
-                          await showDownloadLimitDialog(
-                            context: context,
-                            currentCount: currentUser?.downloadedImage.length ?? 0,
-                            maxLimit: DownloadRestrictions.maxDownloadLimit,
-                          );
-                          return;
-                        }
+                          if (!DownloadRestrictions.canDownload(
+                            user: currentUser,
+                          )) {
+                            await showDownloadLimitDialog(
+                              context: context,
+                              currentCount:
+                                  currentUser?.downloadedImage.length ?? 0,
+                              maxLimit: DownloadRestrictions.maxDownloadLimit,
+                            );
+                            return;
+                          }
 
-                        final confirmed = await showDownloadConfirmationDialog(
-                          context: context,
-                        );
+                          final confirmed =
+                              await showDownloadConfirmationDialog(
+                                context: context,
+                              );
 
-                        if (confirmed == true) {
-                          await downloadImageToGallery(image.urls.regular);
-                          final imageId = image.id;
+                          if (confirmed == true) {
+                            await downloadImageToGallery(image.urls.regular);
+                            final imageId = image.id;
 
-                          final urlsJson = {
-                            "full": image.urls.full,
-                            "regular": image.urls.regular,
-                            "small": image.urls.small,
-                          };
+                            final urlsJson = {
+                              "full": image.urls.full,
+                              "regular": image.urls.regular,
+                              "small": image.urls.small,
+                            };
 
-                          final userJson = {
-                            "id": image.user.id,
-                            "username": image.user.username,
-                            "name": image.user.name,
-                            "first_name": image.user.firstName,
-                            "last_name": image.user.lastName,
-                            "profile_link": image.user.profileLink,
-                            "profile_image": image.user.profileImage,
-                          };
+                            final userJson = {
+                              "id": image.user.id,
+                              "username": image.user.username,
+                              "name": image.user.name,
+                              "first_name": image.user.firstName,
+                              "last_name": image.user.lastName,
+                              "profile_link": image.user.profileLink,
+                              "profile_image": image.user.profileImage,
+                            };
 
-                          context.read<DownloadBloc>().add(
-                            AddToDownloadEvent(
-                              id: imageId,
-                              urls: urlsJson,
-                              user: userJson,
-                            ),
-                          );
+                            context.read<DownloadBloc>().add(
+                              AddToDownloadEvent(
+                                id: imageId,
+                                urls: urlsJson,
+                                user: userJson,
+                              ),
+                            );
 
-                          debugPrint(
-                            'Downloading wallpaper $index with ID: $imageId',
-                          );
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Color(0x33000000),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Image.asset(
-                          'assets/navbaricons/download.png',
-                          width: 16,
-                          height: 16,
+                            debugPrint(
+                              'Downloading wallpaper $index with ID: $imageId',
+                            );
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Color(0x33000000),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Image.asset(
+                            'assets/navbaricons/download.png',
+                            width: 16,
+                            height: 16,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         );
-      },
+      }),
     );
   }
+
+  // Widget buildFeaturedCollectionSection() {
+  //     return Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //           children: [
+  //             const Text(
+  //               'Featured Collection',
+  //               style: TextStyle(
+  //                 color: Colors.white,
+  //                 fontSize: 16,
+  //                 fontWeight: FontWeight.w600,
+  //               ),
+  //             ),
+  //             GestureDetector(
+  //               onTap: () {
+  //                 if (widget.onTabChange != null) {
+  //                   widget.onTabChange!(2); // Switch to Collection tab (index 2)
+  //                 }
+  //               },
+  //               child: const Text(
+  //                 'See more >',
+  //                 style: TextStyle(
+  //                   color: Color(0xFF868EAE),
+  //                   fontSize: 14,
+  //                   fontWeight: FontWeight.w400,
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         const SizedBox(height: 16),
+  //         SizedBox(
+  //           height: 146,
+  //           child: BlocBuilder<CollectionBloc, CollectionState>(
+  //             bloc: _collectionBloc,
+  //             builder: (context, state) {
+  //               if (state is CollectionLoading) {
+  //                 return const Center(
+  //                   child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+  //                 );
+  //               } else if (state is CollectionLoaded) {
+  //                 final collections = state.data;
+  //                 final displayCount =
+  //                     collections.length > 4 ? 4 : collections.length;
+  //                 return ListView.builder(
+  //                   scrollDirection: Axis.horizontal,
+  //                   itemCount: displayCount,
+  //                   itemBuilder: (context, index) {
+  //                     return GestureDetector(
+  //                       onTap: () {
+  //                         Navigator.push(
+  //                           context,
+  //                           MaterialPageRoute(
+  //                             builder:
+  //                                 (context) => CollectionDetailsPage(
+  //                                   title: collections[index + 1].title,
+  //                                   id: collections[index + 1].id,
+  //                                 ),
+  //                           ),
+  //                         );
+  //                       },
+  //                       child: Container(
+  //                         margin: const EdgeInsets.only(right: 12.0),
+  //                         width: 106,
+  //                         height: 146,
+  //                         decoration: BoxDecoration(
+  //                           borderRadius: BorderRadius.circular(12.0),
+  //                         ),
+  //                         child: ClipRRect(
+  //                           borderRadius: BorderRadius.circular(12.0),
+  //                           child: Image.network(
+  //                             collections[index + 1].coverPhoto.urls.regular,
+  //                             fit: BoxFit.cover,
+  //                             errorBuilder: (context, error, stackTrace) {
+  //                               return Container(
+  //                                 color: const Color(0xFF3A3D47),
+  //                                 child: const Icon(
+  //                                   Icons.image_not_supported,
+  //                                   color: Color(0xFF868EAE),
+  //                                 ),
+  //                               );
+  //                             },
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     );
+  //                   },
+  //                 );
+  //               } else if (state is CollectionError) {
+  //                 return SizedBox(
+  //                   height: 146,
+  //                   child: Center(
+  //                     child: Column(
+  //                       mainAxisAlignment: MainAxisAlignment.center,
+  //                       children: [
+  //                         const Icon(
+  //                           Icons.wifi_off,
+  //                           color: Color(0xFF868EAE),
+  //                           size: 32,
+  //                         ),
+  //                         const SizedBox(height: 8),
+  //                         const Text(
+  //                           'Unable to load collections',
+  //                           style: TextStyle(
+  //                             color: Color(0xFF868EAE),
+  //                             fontSize: 14,
+  //                           ),
+  //                         ),
+  //                         const SizedBox(height: 8),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                 );
+  //               }
+  //               return const SizedBox.shrink();
+  //             },
+  //           ),
+  //         ),
+  //       ],
+  //     );
+  //   }
 }
