@@ -253,21 +253,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           if (event.pushToken.isNotEmpty) "pushToken": event.pushToken,
         })}');
       if (resp.statusCode == 200) {
-        
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+         prefs.setString('user_type', 'google');
         Map<String, dynamic> data = jsonDecode(resp.body);
+        print('$data-----------------');        
         var token = resp.headers["x-auth-token"];
         var id = data["_id"];
-        SharedPreferences prefs = await SharedPreferences.getInstance();
+        
+        
         prefs.setString('auth_token', token!);
         prefs.setString('user_id', id);
+       
+        bool isProUser = data['isProUser'] ?? false;
+        prefs.setBool('isProUser', isProUser);
+        
+        
+        
         // Store user data with profile image URL
         Map<String, dynamic> userData = Map<String, dynamic>.from(data);
         userData['profileImageUrl'] = event.profileImageUrl;
         
         prefs.setString('user_data', jsonEncode(userData));
-        prefs.setString('user_type', 'google');
-        bool isProUser = data['isProUser'] ?? false;
-        prefs.setBool('isProUser', isProUser);
+        
         
         User user = User.fromJson(data);
         event.onSuccess(user);
