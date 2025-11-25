@@ -7,7 +7,6 @@ import 'package:walldecor/bloc/feedback/feedback_bloc.dart';
 import 'package:walldecor/bloc/feedback/feedback_event.dart';
 import 'package:walldecor/bloc/feedback/feedback_state.dart';
 
-
 /// Simple static method to show feedback from anywhere in your app
 class FeedbackDialog {
   /// Call this from your settings screen or anywhere you want feedback
@@ -87,7 +86,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
   /// First Popup - Rating with emojis
   Widget _buildRatingDialog(BuildContext context, FeedbackState state) {
     return Scaffold(
-      backgroundColor:  Colors.transparent,
+      backgroundColor: Colors.transparent,
       resizeToAvoidBottomInset: false,
       body: Center(
         child: Dialog(
@@ -112,11 +111,15 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                   alignment: Alignment.topRight,
                   child: GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(Icons.close, color: Colors.grey, size: 20),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
-        
+
                 // Emoji based on rating
                 SvgPicture.asset(
                   _getEmojiAsset(state.rating),
@@ -124,7 +127,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                   height: 80,
                 ),
                 const SizedBox(height: 20),
-        
+
                 // Title
                 const Text(
                   'How satisfied are you?',
@@ -135,21 +138,21 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                   ),
                 ),
                 const SizedBox(height: 8),
-        
+
                 // Subtitle
                 const Text(
                   'Your feedback is valuable',
                   style: TextStyle(fontSize: 14, color: Color(0xFFFFFFFF)),
                 ),
                 const SizedBox(height: 20),
-        
+
                 // 5 Star Rating
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(5, (index) {
                     final starIndex = index + 1;
                     final isSelected = starIndex <= state.rating;
-        
+
                     return GestureDetector(
                       onTap: () {
                         context.read<FeedbackBloc>().add(
@@ -169,14 +172,14 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                   }),
                 ),
                 const SizedBox(height: 20),
-        
+
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
                       final parentContext =
                           context; // 👈 Save parent context (very important)
-        
+
                       if (state.rating >= 1 && state.rating <= 3) {
                         showDialog(
                           context: parentContext,
@@ -188,11 +191,9 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                             );
                           },
                         );
-                        
                       } else if (state.rating >= 4) {
                         openPlayStore();
                         context.pop();
-                    
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -204,7 +205,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                         );
                       }
                     },
-        
+
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFFEE5776),
                       foregroundColor: Colors.white,
@@ -242,166 +243,202 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
 
   /// Second Popup - Detailed feedback form (shows when rating <= 3)
   Widget _buildFeedbackFormDialog(BuildContext context, FeedbackState state) {
+    bool _hasScrolled = false;
+    final ScrollController _scrollController = ScrollController();
+
     return BlocBuilder<FeedbackBloc, FeedbackState>(
       builder: (context, currentState) {
         return Scaffold(
           backgroundColor: Colors.transparent,
           resizeToAvoidBottomInset: false,
           body: Center(
-            child: Dialog(
-              backgroundColor: Colors.transparent,
-              child: SingleChildScrollView(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF40424E),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Close button
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: GestureDetector(
-                          onTap: () => Navigator.of(context).pop(),
-                          child: const Icon(Icons.close, color: Colors.grey, size: 20),
+            child: GestureDetector(
+              onTap: () {
+                FocusScope.of(context).unfocus(); // hides keyboard
+                setState(() {
+                  _hasScrolled = !_hasScrolled;
+                });
+              },
+              child: Dialog(
+                backgroundColor: Colors.transparent,
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF40424E),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                        
-                      // Title
-                      const Text(
-                        'Your Opinion Matters!',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFFFFFFFF),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Close button
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: GestureDetector(
+                            onTap: () {
+                              _commentController.clear();
+                              Navigator.of(context).pop();
+                            },
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.grey,
+                              size: 20,
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                        
-                      // Checkbox options
-                      _buildCheckboxOption(
-                        context,
-                        currentState,
-                        'option1',
-                        'The application has a very userfriendly interface.',
-                        currentState.option1,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildCheckboxOption(
-                        context,
-                        currentState,
-                        'option2',
-                        'The wallpapers are crystal clear and high resolution.',
-                        currentState.option2,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildCheckboxOption(
-                        context,
-                        currentState,
-                        'option3',
-                        'Accurate results based on search or category',
-                        currentState.option3,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildCheckboxOption(
-                        context,
-                        currentState,
-                        'option4',
-                        'Need more features and improvements.',
-                        currentState.option4,
-                      ),
-                      const SizedBox(height: 20),
-                        
-                      // Comment section title
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Write your suggestions here...',
+                        const SizedBox(height: 10),
+
+                        // Title
+                        const Text(
+                          'Your Opinion Matters!',
                           style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                             color: Color(0xFFFFFFFF),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                        
-                      // Comment input box
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 89, 91, 107),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Color.fromARGB(255, 89, 91, 107)),
+                        const SizedBox(height: 20),
+
+                        // Checkbox options
+                        _buildCheckboxOption(
+                          context,
+                          currentState,
+                          'option1',
+                          'The application has a very userfriendly interface.',
+                          currentState.option1,
                         ),
-                        child: TextField(
-                          controller: _commentController,
-                          maxLines: 4,
-                          decoration: const InputDecoration(
-                            fillColor: Color.fromARGB(255, 89, 91, 107),
-                            filled: true,
-                            hintText: 'Enter here...',
-                        
-                            border: InputBorder.none,
-                            hintStyle: TextStyle(color: Colors.white),
-                          ),
-                          style: const TextStyle(fontSize: 16 ,color: Colors.white),
-                          onChanged: (value) {
-                            context.read<FeedbackBloc>().add(UpdateCommentEvent(value));
-                          },
+                        const SizedBox(height: 12),
+                        _buildCheckboxOption(
+                          context,
+                          currentState,
+                          'option2',
+                          'The wallpapers are crystal clear and high resolution.',
+                          currentState.option2,
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                        
-                      // Send Feedback button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: currentState.isSubmitting
-                              ? null
-                              : () {
-                                  context.read<FeedbackBloc>().add(
-                                    const SubmitFeedbackEvent(),
-                                  );
-                                  context.pop();
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFEE5776),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
+                        const SizedBox(height: 12),
+                        _buildCheckboxOption(
+                          context,
+                          currentState,
+                          'option3',
+                          'Accurate results based on search or category',
+                          currentState.option3,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildCheckboxOption(
+                          context,
+                          currentState,
+                          'option4',
+                          'Need more features and improvements.',
+                          currentState.option4,
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Comment section title
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Write your suggestions here...',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFFFFFFFF),
                             ),
                           ),
-                          child: currentState.isSubmitting
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Text(
-                                  'Send Feedback',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+
+                        // Comment input box
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Color.fromARGB(255, 89, 91, 107),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Color.fromARGB(255, 89, 91, 107),
+                            ),
+                          ),
+                          child: TextField(
+                            controller: _commentController,
+                            maxLines: 4,
+                            decoration: const InputDecoration(
+                              fillColor: Color.fromARGB(255, 89, 91, 107),
+                              filled: true,
+                              hintText: 'Enter here...',
+                              border: InputBorder.none,
+                              hintStyle: TextStyle(color: Colors.white),
+                            ),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                            onChanged: (value) {
+                              context.read<FeedbackBloc>().add(
+                                UpdateCommentEvent(value),
+                              );
+                              if (!_hasScrolled && value.isNotEmpty) {
+                                _hasScrolled = true;
+                                _scrollController.animateTo(
+                                  _scrollController.offset +
+                                      100, // adjust as needed
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Send Feedback button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed:
+                                currentState.isSubmitting
+                                    ? null
+                                    : () {
+                                      context.read<FeedbackBloc>().add(
+                                        const SubmitFeedbackEvent(),
+                                      );
+                                      context.pop();
+                                    },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFEE5776),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                            ),
+                            child:
+                                currentState.isSubmitting
+                                    ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                    : const Text(
+                                      'Send Feedback',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -432,15 +469,19 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
             height: 20,
             decoration: BoxDecoration(
               border: Border.all(
-                color: isSelected ? const Color(0xFF2C3E50) : const Color(0xFFB6B8BB),
+                color:
+                    isSelected
+                        ? const Color(0xFF2C3E50)
+                        : const Color(0xFFB6B8BB),
                 width: 2,
               ),
               borderRadius: BorderRadius.circular(4),
               color: isSelected ? const Color(0xFF2C3E50) : Colors.transparent,
             ),
-            child: isSelected
-                ? const Icon(Icons.check, size: 14, color: Colors.white)
-                : null,
+            child:
+                isSelected
+                    ? const Icon(Icons.check, size: 14, color: Colors.white)
+                    : null,
           ),
           const SizedBox(width: 12),
           Expanded(
