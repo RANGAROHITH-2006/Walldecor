@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
@@ -32,41 +33,20 @@ class ProfileScreenState extends State<ProfileScreen> {
     _loadProfileImage();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Reload profile data when screen becomes visible
-    _loadProfileImage();
-  }
 
-  /// Load profile image URL from stored data
   Future<void> _loadProfileImage() async {
-    try {
-      // Only load profile image for Google/Apple users
       final userType = await _authRepository.getCurrentUserType();
       if (userType == 'google' || userType == 'apple') {
-        final profileUrl = await _authRepository.getProfileImageUrl();
-        if (mounted && profileUrl != null && profileUrl.isNotEmpty) {
-          setState(() {
-            _profileImageUrl = profileUrl;
-          });
-        }
+        final user = FirebaseAuth.instance.currentUser;
+        print('photo url: ${user?.photoURL}');
+        setState(() {
+          _profileImageUrl = user?.photoURL;
+        });
       } else {
-        // Clear profile image for guest users
-        if (mounted) {
-          setState(() {
-            _profileImageUrl = null;
-          });
-        }
+        setState(() {
+          _profileImageUrl = null;
+        });
       }
-    } catch (e) {
-      print('Error loading profile image: $e');
-    }
-  }
-
-  /// Public method to refresh profile data
-  void refreshProfileData() {
-    _loadProfileImage();
   }
 
   @override
@@ -116,13 +96,14 @@ class ProfileScreenState extends State<ProfileScreen> {
                 BlocListener<AuthBloc, AuthState>(
                   listener: (context, state) {
                     // Reload profile data when auth state changes
-                    if (state.status == AuthStatus.success && state.user != null) {
+                    if (state.status == AuthStatus.success &&
+                        state.user != null) {
                       _loadProfileImage();
                     }
                   },
                   child: BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, state) {
-                      String userName = 'User';
+                      String userName = 'Guest User';
 
                       if (state.status == AuthStatus.success &&
                           state.user != null) {
@@ -181,7 +162,9 @@ class ProfileScreenState extends State<ProfileScreen> {
                                           return Icon(
                                             Icons.person,
                                             size: 60,
-                                            color: Colors.white.withOpacity(0.7),
+                                            color: Colors.white.withOpacity(
+                                              0.7,
+                                            ),
                                           );
                                         },
                                         loadingBuilder: (
@@ -209,7 +192,9 @@ class ProfileScreenState extends State<ProfileScreen> {
                                                         : null,
                                                 strokeWidth: 2,
                                                 valueColor:
-                                                    AlwaysStoppedAnimation<Color>(
+                                                    AlwaysStoppedAnimation<
+                                                      Color
+                                                    >(
                                                       Colors.white.withOpacity(
                                                         0.7,
                                                       ),
@@ -226,7 +211,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                                       ),
                             ),
                           ),
-                          SizedBox(height: 10,),
+                          SizedBox(height: 10),
                           Text(
                             userName,
                             style: const TextStyle(

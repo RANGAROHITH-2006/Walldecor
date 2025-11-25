@@ -162,11 +162,11 @@ class _MainScreenState extends State<MainScreen> {
                     currentIndex: currentIndex,
                     onTap: (index) {
                       setState(() => currentIndex = index);
-                      // Refresh profile data when profile tab is selected
-                      if (index == 3 && _profileKey.currentState != null) {
-                        // Trigger a refresh for the profile screen
-                        _profileKey.currentState!.refreshProfileData();
-                      }
+                      // // Refresh profile data when profile tab is selected
+                      // if (index == 3 && _profileKey.currentState != null) {
+                      //   // Trigger a refresh for the profile screen
+                      //   _profileKey.currentState!.refreshProfileData();
+                      // }
                     },
                     selectedItemColor: const Color(0xFFEE5776),
                     unselectedItemColor: const Color(0xFF868EAE),
