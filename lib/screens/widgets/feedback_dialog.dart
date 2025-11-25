@@ -373,11 +373,12 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                               filled: true,
                               hintText: 'Enter here...',
                               border: InputBorder.none,
-                              hintStyle: TextStyle(color: Colors.white),
+                              hintStyle: TextStyle(color: Colors.white , fontFamily: 'MonaSans' ),
                             ),
                             style: const TextStyle(
                               fontSize: 16,
                               color: Colors.white,
+                              fontFamily: 'MonaSans'
                             ),
                             onChanged: (value) {
                               context.read<FeedbackBloc>().add(

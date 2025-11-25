@@ -131,17 +131,6 @@ class _MainScreenState extends State<MainScreen> {
               body: Stack(
                 children: [
                   bottomScreens[currentIndex],
-                  if (state.status == AuthStatus.loading)
-                    Container(
-                      color: const Color(0xFF25272F).withOpacity(0.7),
-                      child: const Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0xFFEE5776),
-                          ),
-                        ),
-                      ),
-                    ),
                 ],
               ),
               bottomNavigationBar: Container(
