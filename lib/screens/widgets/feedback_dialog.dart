@@ -243,8 +243,8 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
 
   /// Second Popup - Detailed feedback form (shows when rating <= 3)
   Widget _buildFeedbackFormDialog(BuildContext context, FeedbackState state) {
-    bool _hasScrolled = false;
-    final ScrollController _scrollController = ScrollController();
+    bool hasScrolled = false;
+    final ScrollController scrollController = ScrollController();
 
     return BlocBuilder<FeedbackBloc, FeedbackState>(
       builder: (context, currentState) {
@@ -256,13 +256,13 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
               onTap: () {
                 FocusScope.of(context).unfocus(); // hides keyboard
                 setState(() {
-                  _hasScrolled = !_hasScrolled;
+                  hasScrolled = !hasScrolled;
                 });
               },
               child: Dialog(
                 backgroundColor: Colors.transparent,
                 child: SingleChildScrollView(
-                  controller: _scrollController,
+                  controller: scrollController,
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -383,10 +383,10 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                               context.read<FeedbackBloc>().add(
                                 UpdateCommentEvent(value),
                               );
-                              if (!_hasScrolled && value.isNotEmpty) {
-                                _hasScrolled = true;
-                                _scrollController.animateTo(
-                                  _scrollController.offset +
+                              if (!hasScrolled && value.isNotEmpty) {
+                                hasScrolled = true;
+                                scrollController.animateTo(
+                                  scrollController.offset +
                                       100, // adjust as needed
                                   duration: const Duration(milliseconds: 300),
                                   curve: Curves.easeInOut,
