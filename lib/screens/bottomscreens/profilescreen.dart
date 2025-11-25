@@ -14,10 +14,10 @@ class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key, this.onTabChange});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<ProfileScreen> createState() => ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class ProfileScreenState extends State<ProfileScreen> {
   late DownloadBloc _downloadBloc;
   final AuthRepository _authRepository = AuthRepository();
   int _currentDownloadCount = 0;
@@ -32,18 +32,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadProfileImage();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reload profile data when screen becomes visible
+    _loadProfileImage();
+  }
+
   /// Load profile image URL from stored data
   Future<void> _loadProfileImage() async {
-    // Only load profile image for Google/Apple users
-    final userType = await _authRepository.getCurrentUserType();
-    if (userType == 'google' || userType == 'apple') {
-      final profileUrl = await _authRepository.getProfileImageUrl();
-      if (mounted) {
-        setState(() {
-          _profileImageUrl = profileUrl;
-        });
+    try {
+      // Only load profile image for Google/Apple users
+      final userType = await _authRepository.getCurrentUserType();
+      if (userType == 'google' || userType == 'apple') {
+        final profileUrl = await _authRepository.getProfileImageUrl();
+        if (mounted && profileUrl != null && profileUrl.isNotEmpty) {
+          setState(() {
+            _profileImageUrl = profileUrl;
+          });
+        }
+      } else {
+        // Clear profile image for guest users
+        if (mounted) {
+          setState(() {
+            _profileImageUrl = null;
+          });
+        }
       }
+    } catch (e) {
+      print('Error loading profile image: $e');
     }
+  }
+
+  /// Public method to refresh profile data
+  void refreshProfileData() {
+    _loadProfileImage();
   }
 
   @override
@@ -90,124 +113,132 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                BlocBuilder<AuthBloc, AuthState>(
-                  builder: (context, state) {
-                    String userName = 'User';
+                BlocListener<AuthBloc, AuthState>(
+                  listener: (context, state) {
+                    // Reload profile data when auth state changes
+                    if (state.status == AuthStatus.success && state.user != null) {
+                      _loadProfileImage();
+                    }
+                  },
+                  child: BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      String userName = 'User';
 
-                    if (state.status == AuthStatus.success &&
-                        state.user != null) {
-                      // For authenticated users (Google/Apple)
-                      if (state.user!.isGoogleLogin ||
-                          state.user!.isAppleLogin) {
-                        userName =
-                            '${state.user!.firstName} ${state.user!.lastName}'
-                                .trim();
-                        if (userName.isEmpty) {
+                      if (state.status == AuthStatus.success &&
+                          state.user != null) {
+                        // For authenticated users (Google/Apple)
+                        if (state.user!.isGoogleLogin ||
+                            state.user!.isAppleLogin) {
                           userName =
-                              state.user!.email.split(
-                                '@',
-                              )[0]; // Use email prefix if name is empty
-                        }
-                      } else {
-                        // For guest users, use first and last name from API data
-                        String guestName =
-                            '${state.user!.firstName} ${state.user!.lastName}'
-                                .trim();
-                        if (guestName.isNotEmpty) {
-                          userName = guestName;
+                              '${state.user!.firstName} ${state.user!.lastName}'
+                                  .trim();
+                          if (userName.isEmpty) {
+                            userName =
+                                state.user!.email.split(
+                                  '@',
+                                )[0]; // Use email prefix if name is empty
+                          }
                         } else {
-                          userName = 'Guest User';
+                          // For guest users, use first and last name from API data
+                          String guestName =
+                              '${state.user!.firstName} ${state.user!.lastName}'
+                                  .trim();
+                          if (guestName.isNotEmpty) {
+                            userName = guestName;
+                          } else {
+                            userName = 'Guest User';
+                          }
                         }
                       }
-                    }
 
-                    return Column(
-                      children: [
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.2),
-                              width: 2,
+                      return Column(
+                        children: [
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                                width: 2,
+                              ),
+                            ),
+                            child: ClipOval(
+                              child:
+                                  _profileImageUrl != null &&
+                                          _profileImageUrl!.isNotEmpty
+                                      ? Image.network(
+                                        _profileImageUrl!,
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (
+                                          context,
+                                          error,
+                                          stackTrace,
+                                        ) {
+                                          // Show default image if network image fails
+                                          return Icon(
+                                            Icons.person,
+                                            size: 60,
+                                            color: Colors.white.withOpacity(0.7),
+                                          );
+                                        },
+                                        loadingBuilder: (
+                                          context,
+                                          child,
+                                          loadingProgress,
+                                        ) {
+                                          if (loadingProgress == null) {
+                                            return child;
+                                          }
+                                          return Container(
+                                            width: 80,
+                                            height: 80,
+                                            color: Colors.grey[800],
+                                            child: Center(
+                                              child: CircularProgressIndicator(
+                                                value:
+                                                    loadingProgress
+                                                                .expectedTotalBytes !=
+                                                            null
+                                                        ? loadingProgress
+                                                                .cumulativeBytesLoaded /
+                                                            loadingProgress
+                                                                .expectedTotalBytes!
+                                                        : null,
+                                                strokeWidth: 2,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<Color>(
+                                                      Colors.white.withOpacity(
+                                                        0.7,
+                                                      ),
+                                                    ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      )
+                                      : Icon(
+                                        Icons.person,
+                                        size: 60,
+                                        color: Colors.white.withOpacity(0.7),
+                                      ),
                             ),
                           ),
-                          child: ClipOval(
-                            child:
-                                _profileImageUrl != null &&
-                                        _profileImageUrl!.isNotEmpty
-                                    ? Image.network(
-                                      _profileImageUrl!,
-                                      width: 80,
-                                      height: 80,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (
-                                        context,
-                                        error,
-                                        stackTrace,
-                                      ) {
-                                        // Show default image if network image fails
-                                        return Icon(
-                                          Icons.person,
-                                          size: 60,
-                                          color: Colors.white.withOpacity(0.7),
-                                        );
-                                      },
-                                      loadingBuilder: (
-                                        context,
-                                        child,
-                                        loadingProgress,
-                                      ) {
-                                        if (loadingProgress == null) {
-                                          return child;
-                                        }
-                                        return Container(
-                                          width: 80,
-                                          height: 80,
-                                          color: Colors.grey[800],
-                                          child: Center(
-                                            child: CircularProgressIndicator(
-                                              value:
-                                                  loadingProgress
-                                                              .expectedTotalBytes !=
-                                                          null
-                                                      ? loadingProgress
-                                                              .cumulativeBytesLoaded /
-                                                          loadingProgress
-                                                              .expectedTotalBytes!
-                                                      : null,
-                                              strokeWidth: 2,
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                    Colors.white.withOpacity(
-                                                      0.7,
-                                                    ),
-                                                  ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    )
-                                    : Icon(
-                                      Icons.person,
-                                      size: 60,
-                                      color: Colors.white.withOpacity(0.7),
-                                    ),
+                          SizedBox(height: 10,),
+                          Text(
+                            userName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 10,),
-                        Text(
-                          userName,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                        ],
+                      );
+                    },
+                  ),
                 ),
                 const SizedBox(height: 16),
                 // Only show download limit for non-pro users

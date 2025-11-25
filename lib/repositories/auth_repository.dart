@@ -560,6 +560,21 @@ class AuthRepository {
     }
   }
 
+  /// Update profile image URL in stored user data
+  Future<void> updateProfileImageUrl(String? profileImageUrl) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userDataJson = prefs.getString(_userDataKey);
+      if (userDataJson != null) {
+        Map<String, dynamic> userData = jsonDecode(userDataJson);
+        userData['profileImageUrl'] = profileImageUrl ?? '';
+        await prefs.setString(_userDataKey, jsonEncode(userData));
+      }
+    } catch (e) {
+      print('Error updating profile image URL: $e');
+    }
+  }
+
   /// Delete user account via API
   Future<String> deleteAccount() async {
     try {

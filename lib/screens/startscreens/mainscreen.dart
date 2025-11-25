@@ -20,6 +20,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int currentIndex = 0;
   late List<Widget> bottomScreens;
+  final GlobalKey<ProfileScreenState> _profileKey = GlobalKey();
 
   @override
   void initState() {
@@ -30,6 +31,7 @@ class _MainScreenState extends State<MainScreen> {
       const LibrarypageData(),
       const PremiumScreen(),
       ProfileScreen(
+        key: _profileKey,
         onTabChange: (index) => setState(() => currentIndex = index),
       ),
     ];
@@ -158,7 +160,14 @@ class _MainScreenState extends State<MainScreen> {
                     type: BottomNavigationBarType.fixed,
                     backgroundColor: const Color(0xFF25272F),
                     currentIndex: currentIndex,
-                    onTap: (index) => setState(() => currentIndex = index),
+                    onTap: (index) {
+                      setState(() => currentIndex = index);
+                      // Refresh profile data when profile tab is selected
+                      if (index == 3 && _profileKey.currentState != null) {
+                        // Trigger a refresh for the profile screen
+                        _profileKey.currentState!.refreshProfileData();
+                      }
+                    },
                     selectedItemColor: const Color(0xFFEE5776),
                     unselectedItemColor: const Color(0xFF868EAE),
                     showSelectedLabels: false,
