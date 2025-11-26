@@ -305,7 +305,7 @@ class ParallaxCategoryItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 140,
+        height: 160,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
@@ -324,7 +324,7 @@ class ParallaxCategoryItem extends StatelessWidget {
               // Parallax background
               CategoryParallax(
                 child: CachedNetworkImage(
-                  height: 250,
+
                   imageUrl: category.coverPhoto.urls.regular,
                   fit: BoxFit.fill,
                   placeholder: (context, url) => Container(
@@ -395,64 +395,35 @@ class ParallaxCategoryItem extends StatelessWidget {
 
 // ================= CUSTOM PARALLAX WIDGET =================
 
-class CategoryParallax extends StatefulWidget {
-  const CategoryParallax({
+class CategoryParallax extends StatelessWidget {
+  CategoryParallax({
     super.key,
     required this.child,
   });
 
   final Widget child;
-
-  @override
-  State<CategoryParallax> createState() => _CategoryParallaxState();
-}
-
-class _CategoryParallaxState extends State<CategoryParallax> {
-  late ScrollableState _scrollable;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollable = Scrollable.of(context);
-      _scrollable.position.addListener(_onScroll);
-    });
-  }
-
-  @override
-  void dispose() {
-    _scrollable.position.removeListener(_onScroll);
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
+  final GlobalKey _backgroundImageKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
-    final scrollable = Scrollable.maybeOf(context);
-    if (scrollable == null) {
-      return widget.child;
-    }
+    final scrollable = Scrollable.of(context);
 
     return Flow(
       delegate: ParallaxFlowDelegate(
         scrollable: scrollable,
         listItemContext: context,
+        backgroundImageKey: _backgroundImageKey,
       ),
       children: [
-        SizedBox(
-          width: double.infinity,
-          height: 180, // Make image taller for parallax effect
-          child: widget.child,
+        KeyedSubtree(
+          key: _backgroundImageKey,
+          child: child,
         ),
       ],
     );
   }
 }
+
 
 // ================= PARALLAX FLOW DELEGATE =================
 
@@ -460,58 +431,54 @@ class ParallaxFlowDelegate extends FlowDelegate {
   ParallaxFlowDelegate({
     required this.scrollable,
     required this.listItemContext,
+    required this.backgroundImageKey,
   }) : super(repaint: scrollable.position);
 
   final ScrollableState scrollable;
   final BuildContext listItemContext;
+  final GlobalKey backgroundImageKey;
 
   @override
   BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) {
-    return BoxConstraints.tightFor(
-      width: constraints.maxWidth,
-    );
+    return BoxConstraints.tightFor(width: constraints.maxWidth);
   }
 
   @override
   void paintChildren(FlowPaintingContext context) {
-    // Calculate the position of this list item within the viewport
     final scrollableBox = scrollable.context.findRenderObject() as RenderBox;
     final listItemBox = listItemContext.findRenderObject() as RenderBox;
-    
-    if (listItemBox.attached) {
-      final listItemOffset = listItemBox.localToGlobal(
-        listItemBox.size.centerLeft(Offset.zero),
-        ancestor: scrollableBox,
-      );
 
-      // Determine the percent position of this list item within the scrollable area
-      final viewportDimension = scrollable.position.viewportDimension;
-      final scrollFraction =
-    ((listItemOffset.dy / viewportDimension)*1.8).clamp(-1.0, 2.0);
+    final listItemOffset = listItemBox.localToGlobal(
+      listItemBox.size.centerLeft(Offset.zero),
+      ancestor: scrollableBox,
+    );
 
+    final viewportDimension = scrollable.position.viewportDimension;
+    final scrollFraction =
+        (listItemOffset.dy / viewportDimension).clamp(0.0, 1.0);
 
-      // Calculate the vertical alignment of the background based on the scroll percent
-      final verticalAlignment = Alignment(0.0, scrollFraction * 2 - 1);
+    final verticalAlignment = Alignment(0.0, scrollFraction * 2 - 1);
 
-      // Convert the background alignment into a pixel offset for painting purposes
-      final backgroundSize = context.getChildSize(0)!;
-      final listItemSize = context.size;
-      final childRect = verticalAlignment.inscribe(backgroundSize, Offset.zero & listItemSize);
+    final backgroundSize =
+        (backgroundImageKey.currentContext!.findRenderObject() as RenderBox)
+            .size;
 
-      // Paint the background
-      context.paintChild(
-        0,
-        transform: Transform.translate(offset: Offset(0.0, childRect.top)).transform,
-      );
-    } else {
-      // Fallback if not attached
-      context.paintChild(0);
-    }
+    final listItemSize = context.size;
+
+    final childRect =
+        verticalAlignment.inscribe(backgroundSize, Offset.zero & listItemSize);
+
+    context.paintChild(
+      0,
+      transform:
+          Transform.translate(offset: Offset(0.0, childRect.top)).transform,
+    );
   }
 
   @override
   bool shouldRepaint(ParallaxFlowDelegate oldDelegate) {
     return scrollable != oldDelegate.scrollable ||
-        listItemContext != oldDelegate.listItemContext;
+        listItemContext != oldDelegate.listItemContext ||
+        backgroundImageKey != oldDelegate.backgroundImageKey;
   }
 }

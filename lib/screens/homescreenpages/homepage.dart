@@ -29,7 +29,7 @@ import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 import 'package:walldecor/repositories/category_repository.dart';
 import 'package:walldecor/repositories/collection_repository.dart';
 import 'package:walldecor/repositories/random_image_repository.dart';
-import 'package:walldecor/models/category_model.dart';
+// import 'package:walldecor/models/category_model.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
 import 'package:walldecor/models/random_image_model.dart' as RandomModel;
 import 'package:walldecor/repositories/services/google_auth_service.dart';
@@ -268,8 +268,8 @@ class _HomepageState extends State<Homepage> {
                     // const SizedBox(height: 16),
                     _buildDiscoverMoreSection(),
                     const SizedBox(height: 16),
-                    _buildCategoryFilterSection(),
-                    const SizedBox(height: 16),
+                    // _buildCategoryFilterSection(),
+                    // const SizedBox(height: 16),
                     _buildWallpapersGrid(),
                   ],
                 ),
@@ -306,107 +306,107 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  Widget _buildCategoryFilterSection() {
-    return SizedBox(
-      height: 36,
-      child: BlocBuilder<CategoryBloc, CategoryState>(
-        bloc: _categoryBloc,
-        builder: (context, state) {
-          print('CATEGORY BUILDER STATE -> $state');
-          if (state is CategoryLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: Color(0xFFEE5776)),
-            );
-          } else if (state is CategoryLoaded) {
-            List<CategoryModel> categories = state.data;
+  // Widget _buildCategoryFilterSection() {
+  //   return SizedBox(
+  //     height: 36,
+  //     child: BlocBuilder<CategoryBloc, CategoryState>(
+  //       bloc: _categoryBloc,
+  //       builder: (context, state) {
+  //         print('CATEGORY BUILDER STATE -> $state');
+  //         if (state is CategoryLoading) {
+  //           return const Center(
+  //             child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+  //           );
+  //         } else if (state is CategoryLoaded) {
+  //           List<CategoryModel> categories = state.data;
 
-            return ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                final bool isSelected = selectedCategoryId == category.id;
+  //           return ListView.builder(
+  //             scrollDirection: Axis.horizontal,
+  //             itemCount: categories.length,
+  //             itemBuilder: (context, index) {
+  //               final category = categories[index];
+  //               final bool isSelected = selectedCategoryId == category.id;
 
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedCategoryId = category.id;
-                      selectedCategoryTitle = category.title;
-                      categoryImages =
-                          []; // Clear current images to show loading
-                    });
+  //               return GestureDetector(
+  //                 onTap: () {
+  //                   setState(() {
+  //                     selectedCategoryId = category.id;
+  //                     selectedCategoryTitle = category.title;
+  //                     categoryImages =
+  //                         []; // Clear current images to show loading
+  //                   });
 
-                    print('🔥 Manually selected category: ${category.id}');
-                    _randomImageBloc.add(FetchRandomImagesEvent(category.id));
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 8.0),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 8.0,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color:
-                            isSelected
-                                ? Color(0xFFEE5776)
-                                : const Color(0xFF868EAE),
-                        width: 1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(18.0),
-                      color:
-                          isSelected ? Color(0xFFEE5776) : Colors.transparent,
-                    ),
-                    child: Center(
-                      child: Text(
-                        category.title,
-                        style: TextStyle(
-                          color:
-                              isSelected
-                                  ? Colors.white
-                                  : const Color(0xFF868EAE),
-                          fontSize: 14,
-                          fontWeight:
-                              isSelected ? FontWeight.w500 : FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
-          } else if (state is CategoryError) {
-            return SizedBox(
-              height: 36,
-              child: Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFEE5776),
-                      ),
-                      onPressed: () {
-                        _collectionBloc.add(FetchCollectionEvent());
-                        _categoryBloc.add(FetchCategoryEvent());
-                      },
-                      child: const Text(
-                        'Retry',
-                        style: TextStyle(color: Colors.white, fontSize: 12),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
+  //                   print('🔥 Manually selected category: ${category.id}');
+  //                   _randomImageBloc.add(FetchRandomImagesEvent(category.id));
+  //                 },
+  //                 child: Container(
+  //                   margin: const EdgeInsets.only(right: 8.0),
+  //                   padding: const EdgeInsets.symmetric(
+  //                     horizontal: 16.0,
+  //                     vertical: 8.0,
+  //                   ),
+  //                   decoration: BoxDecoration(
+  //                     border: Border.all(
+  //                       color:
+  //                           isSelected
+  //                               ? Color(0xFFEE5776)
+  //                               : const Color(0xFF868EAE),
+  //                       width: 1.0,
+  //                     ),
+  //                     borderRadius: BorderRadius.circular(18.0),
+  //                     color:
+  //                         isSelected ? Color(0xFFEE5776) : Colors.transparent,
+  //                   ),
+  //                   child: Center(
+  //                     child: Text(
+  //                       category.title,
+  //                       style: TextStyle(
+  //                         color:
+  //                             isSelected
+  //                                 ? Colors.white
+  //                                 : const Color(0xFF868EAE),
+  //                         fontSize: 14,
+  //                         fontWeight:
+  //                             isSelected ? FontWeight.w500 : FontWeight.w400,
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ),
+  //               );
+  //             },
+  //           );
+  //         } else if (state is CategoryError) {
+  //           return SizedBox(
+  //             height: 36,
+  //             child: Center(
+  //               child: Row(
+  //                 mainAxisAlignment: MainAxisAlignment.center,
+  //                 children: [
+  //                   const SizedBox(width: 8),
+  //                   ElevatedButton(
+  //                     style: ElevatedButton.styleFrom(
+  //                       backgroundColor: Color(0xFFEE5776),
+  //                     ),
+  //                     onPressed: () {
+  //                       _collectionBloc.add(FetchCollectionEvent());
+  //                       _categoryBloc.add(FetchCategoryEvent());
+  //                     },
+  //                     child: const Text(
+  //                       'Retry',
+  //                       style: TextStyle(color: Colors.white, fontSize: 12),
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           );
+  //         }
 
-          return const SizedBox.shrink();
-        },
-      ),
-    );
-  }
+  //         return const SizedBox.shrink();
+  //       },
+  //     ),
+  //   );
+  // }
 
   Widget _buildWallpapersGrid() {
     if (categoryImages.isEmpty &&
