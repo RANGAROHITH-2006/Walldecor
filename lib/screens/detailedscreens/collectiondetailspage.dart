@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
@@ -80,7 +81,7 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= 
+    if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       _loadMoreData();
     }
@@ -109,11 +110,12 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => Resultpage(
-              id: item.id,
-              urls: convertUrls(item.urls),
-              user: convertUser(item.user),
-            ),
+            builder:
+                (context) => Resultpage(
+                  id: item.id,
+                  urls: convertUrls(item.urls),
+                  user: convertUser(item.user),
+                ),
           ),
         );
         debugPrint('collection image $index tapped');
@@ -137,13 +139,14 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
                 child: Image.network(
                   item.urls.small,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: Colors.grey[800],
-                    child: const Icon(
-                      Icons.image_not_supported,
-                      color: Colors.white,
-                    ),
-                  ),
+                  errorBuilder:
+                      (_, __, ___) => Container(
+                        color: Colors.grey[800],
+                        child: const Icon(
+                          Icons.image_not_supported,
+                          color: Colors.white,
+                        ),
+                      ),
                 ),
               ),
               Positioned(
@@ -168,9 +171,7 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
                       return;
                     }
 
-                    if (!DownloadRestrictions.canDownload(
-                      user: currentUser,
-                    )) {
+                    if (!DownloadRestrictions.canDownload(user: currentUser)) {
                       await showDownloadLimitDialog(
                         context: context,
                         currentCount: currentUser?.downloadedImage.length ?? 0,
@@ -186,7 +187,7 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
                     if (confirmed == true) {
                       debugPrint('Downloading wallpaper $index');
                       await downloadImageToGallery(item.urls.regular);
-                      
+
                       final imageId = item.id;
                       final urlsJson = {
                         "full": item.urls.full,
@@ -293,7 +294,10 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
               builder: (context, state) {
                 if (state is CollectionLoading) {
                   return const Center(
-                    child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+                    child: CupertinoActivityIndicator(
+                      color: Colors.white,
+                      radius: 15,
+                    ),
                   );
                 } else if (state is CollectionDetailsLoaded) {
                   final List<CollectiondetailesModel> details = state.data;
@@ -346,9 +350,9 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                CircularProgressIndicator(
-                                  color: Color(0xFFEE5776),
-                                  strokeWidth: 2,
+                                CupertinoActivityIndicator(
+                                  color: Colors.white,
+                                  radius: 15,
                                 ),
                               ],
                             ),

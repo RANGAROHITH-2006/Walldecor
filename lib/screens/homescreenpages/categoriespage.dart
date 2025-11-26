@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,12 +26,15 @@ class Categorypage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) =>
-              CategoryBloc(CategoryRepository())..add(FetchCategoryEvent()),
+          create:
+              (_) =>
+                  CategoryBloc(CategoryRepository())..add(FetchCategoryEvent()),
         ),
         BlocProvider(
-          create: (_) =>
-              TrendingBloc(TrendingRepository())..add(FetchCategoryTrendingEvent()),
+          create:
+              (_) =>
+                  TrendingBloc(TrendingRepository())
+                    ..add(FetchCategoryTrendingEvent()),
         ),
       ],
       child: const _CategoryView(),
@@ -60,7 +64,7 @@ class _CategoryViewState extends State<_CategoryView> {
               },
             );
           }
-          
+
           return SafeArea(
             bottom: false,
             child: SingleChildScrollView(
@@ -84,7 +88,12 @@ class _CategoryViewState extends State<_CategoryView> {
                       if (state is TrendingLoading) {
                         return const SizedBox(
                           height: 60,
-                          child: Center(child: CircularProgressIndicator(color: Color(0xFFEE5776))),
+                          child: Center(
+                            child: CupertinoActivityIndicator(
+                              color: Colors.white,
+                              radius: 15,
+                            ),
+                          ),
                         );
                       }
 
@@ -95,11 +104,6 @@ class _CategoryViewState extends State<_CategoryView> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(
-                                  Icons.wifi_off,
-                                  color: Color(0xFF868EAE),
-                                  size: 20,
-                                ),
                                 const SizedBox(height: 4),
                                 Text(
                                   'Unable to load trending',
@@ -120,8 +124,8 @@ class _CategoryViewState extends State<_CategoryView> {
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             itemCount: state.data.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(width: 12),
+                            separatorBuilder:
+                                (_, __) => const SizedBox(width: 12),
                             itemBuilder: (context, index) {
                               final item = state.data[index];
                               return buildTrendingPill(item);
@@ -151,31 +155,36 @@ class _CategoryViewState extends State<_CategoryView> {
                     builder: (context, state) {
                       if (state is CategoryLoading) {
                         return const Center(
-                          child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+                          child: CupertinoActivityIndicator(
+                            color: Colors.white,
+                            radius: 15,
+                          ),
                         );
                       }
 
                       if (state is CategoryLoaded) {
                         return Column(
-                          children: state.data.map((category) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12.0),
-                              child: ParallaxCategoryItem(
-                                category: category,
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => CategoryDetailsPage(
-                                        title: category.title,
-                                        id: category.id,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            );
-                          }).toList(),
+                          children:
+                              state.data.map((category) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 12.0),
+                                  child: ParallaxCategoryItem(
+                                    category: category,
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) => CategoryDetailsPage(
+                                                title: category.title,
+                                                id: category.id,
+                                              ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                );
+                              }).toList(),
                         );
                       }
 
@@ -183,11 +192,6 @@ class _CategoryViewState extends State<_CategoryView> {
                         return Center(
                           child: Column(
                             children: [
-                              const Icon(
-                                Icons.wifi_off,
-                                color: Color(0xFF868EAE),
-                                size: 32,
-                              ),
                               const SizedBox(height: 8),
                               const Text(
                                 'Unable to load categories',
@@ -199,7 +203,9 @@ class _CategoryViewState extends State<_CategoryView> {
                               const SizedBox(height: 8),
                               TextButton(
                                 onPressed: () {
-                                  context.read<CategoryBloc>().add(FetchCategoryEvent());
+                                  context.read<CategoryBloc>().add(
+                                    FetchCategoryEvent(),
+                                  );
                                 },
                                 child: const Text(
                                   'Retry',
@@ -233,10 +239,9 @@ class _CategoryViewState extends State<_CategoryView> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CategoryDetailsPage(
-              title: item.title,
-              id: item.id,
-            ),
+            builder:
+                (context) =>
+                    CategoryDetailsPage(title: item.title, id: item.id),
           ),
         );
       },
@@ -257,15 +262,16 @@ class _CategoryViewState extends State<_CategoryView> {
                 width: 40,
                 height: 40,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  width: 40,
-                  height: 40,
-                  color: const Color(0xFF3A3D47),
-                  child: const Icon(
-                    Icons.image_not_supported,
-                    color: Color(0xFF868EAE),
-                  ),
-                ),
+                errorBuilder:
+                    (context, error, stackTrace) => Container(
+                      width: 40,
+                      height: 40,
+                      color: const Color(0xFF3A3D47),
+                      child: const Icon(
+                        Icons.image_not_supported,
+                        color: Color(0xFF868EAE),
+                      ),
+                    ),
               ),
             ),
             const SizedBox(width: 10),
@@ -324,24 +330,25 @@ class ParallaxCategoryItem extends StatelessWidget {
               // Parallax background
               CategoryParallax(
                 child: CachedNetworkImage(
-
                   imageUrl: category.coverPhoto.urls.regular,
                   fit: BoxFit.fill,
-                  placeholder: (context, url) => Container(
-                    color: const Color(0xFF3A3D47),
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFFEE5776),
+                  placeholder:
+                      (context, url) => Container(
+                        color: const Color(0xFF3A3D47),
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFFEE5776),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    color: const Color(0xFF3A3D47),
-                    child: const Icon(
-                      Icons.image_not_supported,
-                      color: Color(0xFF868EAE),
-                    ),
-                  ),
+                  errorWidget:
+                      (context, url, error) => Container(
+                        color: const Color(0xFF3A3D47),
+                        child: const Icon(
+                          Icons.image_not_supported,
+                          color: Color(0xFF868EAE),
+                        ),
+                      ),
                 ),
               ),
               // Gradient overlay
@@ -396,10 +403,7 @@ class ParallaxCategoryItem extends StatelessWidget {
 // ================= CUSTOM PARALLAX WIDGET =================
 
 class CategoryParallax extends StatelessWidget {
-  CategoryParallax({
-    super.key,
-    required this.child,
-  });
+  CategoryParallax({super.key, required this.child});
 
   final Widget child;
   final GlobalKey _backgroundImageKey = GlobalKey();
@@ -414,16 +418,10 @@ class CategoryParallax extends StatelessWidget {
         listItemContext: context,
         backgroundImageKey: _backgroundImageKey,
       ),
-      children: [
-        KeyedSubtree(
-          key: _backgroundImageKey,
-          child: child,
-        ),
-      ],
+      children: [KeyedSubtree(key: _backgroundImageKey, child: child)],
     );
   }
 }
-
 
 // ================= PARALLAX FLOW DELEGATE =================
 
@@ -454,8 +452,10 @@ class ParallaxFlowDelegate extends FlowDelegate {
     );
 
     final viewportDimension = scrollable.position.viewportDimension;
-    final scrollFraction =
-        (listItemOffset.dy / viewportDimension).clamp(0.0, 1.0);
+    final scrollFraction = (listItemOffset.dy / viewportDimension).clamp(
+      0.0,
+      1.0,
+    );
 
     final verticalAlignment = Alignment(0.0, scrollFraction * 2 - 1);
 
@@ -465,8 +465,10 @@ class ParallaxFlowDelegate extends FlowDelegate {
 
     final listItemSize = context.size;
 
-    final childRect =
-        verticalAlignment.inscribe(backgroundSize, Offset.zero & listItemSize);
+    final childRect = verticalAlignment.inscribe(
+      backgroundSize,
+      Offset.zero & listItemSize,
+    );
 
     context.paintChild(
       0,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -230,7 +231,12 @@ class _SearchpageState extends State<Searchpage> {
         if (state is SearchLoading) {
           return const SizedBox(
             height: 200,
-            child: Center(child: CircularProgressIndicator()),
+            child: Center(
+              child: CupertinoActivityIndicator(
+                color: Colors.white,
+                radius: 15,
+              ),
+            ),
           );
         }
 
@@ -444,7 +450,10 @@ class _SearchpageState extends State<Searchpage> {
                   color: Colors.grey[800],
                 ),
                 child: const Center(
-                  child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+                  child: CupertinoActivityIndicator(
+                    color: Colors.white,
+                    radius: 15,
+                  ),
                 ),
               );
             }
@@ -568,7 +577,10 @@ class _SearchpageState extends State<Searchpage> {
                 color: Colors.grey[800],
               ),
               child: const Center(
-                child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+                child: CupertinoActivityIndicator(
+                  color: Colors.white,
+                  radius: 15,
+                ),
               ),
             );
           },
@@ -594,7 +606,12 @@ class _SearchpageState extends State<Searchpage> {
             if (state is TrendingLoading) {
               return const SizedBox(
                 height: 200,
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(
+                  child: CupertinoActivityIndicator(
+                    color: Colors.white,
+                    radius: 15,
+                  ),
+                ),
               );
             }
 
@@ -642,7 +659,9 @@ class _SearchpageState extends State<Searchpage> {
                   final item = state.data[index];
                   return GestureDetector(
                     onTap: () {
-                      _searchController = TextEditingController(text: item.text);
+                      _searchController = TextEditingController(
+                        text: item.text,
+                      );
                       _onSearchChanged(item.text);
                     },
                     child: ClipRRect(

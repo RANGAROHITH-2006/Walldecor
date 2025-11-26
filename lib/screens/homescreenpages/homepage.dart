@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -76,13 +77,16 @@ class _HomepageState extends State<Homepage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 300) {
       _loadMoreImages();
     }
   }
 
   void _loadMoreImages() {
-    if (!_isLoadingMore && selectedCategoryId != null && selectedCategoryId!.isNotEmpty) {
+    if (!_isLoadingMore &&
+        selectedCategoryId != null &&
+        selectedCategoryId!.isNotEmpty) {
       final currentState = _randomImageBloc.state;
       if (currentState is RandomImageLoaded && !currentState.isLoadingMore) {
         setState(() {
@@ -444,7 +448,7 @@ class _HomepageState extends State<Homepage> {
       return Container(
         height: 200,
         alignment: Alignment.center,
-        child: const CircularProgressIndicator(color: Color(0xFFEE5776)),
+        child: CupertinoActivityIndicator(color: Colors.white, radius: 15),
       );
     }
 
@@ -678,7 +682,12 @@ class _HomepageState extends State<Homepage> {
       child: Center(
         child: Column(
           children: [
-            const CircularProgressIndicator(color: Color(0xFFEE5776)),
+            Center(
+              child: CupertinoActivityIndicator(
+                color: Colors.white,
+                radius: 15,
+              ),
+            ),
             const SizedBox(height: 12),
           ],
         ),

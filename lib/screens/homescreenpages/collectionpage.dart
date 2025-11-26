@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -41,12 +42,17 @@ class _CollectionPageState extends State<CollectionPage> {
               },
             );
           }
-          
+
           return BlocBuilder<CollectionBloc, CollectionState>(
             bloc: _collectionBloc,
             builder: (context, state) {
               if (state is CollectionLoading) {
-                return const Center(child: CircularProgressIndicator(color: Color(0xFFEE5776)));
+                return const Center(
+                  child: CupertinoActivityIndicator(
+                    color: Colors.white,
+                    radius: 15,
+                  ),
+                );
               } else if (state is CollectionLoaded) {
                 final collections = state.data;
                 return Padding(
@@ -57,10 +63,7 @@ class _CollectionPageState extends State<CollectionPage> {
                       mainAxisSpacing: 8,
                       crossAxisSpacing: 8,
                       children: List.generate(collections.length, (index) {
-                        return _buildStaggeredItem(
-                          collections,
-                          index,
-                        );
+                        return _buildStaggeredItem(collections, index);
                       }),
                     ),
                   ),
@@ -70,11 +73,6 @@ class _CollectionPageState extends State<CollectionPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.wifi_off,
-                        color: Color(0xFF868EAE),
-                        size: 48,
-                      ),
                       const SizedBox(height: 16),
                       const Text(
                         'Unable to load collections',
@@ -130,22 +128,33 @@ class _CollectionPageState extends State<CollectionPage> {
     return StaggeredGridTile.count(
       crossAxisCellCount: crossAxisCellCount,
       mainAxisCellCount: mainAxisCellCount,
-      child: _buildImageCard(collections ,index, isLarge: positionInGroup == 0),
+      child: _buildImageCard(collections, index, isLarge: positionInGroup == 0),
     );
   }
 
-  Widget _buildImageCard(collections,index, {bool isLarge = false}) {
+  Widget _buildImageCard(collections, index, {bool isLarge = false}) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(
-          builder: (context) => CollectionDetailsPage(title: collections[index].title,id: collections[index].id),
-        ));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => CollectionDetailsPage(
+                  title: collections[index].title,
+                  id: collections[index].id,
+                ),
+          ),
+        );
       },
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
-            BoxShadow(color: Colors.black, blurRadius: 6, offset: const Offset(0, 3)),
+            BoxShadow(
+              color: Colors.black,
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
           ],
         ),
         child: ClipRRect(
@@ -156,11 +165,15 @@ class _CollectionPageState extends State<CollectionPage> {
               Image.network(
                 collections[index].coverPhoto.urls.regular,
                 fit: BoxFit.fill,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  color: const Color(0xFF3A3D47),
-                  child: Icon(Icons.image_not_supported,
-                      color: const Color(0xFF868EAE), size: isLarge ? 50 : 30),
-                ),
+                errorBuilder:
+                    (context, error, stackTrace) => Container(
+                      color: const Color(0xFF3A3D47),
+                      child: Icon(
+                        Icons.image_not_supported,
+                        color: const Color(0xFF868EAE),
+                        size: isLarge ? 50 : 30,
+                      ),
+                    ),
               ),
               Positioned(
                 left: 8,
@@ -177,7 +190,11 @@ class _CollectionPageState extends State<CollectionPage> {
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           shadows: [
-                            Shadow(color: Colors.black54, offset: Offset(0, 1), blurRadius: 2),
+                            Shadow(
+                              color: Colors.black54,
+                              offset: Offset(0, 1),
+                              blurRadius: 2,
+                            ),
                           ],
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -185,8 +202,11 @@ class _CollectionPageState extends State<CollectionPage> {
                     ),
                     Container(
                       padding: EdgeInsets.all(isLarge ? 6 : 4),
-                      child: Image.asset('assets/navbaricons/playicon.png',
-                          width: 42, height: 19),
+                      child: Image.asset(
+                        'assets/navbaricons/playicon.png',
+                        width: 42,
+                        height: 19,
+                      ),
                     ),
                   ],
                 ),

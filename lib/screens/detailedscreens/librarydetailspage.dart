@@ -1,4 +1,5 @@
 // ignore_for_file: avoid_print
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -185,7 +186,10 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
 
               if (state is LibraryLoading) {
                 return const Center(
-                  child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+                  child: CupertinoActivityIndicator(
+                    color: Colors.white,
+                    radius: 15,
+                  ),
                 );
               } else if (state is LibraryDetailsLoaded) {
                 final List<LibraryDetailsModel> details = state.data;
@@ -236,8 +240,11 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
                             context,
                             MaterialPageRoute(
                               builder:
-                                  (context) =>
-                                      Resultpage(id: item.id, urls: urls, user: user),
+                                  (context) => Resultpage(
+                                    id: item.id,
+                                    urls: urls,
+                                    user: user,
+                                  ),
                             ),
                           );
                           debugPrint('Library image $index tapped');
@@ -312,7 +319,7 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Error: ${state.message}',
+                        'Unable to load Library',
                         style: const TextStyle(color: Colors.redAccent),
                         textAlign: TextAlign.center,
                       ),
@@ -339,7 +346,10 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
                   );
                 });
                 return const Center(
-                  child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+                  child:CupertinoActivityIndicator(
+                color: Colors.white,
+                radius: 15,
+              ),
                 );
               } else {
                 print(
@@ -354,7 +364,10 @@ class _LibraryDetailsPageState extends State<LibraryDetailsPage> {
                         style: const TextStyle(color: Colors.white),
                       ),
                       const SizedBox(height: 16),
-                      const CircularProgressIndicator(color: Color(0xFFEE5776)),
+                      CupertinoActivityIndicator(
+                        color: Colors.white,
+                        radius: 15,
+                      ),
                     ],
                   ),
                 );

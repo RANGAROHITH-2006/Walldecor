@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
@@ -54,7 +55,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= 
+    if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       _loadMoreData();
     }
@@ -83,11 +84,9 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => Resultpage(
-              id: item.id,
-              urls: item.urls,
-              user: item.user,
-            ),
+            builder:
+                (context) =>
+                    Resultpage(id: item.id, urls: item.urls, user: item.user),
           ),
         );
         debugPrint('category image $index tapped');
@@ -111,13 +110,14 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 child: Image.network(
                   item.urls.small,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: Colors.grey[800],
-                    child: const Icon(
-                      Icons.image_not_supported,
-                      color: Colors.white,
-                    ),
-                  ),
+                  errorBuilder:
+                      (_, __, ___) => Container(
+                        color: Colors.grey[800],
+                        child: const Icon(
+                          Icons.image_not_supported,
+                          color: Colors.white,
+                        ),
+                      ),
                 ),
               ),
               Positioned(
@@ -142,9 +142,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       return;
                     }
 
-                    if (!DownloadRestrictions.canDownload(
-                      user: currentUser,
-                    )) {
+                    if (!DownloadRestrictions.canDownload(user: currentUser)) {
                       await showDownloadLimitDialog(
                         context: context,
                         currentCount: currentUser?.downloadedImage.length ?? 0,
@@ -156,11 +154,11 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                     final confirmed = await showDownloadConfirmationDialog(
                       context: context,
                     );
-                    
+
                     if (confirmed == true) {
                       debugPrint('Downloading wallpaper $index');
                       await downloadImageToGallery(item.urls.regular);
-                      
+
                       final imageId = item.id;
                       context.read<DownloadBloc>().add(
                         AddToDownloadEvent(
@@ -248,9 +246,13 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
             },
             child: BlocBuilder<CategoryBloc, CategoryState>(
               builder: (context, state) {
-                if (state is CategoryLoading || state is CategoryDetailsLoading) {
+                if (state is CategoryLoading ||
+                    state is CategoryDetailsLoading) {
                   return const Center(
-                    child: CircularProgressIndicator(color: Color(0xFFEE5776)),
+                    child: CupertinoActivityIndicator(
+                      color: Colors.white,
+                      radius: 15,
+                    ),
                   );
                 } else if (state is CategoryDetailsLoaded) {
                   final List<CategorydetailesModel> details = state.data;
@@ -303,9 +305,9 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                CircularProgressIndicator(
-                                  color: Color(0xFFEE5776),
-                                  strokeWidth: 2,
+                                CupertinoActivityIndicator(
+                                  color: Colors.white,
+                                  radius: 15,
                                 ),
                               ],
                             ),

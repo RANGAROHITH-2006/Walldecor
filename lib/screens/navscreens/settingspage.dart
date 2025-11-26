@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -42,6 +43,7 @@ class _SettingspageState extends State<Settingspage> {
       });
     }
   }
+
   /// Show logout confirmation dialog
   void _showLogoutDialog() {
     showDialog(
@@ -132,7 +134,9 @@ class _SettingspageState extends State<Settingspage> {
 
   ///privacy policy function
   void openPrivacyPolicy() async {
-    final url = Uri.parse("https://privacy.freephotos.wibes.co.in/privacy_policy");
+    final url = Uri.parse(
+      "https://privacy.freephotos.wibes.co.in/privacy_policy",
+    );
 
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -229,7 +233,7 @@ class _SettingspageState extends State<Settingspage> {
         barrierDismissible: false,
         builder: (BuildContext context) {
           return const Center(
-            child: CircularProgressIndicator(color: Colors.white),
+            child: CupertinoActivityIndicator(color: Colors.white, radius: 15),
           );
         },
       );
@@ -281,7 +285,7 @@ class _SettingspageState extends State<Settingspage> {
         barrierDismissible: false,
         builder: (BuildContext context) {
           return const Center(
-            child: CircularProgressIndicator(color: Colors.white),
+            child: CupertinoActivityIndicator(color: Colors.white, radius: 15),
           );
         },
       );
@@ -462,18 +466,18 @@ class _SettingspageState extends State<Settingspage> {
                           _showLogoutDialog();
                         },
                       ),
-                      if (_isAuthenticatedUser)
-                    ListTile(
-                      leading: SvgPicture.asset('assets/svg/delete.svg'),
-                      title: const Text(
-                        'Delete Account',
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
+                    if (_isAuthenticatedUser)
+                      ListTile(
+                        leading: SvgPicture.asset('assets/svg/delete.svg'),
+                        title: const Text(
+                          'Delete Account',
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
 
-                      onTap: () {
-                        _showDeleteAccountDialog();
-                      },
-                    ),
+                        onTap: () {
+                          _showDeleteAccountDialog();
+                        },
+                      ),
                   ],
                 ),
               ),
