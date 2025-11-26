@@ -127,7 +127,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   void openPrivacyPolicy() async {
-    final url = Uri.parse("https://privacy.freephotos.wibes.co.in/privacy_policy");
+    final url = Uri.parse(
+      "https://privacy.freephotos.wibes.co.in/privacy_policy",
+    );
 
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -186,7 +188,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     children: [
                       IconButton(
                         onPressed: () {
-                          Navigator.pop(
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => MainScreen(),

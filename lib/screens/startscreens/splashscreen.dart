@@ -31,8 +31,18 @@ class _SplashScreenState extends State<SplashScreen> {
             onSuccess: (user) {
               print('✅ Existing session found for user: ${user.email.isNotEmpty ? user.email : user.id}');
               print('User type: ${user.userType}');
+              print('Is Pro User: ${user.isProUser}');
+              print('Has Active Subscription: ${user.hasActiveSubscription}');
+              
               if (mounted) {
-                context.go('/mainscreen');
+                // Check if user has active subscription
+                if (user.hasActiveSubscription) {
+                  print('🌟 User has active subscription - navigating to main screen');
+                  context.go('/mainscreen');
+                } else {
+                  print('💰 User does not have active subscription - navigating to subscription page');
+                  context.go('/subscriptionpage');
+                }
               }
             },
             onError: (error) {
@@ -72,15 +82,25 @@ class _SplashScreenState extends State<SplashScreen> {
             onSuccess: (user) {
               print('✅ Guest login successful: ${user.id}');
               print('Guest name: ${user.firstName} ${user.lastName}');
+              print('Guest Is Pro User: ${user.isProUser}');
+              print('Guest Has Active Subscription: ${user.hasActiveSubscription}');
+              
               if (mounted) {
-                context.go('/mainscreen');
+                // Check if guest user has active subscription
+                if (user.hasActiveSubscription) {
+                  print('🌟 Guest user has active subscription - navigating to main screen');
+                  context.go('/mainscreen');
+                } else {
+                  print('💰 Guest user does not have active subscription - navigating to subscription page');
+                  context.go('/subscriptionpage');
+                }
               }
             },
             onError: (error) {
               print('❌ Guest login failed: $error');
-              print('⚠️ Continuing to main screen anyway...');
+              print('⚠️ Continuing to subscription screen anyway...');
               if (mounted) {
-                context.go('/mainscreen'); // Go anyway
+                context.go('/subscriptionpage'); // Go to subscription page on error
               }
             },
           ),
@@ -89,7 +109,7 @@ class _SplashScreenState extends State<SplashScreen> {
     } catch (e) {
       print('Error initializing guest login: $e');
       if (mounted) {
-        context.go('/mainscreen');
+        context.go('/subscriptionpage');
       }
     }
   }

@@ -2,6 +2,7 @@ import 'package:walldecor/screens/bottomscreens/homescreen.dart';
 import 'package:walldecor/screens/library/download_screen.dart';
 import 'package:walldecor/screens/library/favorite_screen.dart';
 import 'package:walldecor/screens/library/librarydownload.dart';
+import 'package:walldecor/screens/navscreens/subscriptionpage.dart';
 import 'package:walldecor/screens/startscreens/loginscreen.dart';
 import 'package:walldecor/screens/startscreens/mainscreen.dart';
 import 'package:walldecor/screens/startscreens/splashscreen.dart';
@@ -37,6 +38,10 @@ final route = GoRouter(
     GoRoute(
       path: '/downloadscreen',
       builder: (context, state) => const Librarydownload(),
+    ),
+    GoRoute(
+      path: '/subscriptionpage',
+      builder: (context, state) => const SubscriptionPage(),
     ),
 
   ],
