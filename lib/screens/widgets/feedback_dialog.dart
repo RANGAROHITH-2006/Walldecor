@@ -406,6 +406,19 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                                 currentState.isSubmitting
                                     ? null
                                     : () {
+                                      // Validate feedback before submission
+                                      if (!currentState.hasValidFeedback) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Please select at least one option or write a comment.',
+                                            ),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                        return;
+                                      }
+                                      
                                       context.read<FeedbackBloc>().add(
                                         const SubmitFeedbackEvent(),
                                       );

@@ -49,6 +49,13 @@ class FeedbackState extends Equatable {
 
   bool get showFeedbackForm => rating > 0 && rating < 4;
 
+  /// Check if at least one checkbox is selected or comment is provided
+  bool get hasValidFeedback {
+    final hasCheckbox = option1 || option2 || option3 || option4;
+    final hasComment = comment.trim().isNotEmpty;
+    return hasCheckbox || hasComment;
+  }
+
   @override
   List<Object?> get props => [
     rating,
