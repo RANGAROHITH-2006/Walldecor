@@ -29,7 +29,7 @@ class Searchpage extends StatefulWidget {
 
 class _SearchpageState extends State<Searchpage> {
   int _currentIndex = 0;
-  final TextEditingController _searchController = TextEditingController();
+  TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearching = false;
   Timer? _debounceTimer;
@@ -312,7 +312,7 @@ class _SearchpageState extends State<Searchpage> {
                           regular: _getImageUrl(item),
                           small: _getImageUrl(item),
                         );
-                        
+
                         final user = User(
                           id: item['id'] ?? '',
                           username: item['user']?['username'] ?? 'Unknown',
@@ -322,15 +322,16 @@ class _SearchpageState extends State<Searchpage> {
                           profileLink: item['user']?['profile_link'] ?? '',
                           profileImage: item['user']?['profile_image'] ?? '',
                         );
-                        
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Resultpage(
-                              id: item['id'] ?? '',
-                              urls: urls,
-                              user: user,
-                            ),
+                            builder:
+                                (context) => Resultpage(
+                                  id: item['id'] ?? '',
+                                  urls: urls,
+                                  user: user,
+                                ),
                           ),
                         );
                       } catch (e) {
@@ -453,29 +454,31 @@ class _SearchpageState extends State<Searchpage> {
               return Column(
                 children: [
                   CarouselSlider(
-                    items: wallpapers.map((wallpaper) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Image.network(
-                          wallpaper.urls.regular,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          errorBuilder: (_, __, ___) => Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: Colors.grey[800],
+                    items:
+                        wallpapers.map((wallpaper) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: Image.network(
+                              wallpaper.urls.regular,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              errorBuilder:
+                                  (_, __, ___) => Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      color: Colors.grey[800],
+                                    ),
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.image_not_supported,
+                                        color: Colors.white,
+                                        size: 40,
+                                      ),
+                                    ),
+                                  ),
                             ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.image_not_supported,
-                                color: Colors.white,
-                                size: 40,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                          );
+                        }).toList(),
                     options: CarouselOptions(
                       height: 170,
                       enlargeCenterPage: true,
@@ -492,22 +495,24 @@ class _SearchpageState extends State<Searchpage> {
                   // ---------------- Carousel Dots ----------------
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: wallpapers.asMap().entries.map((entry) {
-                      return Container(
-                        width: 8.0,
-                        height: 8.0,
-                        margin: const EdgeInsets.symmetric(
-                          vertical: 10.0,
-                          horizontal: 4.0,
-                        ),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _currentIndex == entry.key
-                              ? Colors.white
-                              : Colors.grey[600],
-                        ),
-                      );
-                    }).toList(),
+                    children:
+                        wallpapers.asMap().entries.map((entry) {
+                          return Container(
+                            width: 8.0,
+                            height: 8.0,
+                            margin: const EdgeInsets.symmetric(
+                              vertical: 10.0,
+                              horizontal: 4.0,
+                            ),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color:
+                                  _currentIndex == entry.key
+                                      ? Colors.white
+                                      : Colors.grey[600],
+                            ),
+                          );
+                        }).toList(),
                   ),
                 ],
               );
@@ -525,24 +530,27 @@ class _SearchpageState extends State<Searchpage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.wifi_off,
-                        color: Color(0xFF868EAE),
-                        size: 32,
-                      ),
                       const SizedBox(height: 8),
                       const Text(
                         'Unable to load carousel',
-                        style: TextStyle(color: Color(0xFF868EAE), fontSize: 12),
+                        style: TextStyle(
+                          color: Color(0xFF868EAE),
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       TextButton(
                         onPressed: () {
-                          _categoryBloc.add(FetchCarouselWallpapersEvent('wallpaper'));
+                          _categoryBloc.add(
+                            FetchCarouselWallpapersEvent('wallpaper'),
+                          );
                         },
                         child: const Text(
                           'Retry',
-                          style: TextStyle(color: Color(0xFFEE5776), fontSize: 12),
+                          style: TextStyle(
+                            color: Color(0xFFEE5776),
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                     ],
@@ -595,12 +603,6 @@ class _SearchpageState extends State<Searchpage> {
                 child: Column(
                   children: [
                     const SizedBox(height: 50),
-                    const Icon(
-                      Icons.wifi_off,
-                      color: Color(0xFF868EAE),
-                      size: 32,
-                    ),
-                    const SizedBox(height: 16),
                     const Text(
                       'Unable to load trending',
                       style: TextStyle(color: Color(0xFF868EAE), fontSize: 14),
@@ -638,31 +640,37 @@ class _SearchpageState extends State<Searchpage> {
                 ),
                 itemBuilder: (context, index) {
                   final item = state.data[index];
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Image.network(
-                          item.thumbnail,
-                          fit: BoxFit.cover,
-                          errorBuilder:
-                              (_, __, ___) => const Icon(
-                                Icons.image_not_supported,
+                  return GestureDetector(
+                    onTap: () {
+                      _searchController = TextEditingController(text: item.text);
+                      _onSearchChanged(item.text);
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.network(
+                            item.thumbnail,
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (_, __, ___) => const Icon(
+                                  Icons.image_not_supported,
+                                  color: Colors.white,
+                                ),
+                          ),
+                          Center(
+                            child: Text(
+                              item.text,
+                              style: const TextStyle(
                                 color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
-                        ),
-                        Center(
-                          child: Text(
-                            item.text,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },
