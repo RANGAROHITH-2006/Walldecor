@@ -39,9 +39,7 @@ class _PremiumView extends StatelessWidget {
         builder: (context, state) {
           if (state is ApplistLoading) {
             return const Center(
-              child: CircularProgressIndicator(
-                color: Colors.pinkAccent,
-              ),
+              child: CircularProgressIndicator(color: Colors.pinkAccent),
             );
           }
 
@@ -52,11 +50,7 @@ class _PremiumView extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.wifi_off,
-                      color: Colors.white54,
-                      size: 48,
-                    ),
+                    const Icon(Icons.wifi_off, color: Colors.white54, size: 48),
                     const SizedBox(height: 16),
                     const Text(
                       'Failed to load apps',
@@ -96,15 +90,12 @@ class _PremiumView extends StatelessWidget {
 
           if (state is ApplistLoaded) {
             final allApps = [...state.data.zooq, ...state.data.toolsBrain];
-            
+
             if (allApps.isEmpty) {
               return const Center(
                 child: Text(
                   'No apps available',
-                  style: TextStyle(
-                    color: Colors.white54,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(color: Colors.white54, fontSize: 16),
                 ),
               );
             }
@@ -114,9 +105,13 @@ class _PremiumView extends StatelessWidget {
                 context.read<ApplistBloc>().add(FetchApplistEvent());
               },
               child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 itemCount: allApps.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 10),
+                separatorBuilder:
+                    (context, index) => const SizedBox(height: 10),
                 itemBuilder: (context, index) {
                   final app = allApps[index];
                   return PremiumCard(app: app);
@@ -134,7 +129,7 @@ class _PremiumView extends StatelessWidget {
 
 class PremiumCard extends StatelessWidget {
   final ToolsBrain app;
-  
+
   const PremiumCard({super.key, required this.app});
 
   @override
@@ -175,10 +170,9 @@ class PremiumCard extends StatelessWidget {
                         ),
                       );
                     },
-                    errorBuilder: (context, error, stackTrace) => const Icon(
-                      Icons.widgets, 
-                      color: Colors.white,
-                    ),
+                    errorBuilder:
+                        (context, error, stackTrace) =>
+                            const Icon(Icons.widgets, color: Colors.white),
                   ),
                 ),
               ),
@@ -199,9 +193,9 @@ class PremiumCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      app.logo.description.isNotEmpty 
-                        ? app.logo.description 
-                        : "Premium app with amazing features.",
+                      app.logo.description.isNotEmpty
+                          ? app.logo.description
+                          : "Premium app with amazing features.",
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 12,
@@ -215,7 +209,10 @@ class PremiumCard extends StatelessWidget {
               // Rating (only show if rating exists)
               if (app.rating.isNotEmpty)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.orange.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
@@ -223,11 +220,7 @@ class PremiumCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.star,
-                        color: Colors.orange,
-                        size: 14,
-                      ),
+                      const Icon(Icons.star, color: Colors.orange, size: 14),
                       const SizedBox(width: 4),
                       Text(
                         app.rating,
@@ -250,9 +243,10 @@ class PremiumCard extends StatelessWidget {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children: app.screenshot.map((screenshot) {
-                  return featureImage(screenshot.imageUrl);
-                }).toList(),
+                children:
+                    app.screenshot.map((screenshot) {
+                      return featureImage(screenshot.imageUrl);
+                    }).toList(),
               ),
             ),
 
@@ -302,7 +296,7 @@ class PremiumCard extends StatelessWidget {
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -328,7 +322,7 @@ class PremiumCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         child: Image.network(
           _getFullImageUrl(imageUrl),
-          fit: BoxFit.cover,
+          fit: BoxFit.fill,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return Container(
@@ -341,13 +335,14 @@ class PremiumCard extends StatelessWidget {
               ),
             );
           },
-          errorBuilder: (context, error, stackTrace) => Container(
-            color: Colors.grey.withOpacity(0.3),
-            child: const Icon(
-              Icons.image_not_supported,
-              color: Colors.white54,
-            ),
-          ),
+          errorBuilder:
+              (context, error, stackTrace) => Container(
+                color: Colors.grey.withOpacity(0.3),
+                child: const Icon(
+                  Icons.image_not_supported,
+                  color: Colors.white54,
+                ),
+              ),
         ),
       ),
     );
@@ -356,7 +351,7 @@ class PremiumCard extends StatelessWidget {
   void _shareApp(BuildContext context) {
     final shareText = 'Check out ${app.appName} - ${app.logo.description}';
     final shareUrl = app.androidUrl.isNotEmpty ? app.androidUrl : app.iosUrl;
-    
+
     if (shareUrl.isNotEmpty) {
       Share.share('$shareText\n$shareUrl');
     } else {
@@ -368,13 +363,13 @@ class PremiumCard extends StatelessWidget {
     // Platform check and open appropriate store
     // For now, we'll use the Android URL as default, then fallback to iOS
     String url = '';
-    
+
     if (app.androidUrl.isNotEmpty) {
       url = app.androidUrl;
     } else if (app.iosUrl.isNotEmpty) {
       url = app.iosUrl;
     }
-    
+
     if (url.isNotEmpty) {
       try {
         final Uri uri = Uri.parse(url);
@@ -393,10 +388,7 @@ class PremiumCard extends StatelessWidget {
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: $e'),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
           );
         }
       }

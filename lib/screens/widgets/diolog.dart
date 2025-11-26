@@ -62,51 +62,64 @@ Future<bool?> showDownloadConfirmationDialog({
               ],
             ),
             actions: [
-              ElevatedButton(
-                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(color: Colors.white54),
-                ),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEE5776),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed:
-                    isLoading
-                        ? null
-                        : () {
-                          setState(() => isLoading = true);
-                          Navigator.of(context).pop(true);
-                        },
-                child:
-                    isLoading
-                        ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                        : const Text(
-                          'Download',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: const BorderSide(color: Colors.white54),
                         ),
+                      ),
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.white54),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEE5776),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed:
+                      isLoading
+                          ? null
+                          : () {
+                            setState(() => isLoading = true);
+                            Navigator.of(context).pop(true);
+                          },
+                  child:
+                      isLoading
+                          ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                          : const Text(
+                            'Download',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
+                          ),
+                ),
               ),
+                ],
+              ),
+              
             ],
           );
         },
@@ -682,7 +695,12 @@ class SaveLibrarySheet extends StatefulWidget {
   final Urls urls;
   final User user;
 
-  const SaveLibrarySheet({super.key, required this.id, required this.urls, required this.user});
+  const SaveLibrarySheet({
+    super.key,
+    required this.id,
+    required this.urls,
+    required this.user,
+  });
   @override
   State<SaveLibrarySheet> createState() => _SaveLibrarySheetState();
 }
@@ -778,7 +796,12 @@ class _SaveLibrarySheetState extends State<SaveLibrarySheet> {
                     const SizedBox(height: 10),
                     // Download to Gallery option
                     ListTile(
-                      leading: Image.asset('assets/navbaricons/download.png', height: 24, width: 24, color: Colors.white),
+                      leading: Image.asset(
+                        'assets/navbaricons/download.png',
+                        height: 24,
+                        width: 24,
+                        color: Colors.white,
+                      ),
                       title: const Text(
                         'Download to Gallery',
                         style: TextStyle(color: Colors.white),
@@ -789,20 +812,27 @@ class _SaveLibrarySheetState extends State<SaveLibrarySheet> {
                         final currentUser = authState.user;
 
                         // Check download restrictions
-                        if (DownloadRestrictions.isCompletelyBlocked(user: currentUser)) {
+                        if (DownloadRestrictions.isCompletelyBlocked(
+                          user: currentUser,
+                        )) {
                           Navigator.pop(context);
                           await showDownloadBlockedDialog(
                             context: context,
-                            message: DownloadRestrictions.getBlockedMessage(user: currentUser),
+                            message: DownloadRestrictions.getBlockedMessage(
+                              user: currentUser,
+                            ),
                           );
                           return;
                         }
 
-                        if (!DownloadRestrictions.canDownload(user: currentUser)) {
+                        if (!DownloadRestrictions.canDownload(
+                          user: currentUser,
+                        )) {
                           Navigator.pop(context);
                           await showDownloadLimitDialog(
                             context: context,
-                            currentCount: currentUser?.downloadedImage.length ?? 0,
+                            currentCount:
+                                currentUser?.downloadedImage.length ?? 0,
                             maxLimit: DownloadRestrictions.maxDownloadLimit,
                           );
                           return;
