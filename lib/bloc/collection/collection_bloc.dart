@@ -10,6 +10,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
   CollectionBloc(this.repository) : super(CollectionInitial()) {
     on<FetchCollectionEvent>(_onFetchCollection);
     on<FetchCollectionDetailsEvent>(_onFetchCollectionDetails);
+    on<FetchCollectionDetailsPaginatedEvent>(_onFetchCollectionDetailsPaginated);
   }
 
   Future<void> _onFetchCollection(
@@ -25,8 +26,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
     }
   }
 
-
-   Future<void> _onFetchCollectionDetails(
+  Future<void> _onFetchCollectionDetails(
     FetchCollectionDetailsEvent event,
     Emitter<CollectionState> emit,
   ) async {
@@ -39,4 +39,58 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
     }
   }
 
+  Future<void> _onFetchCollectionDetailsPaginated(
+    FetchCollectionDetailsPaginatedEvent event,
+    Emitter<CollectionState> emit,
+  ) async {
+    final currentState = state;
+    
+    if (event.isLoadMore) {
+      // For loading more data
+      if (currentState is CollectionDetailsPaginatedLoaded) {
+        emit(currentState.copyWith(isLoadingMore: true));
+        
+        try {
+          final newData = await repository.fetchCollectionDetailedDataWithPagination(
+            event.collectionId,
+            page: event.page,
+            limit: event.limit,
+          );
+          
+          final allData = [...currentState.data, ...newData];
+          final hasMoreData = newData.length == event.limit;
+          
+          emit(CollectionDetailsPaginatedLoaded(
+            data: allData,
+            hasMoreData: hasMoreData,
+            currentPage: event.page,
+            isLoadingMore: false,
+          ));
+        } catch (e) {
+          emit(currentState.copyWith(isLoadingMore: false));
+          emit(CollectionError(e.toString()));
+        }
+      }
+    } else {
+      // For initial load
+      emit(CollectionLoading());
+      try {
+        final data = await repository.fetchCollectionDetailedDataWithPagination(
+          event.collectionId,
+          page: event.page,
+          limit: event.limit,
+        );
+        
+        final hasMoreData = data.length == event.limit;
+        
+        emit(CollectionDetailsPaginatedLoaded(
+          data: data,
+          hasMoreData: hasMoreData,
+          currentPage: event.page,
+        ));
+      } catch (e) {
+        emit(CollectionError(e.toString()));
+      }
+    }
+  }
 }

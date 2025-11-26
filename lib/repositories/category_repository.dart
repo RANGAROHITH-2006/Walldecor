@@ -105,4 +105,35 @@ class CategoryRepository {
         throw Exception('Failed to fetch wallpapers: ${response.statusCode} → ${response.body}');
     }
   }
+
+  Future<List<CategorydetailesModel>> fetchCategoryDetailedDataWithPagination(
+    String id, {
+    int page = 1,
+    int limit = 15,
+  }) async {
+    final token = await _getSavedToken();
+    print('🔥 Using token: $token');
+    if (token == null || token.isEmpty) {
+      throw Exception('Guest token not found in SharedPreferences');
+    }
+
+    final url = '$baseUrl/unsplashImage/category/$id?page=$page&limit=$limit';
+    print('📍 Fetching category details from: $url');
+    
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token, 
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.map((e) => CategorydetailesModel.fromJson(e)).toList();
+    } else {
+      print("Category pagination API error: ${response.statusCode} → ${response.body}");
+      throw Exception('Failed to fetch paginated category data: ${response.statusCode} → ${response.body}');
+    }
+  }
 }

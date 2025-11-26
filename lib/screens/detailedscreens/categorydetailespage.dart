@@ -29,10 +29,167 @@ class CategoryDetailsPage extends StatefulWidget {
 }
 
 class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
+  final ScrollController _scrollController = ScrollController();
+  int _currentPage = 1;
+  final int _pageSize = 15;
+
   @override
   void initState() {
     super.initState();
-    context.read<CategoryBloc>().add(FetchCategoryDetailsEvent(widget.id));
+    _scrollController.addListener(_onScroll);
+    // Use the new paginated event for initial load
+    context.read<CategoryBloc>().add(
+      FetchCategoryDetailsPaginatedEvent(
+        categoryId: widget.id,
+        page: _currentPage,
+        limit: _pageSize,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= 
+        _scrollController.position.maxScrollExtent - 200) {
+      _loadMoreData();
+    }
+  }
+
+  void _loadMoreData() {
+    final currentState = context.read<CategoryBloc>().state;
+    if (currentState is CategoryDetailsPaginatedLoaded) {
+      if (currentState.hasMoreData && !currentState.isLoadingMore) {
+        _currentPage++;
+        context.read<CategoryBloc>().add(
+          FetchCategoryDetailsPaginatedEvent(
+            categoryId: widget.id,
+            page: _currentPage,
+            limit: _pageSize,
+            isLoadMore: true,
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildGridItem(CategorydetailesModel item, int index) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Resultpage(
+              id: item.id,
+              urls: item.urls,
+              user: item.user,
+            ),
+          ),
+        );
+        debugPrint('category image $index tapped');
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black,
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16.0),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Image.network(
+                  item.urls.small,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: Colors.grey[800],
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 8,
+                right: 8,
+                child: GestureDetector(
+                  onTap: () async {
+                    // Get current user from AuthBloc
+                    final authState = context.read<AuthBloc>().state;
+                    final currentUser = authState.user;
+
+                    // Check download restrictions
+                    if (DownloadRestrictions.isCompletelyBlocked(
+                      user: currentUser,
+                    )) {
+                      await showDownloadBlockedDialog(
+                        context: context,
+                        message: DownloadRestrictions.getBlockedMessage(
+                          user: currentUser,
+                        ),
+                      );
+                      return;
+                    }
+
+                    if (!DownloadRestrictions.canDownload(
+                      user: currentUser,
+                    )) {
+                      await showDownloadLimitDialog(
+                        context: context,
+                        currentCount: currentUser?.downloadedImage.length ?? 0,
+                        maxLimit: DownloadRestrictions.maxDownloadLimit,
+                      );
+                      return;
+                    }
+
+                    final confirmed = await showDownloadConfirmationDialog(
+                      context: context,
+                    );
+                    
+                    if (confirmed == true) {
+                      debugPrint('Downloading wallpaper $index');
+                      await downloadImageToGallery(item.urls.regular);
+                      
+                      final imageId = item.id;
+                      context.read<DownloadBloc>().add(
+                        AddToDownloadEvent(
+                          id: imageId,
+                          urls: item.urls.toJson(),
+                          user: item.user.toJson(),
+                        ),
+                      );
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Color(0x33000000),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Image.asset(
+                      'assets/navbaricons/download.png',
+                      width: 16,
+                      height: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -91,7 +248,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
             },
             child: BlocBuilder<CategoryBloc, CategoryState>(
               builder: (context, state) {
-                if (state is CategoryLoading) {
+                if (state is CategoryLoading || state is CategoryDetailsLoading) {
                   return const Center(
                     child: CircularProgressIndicator(color: Color(0xFFEE5776)),
                   );
@@ -100,6 +257,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: GridView.builder(
+                      controller: _scrollController,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 3,
@@ -110,137 +268,61 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       itemCount: details.length,
                       itemBuilder: (context, index) {
                         final item = details[index];
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => Resultpage(
-                                      id: item.id,
-                                      urls: item.urls,
-                                      user: item.user,
-                                    ),
-                              ),
-                            );
-                            debugPrint('image $index tapped');
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16.0),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black,
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
+                        return _buildGridItem(item, index);
+                      },
+                    ),
+                  );
+                } else if (state is CategoryDetailsPaginatedLoaded) {
+                  final List<CategorydetailesModel> details = state.data;
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: GridView.builder(
+                            controller: _scrollController,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  crossAxisSpacing: 8,
+                                  mainAxisSpacing: 8,
+                                  childAspectRatio: 0.81,
+                                ),
+                            itemCount: details.length,
+                            itemBuilder: (context, index) {
+                              final item = details[index];
+                              return _buildGridItem(item, index);
+                            },
+                          ),
+                        ),
+                        // Loading indicator for infinite scroll
+                        if (state.isLoadingMore)
+                          Container(
+                            color: Colors.transparent,
+                            padding: const EdgeInsets.all(16),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  color: Color(0xFFEE5776),
+                                  strokeWidth: 2,
                                 ),
                               ],
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16.0),
-                              child: Stack(
-                                children: [
-                                  Positioned.fill(
-                                    child: Image.network(
-                                      item.urls.small,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (_, __, ___) => Container(
-                                            color: Colors.grey[800],
-                                            child: const Icon(
-                                              Icons.image_not_supported,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                    ),
-                                  ),
-
-                                  Positioned(
-                                    bottom: 8,
-                                    right: 8,
-                                    child: GestureDetector(
-                                      onTap: () async {
-                                        // Get current user from AuthBloc
-                                        final authState =
-                                            context.read<AuthBloc>().state;
-                                        final currentUser = authState.user;
-
-                                        // Check download restrictions
-                                        if (DownloadRestrictions.isCompletelyBlocked(
-                                          user: currentUser,
-                                        )) {
-                                          await showDownloadBlockedDialog(
-                                            context: context,
-                                            message:
-                                                DownloadRestrictions.getBlockedMessage(
-                                                  user: currentUser,
-                                                ),
-                                          );
-                                          return;
-                                        }
-
-                                        if (!DownloadRestrictions.canDownload(
-                                          user: currentUser,
-                                        )) {
-                                          await showDownloadLimitDialog(
-                                            context: context,
-                                            currentCount:
-                                                currentUser
-                                                    ?.downloadedImage
-                                                    .length ??
-                                                0,
-                                            maxLimit:
-                                                DownloadRestrictions
-                                                    .maxDownloadLimit,
-                                          );
-                                          return;
-                                        }
-
-                                        final confirmed =
-                                            await showDownloadConfirmationDialog(
-                                              context: context,
-                                            );
-                                        if (confirmed == true) {
-                                          debugPrint(
-                                            'Downloading wallpaper $index',
-                                          );
-                                          await downloadImageToGallery(
-                                            item.urls.regular,
-                                          );
-                                          // Add to downloads using DownloadBloc
-                                          // Use only the actual image ID without timestamp for consistency
-                                          final imageId = item.id;
-                                          context.read<DownloadBloc>().add(
-                                            AddToDownloadEvent(
-                                              id: imageId,
-                                              urls: item.urls.toJson(),
-                                              user: item.user.toJson(),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: Color(0x33000000),
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
-                                        ),
-                                        child: Image.asset(
-                                          'assets/navbaricons/download.png',
-                                          width: 16,
-                                          height: 16,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                          ),
+                        // End of content indicator
+                        if (!state.hasMoreData && details.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            child: const Text(
+                              'No more images to load',
+                              style: TextStyle(
+                                color: Color(0xFF868EAE),
+                                fontSize: 14,
                               ),
                             ),
                           ),
-                        );
-                      },
+                      ],
                     ),
                   );
                 } else if (state is CategoryError) {
@@ -259,8 +341,13 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
+                            _currentPage = 1;
                             context.read<CategoryBloc>().add(
-                              FetchCategoryDetailsEvent(widget.id),
+                              FetchCategoryDetailsPaginatedEvent(
+                                categoryId: widget.id,
+                                page: _currentPage,
+                                limit: _pageSize,
+                              ),
                             );
                           },
                           style: ElevatedButton.styleFrom(

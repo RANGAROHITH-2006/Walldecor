@@ -17,6 +17,34 @@ class CollectionDetailsLoaded extends CollectionState {
   CollectionDetailsLoaded(this.data);
 }
 
+class CollectionDetailsPaginatedLoaded extends CollectionState {
+  final List<CollectiondetailesModel> data;
+  final bool hasMoreData;
+  final int currentPage;
+  final bool isLoadingMore;
+
+  CollectionDetailsPaginatedLoaded({
+    required this.data,
+    required this.hasMoreData,
+    required this.currentPage,
+    this.isLoadingMore = false,
+  });
+
+  CollectionDetailsPaginatedLoaded copyWith({
+    List<CollectiondetailesModel>? data,
+    bool? hasMoreData,
+    int? currentPage,
+    bool? isLoadingMore,
+  }) {
+    return CollectionDetailsPaginatedLoaded(
+      data: data ?? this.data,
+      hasMoreData: hasMoreData ?? this.hasMoreData,
+      currentPage: currentPage ?? this.currentPage,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
+}
+
 class CollectionError extends CollectionState {
   final String message;
   CollectionError(this.message);

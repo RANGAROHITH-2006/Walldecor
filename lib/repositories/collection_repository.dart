@@ -59,4 +59,35 @@ class CollectionRepository {
         throw Exception('Failed to fetch data: ${response.statusCode} → ${response.body}');
     }
   }
+
+  Future<List<CollectiondetailesModel>> fetchCollectionDetailedDataWithPagination(
+    String id, {
+    int page = 1,
+    int limit = 15,
+  }) async {
+    final token = await _getSavedToken();
+    print('🔥 Using token: $token');
+    if (token == null || token.isEmpty) {
+      throw Exception('Guest token not found in SharedPreferences');
+    }
+
+    final url = '$baseUrl/unsplashImage/collection/$id?page=$page&limit=$limit';
+    print('📍 Fetching collection details from: $url');
+    
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token, 
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.map((e) => CollectiondetailesModel.fromJson(e)).toList();
+    } else {
+      print("Pagination API error: ${response.statusCode} → ${response.body}");
+      throw Exception('Failed to fetch paginated data: ${response.statusCode} → ${response.body}');
+    }
+  }
 }

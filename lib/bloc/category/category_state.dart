@@ -23,6 +23,38 @@ class CategoryDetailsLoaded extends CategoryState {
   CategoryDetailsLoaded(this.categories, this.data);
 }
 
+class CategoryDetailsPaginatedLoaded extends CategoryState {
+  final List<CategoryModel> categories;
+  final List<CategorydetailesModel> data;
+  final bool hasMoreData;
+  final int currentPage;
+  final bool isLoadingMore;
+
+  CategoryDetailsPaginatedLoaded({
+    required this.categories,
+    required this.data,
+    required this.hasMoreData,
+    required this.currentPage,
+    this.isLoadingMore = false,
+  });
+
+  CategoryDetailsPaginatedLoaded copyWith({
+    List<CategoryModel>? categories,
+    List<CategorydetailesModel>? data,
+    bool? hasMoreData,
+    int? currentPage,
+    bool? isLoadingMore,
+  }) {
+    return CategoryDetailsPaginatedLoaded(
+      categories: categories ?? this.categories,
+      data: data ?? this.data,
+      hasMoreData: hasMoreData ?? this.hasMoreData,
+      currentPage: currentPage ?? this.currentPage,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
+}
+
 class CarouselWallpapersLoading extends CategoryState {}
 
 class CarouselWallpapersLoaded extends CategoryState {
