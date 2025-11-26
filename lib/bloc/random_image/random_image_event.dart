@@ -5,3 +5,9 @@ class FetchRandomImagesEvent extends RandomImageEvent {
 
   FetchRandomImagesEvent(this.categoryId);
 }
+
+class FetchMoreRandomImagesEvent extends RandomImageEvent {
+  final String categoryId;
+
+  FetchMoreRandomImagesEvent(this.categoryId);
+}

@@ -46,10 +46,12 @@ class _HomepageState extends State<Homepage> {
   late CategoryBloc _categoryBloc;
   late CollectionBloc _collectionBloc;
   late RandomImageBloc _randomImageBloc;
+  final ScrollController _scrollController = ScrollController();
 
   String? selectedCategoryId;
   String selectedCategoryTitle = 'All';
   List<CategorydetailesModel> categoryImages = [];
+  bool _isLoadingMore = false;
 
   @override
   void initState() {
@@ -58,6 +60,7 @@ class _HomepageState extends State<Homepage> {
     _categoryBloc = CategoryBloc(CategoryRepository());
     _collectionBloc = CollectionBloc(CollectionRepository());
     _randomImageBloc = RandomImageBloc(RandomImageRepository());
+    _scrollController.addListener(_onScroll);
     // Fetch initial data
     _categoryBloc.add(FetchCategoryEvent());
     _collectionBloc.add(FetchCollectionEvent());
@@ -65,10 +68,29 @@ class _HomepageState extends State<Homepage> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _categoryBloc.close();
     _collectionBloc.close();
     _randomImageBloc.close();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300) {
+      _loadMoreImages();
+    }
+  }
+
+  void _loadMoreImages() {
+    if (!_isLoadingMore && selectedCategoryId != null && selectedCategoryId!.isNotEmpty) {
+      final currentState = _randomImageBloc.state;
+      if (currentState is RandomImageLoaded && !currentState.isLoadingMore) {
+        setState(() {
+          _isLoadingMore = true;
+        });
+        _randomImageBloc.add(FetchMoreRandomImagesEvent(selectedCategoryId!));
+      }
+    }
   }
 
   void printprefs() async {
@@ -213,6 +235,7 @@ class _HomepageState extends State<Homepage> {
                     print('🔥 RandomImageLoading - clearing images');
                     setState(() {
                       categoryImages = []; // Clear images when loading
+                      _isLoadingMore = false;
                     });
                   } else if (state is RandomImageLoaded) {
                     print(
@@ -220,9 +243,13 @@ class _HomepageState extends State<Homepage> {
                     );
                     setState(() {
                       categoryImages = _convertRandomToCategory(state.data);
+                      _isLoadingMore = state.isLoadingMore;
                     });
                   } else if (state is RandomImageError) {
                     print('🔥 RandomImageError: ${state.message}');
+                    setState(() {
+                      _isLoadingMore = false;
+                    });
                     // Keep current images or show error state
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -259,6 +286,7 @@ class _HomepageState extends State<Homepage> {
               ),
             ],
             child: SingleChildScrollView(
+              controller: _scrollController,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -271,6 +299,7 @@ class _HomepageState extends State<Homepage> {
                     // _buildCategoryFilterSection(),
                     // const SizedBox(height: 16),
                     _buildWallpapersGrid(),
+                    if (_isLoadingMore) _buildLoadingIndicator(),
                   ],
                 ),
               ),
@@ -640,6 +669,20 @@ class _HomepageState extends State<Homepage> {
           ),
         );
       }),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Center(
+        child: Column(
+          children: [
+            const CircularProgressIndicator(color: Color(0xFFEE5776)),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
     );
   }
 

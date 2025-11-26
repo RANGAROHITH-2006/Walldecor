@@ -8,7 +8,19 @@ class RandomImageLoading extends RandomImageState {}
 
 class RandomImageLoaded extends RandomImageState {
   final List<RandomImageModel> data;
-  RandomImageLoaded(this.data);
+  final bool isLoadingMore;
+
+  RandomImageLoaded(this.data, {this.isLoadingMore = false});
+
+  RandomImageLoaded copyWith({
+    List<RandomImageModel>? data,
+    bool? isLoadingMore,
+  }) {
+    return RandomImageLoaded(
+      data ?? this.data,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
 }
 
 class RandomImageError extends RandomImageState {

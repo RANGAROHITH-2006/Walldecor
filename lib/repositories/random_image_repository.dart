@@ -46,4 +46,38 @@ class RandomImageRepository {
       throw Exception('Failed to fetch random images: ${response.statusCode} → ${response.body}');
     }
   }
+
+  Future<List<RandomImageModel>> fetchRandomImagesInfinite(String categoryId) async {
+    final token = await _getSavedToken();
+    print('🔥 Using token for infinite scroll: $token');
+    if (token == null || token.isEmpty) {
+      throw Exception('Guest token not found in SharedPreferences');
+    }
+
+    final requestBody = {
+      "type": "CATEGORY",
+      "categoryId": categoryId
+    };
+
+    print('🔥 Random Image Infinite API Request Body: ${jsonEncode(requestBody)}');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/unsplashImage/randomImage'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token,
+      },
+      body: jsonEncode(requestBody),
+    );
+
+    print('🔥 Random Image Infinite API Response Status: ${response.statusCode}');
+    print('🔥 Random Image Infinite API Response Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.map((e) => RandomImageModel.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to fetch infinite random images: ${response.statusCode} → ${response.body}');
+    }
+  }
 }
