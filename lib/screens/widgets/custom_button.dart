@@ -27,6 +27,7 @@ class CustomButton extends StatefulWidget {
 
 class _CustomButtonState extends State<CustomButton> {
   bool isLoading = false;
+  bool istap = false;
 
   Future<void> _handleGoogleSignIn(BuildContext context) async {
     try {
@@ -183,15 +184,26 @@ class _CustomButtonState extends State<CustomButton> {
       if (mounted) setState(() => isLoading = false);
     }
   }
+void tapped(bool swap){
+  setState(() {
+    istap = swap;
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
         if (widget.text == 'Login With Google') {
-          await googleSignIn();
-          await _handleGoogleSignIn(context);
-          context.pop();
+           if (istap == false){
+              tapped(true);
+              await googleSignIn();
+              await _handleGoogleSignIn(context);
+              tapped(false);
+              context.pop();
+
+           } 
         } else if (widget.text == 'Login With Apple') {
           await _handleAppleSignIn(context);
         } else {
