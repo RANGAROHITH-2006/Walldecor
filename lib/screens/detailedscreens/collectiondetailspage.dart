@@ -187,23 +187,37 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
                                     child: GestureDetector(
                                       onTap: () async {
                                         // Get current user from AuthBloc
-                                        final authState = context.read<AuthBloc>().state;
+                                        final authState =
+                                            context.read<AuthBloc>().state;
                                         final currentUser = authState.user;
 
                                         // Check download restrictions
-                                        if (DownloadRestrictions.isCompletelyBlocked(user: currentUser)) {
+                                        if (DownloadRestrictions.isCompletelyBlocked(
+                                          user: currentUser,
+                                        )) {
                                           await showDownloadBlockedDialog(
                                             context: context,
-                                            message: DownloadRestrictions.getBlockedMessage(user: currentUser),
+                                            message:
+                                                DownloadRestrictions.getBlockedMessage(
+                                                  user: currentUser,
+                                                ),
                                           );
                                           return;
                                         }
 
-                                        if (!DownloadRestrictions.canDownload(user: currentUser)) {
+                                        if (!DownloadRestrictions.canDownload(
+                                          user: currentUser,
+                                        )) {
                                           await showDownloadLimitDialog(
                                             context: context,
-                                            currentCount: currentUser?.downloadedImage.length ?? 0,
-                                            maxLimit: DownloadRestrictions.maxDownloadLimit,
+                                            currentCount:
+                                                currentUser
+                                                    ?.downloadedImage
+                                                    .length ??
+                                                0,
+                                            maxLimit:
+                                                DownloadRestrictions
+                                                    .maxDownloadLimit,
                                           );
                                           return;
                                         }
@@ -281,25 +295,13 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: Colors.redAccent,
-                        ),
                         const SizedBox(height: 16),
-                        Text(
-                          'Error loading collection',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
+                        const Text(
+                          'Unable to load category details',
+                          style: TextStyle(
+                            color: Color(0xFF868EAE),
+                            fontSize: 16,
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          state.message,
-                          style: const TextStyle(color: Colors.redAccent),
-                          textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
@@ -310,6 +312,7 @@ class _CollectionDetailsPageState extends State<CollectionDetailsPage> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFEE5776),
+                            foregroundColor: Colors.white,
                           ),
                           child: const Text('Retry'),
                         ),

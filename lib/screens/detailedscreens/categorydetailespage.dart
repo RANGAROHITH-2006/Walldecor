@@ -161,23 +161,37 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                     child: GestureDetector(
                                       onTap: () async {
                                         // Get current user from AuthBloc
-                                        final authState = context.read<AuthBloc>().state;
+                                        final authState =
+                                            context.read<AuthBloc>().state;
                                         final currentUser = authState.user;
 
                                         // Check download restrictions
-                                        if (DownloadRestrictions.isCompletelyBlocked(user: currentUser)) {
+                                        if (DownloadRestrictions.isCompletelyBlocked(
+                                          user: currentUser,
+                                        )) {
                                           await showDownloadBlockedDialog(
                                             context: context,
-                                            message: DownloadRestrictions.getBlockedMessage(user: currentUser),
+                                            message:
+                                                DownloadRestrictions.getBlockedMessage(
+                                                  user: currentUser,
+                                                ),
                                           );
                                           return;
                                         }
 
-                                        if (!DownloadRestrictions.canDownload(user: currentUser)) {
+                                        if (!DownloadRestrictions.canDownload(
+                                          user: currentUser,
+                                        )) {
                                           await showDownloadLimitDialog(
                                             context: context,
-                                            currentCount: currentUser?.downloadedImage.length ?? 0,
-                                            maxLimit: DownloadRestrictions.maxDownloadLimit,
+                                            currentCount:
+                                                currentUser
+                                                    ?.downloadedImage
+                                                    .length ??
+                                                0,
+                                            maxLimit:
+                                                DownloadRestrictions
+                                                    .maxDownloadLimit,
                                           );
                                           return;
                                         }
@@ -234,11 +248,6 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
-                          Icons.wifi_off,
-                          color: Color(0xFF868EAE),
-                          size: 48,
-                        ),
                         const SizedBox(height: 16),
                         const Text(
                           'Unable to load category details',
