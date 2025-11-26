@@ -8,6 +8,7 @@ import 'package:walldecor/bloc/applist/applist_event.dart';
 import 'package:walldecor/bloc/applist/applist_state.dart';
 import 'package:walldecor/repositories/applist_repository.dart';
 import 'package:walldecor/models/applist_model.dart';
+import 'package:walldecor/screens/widgets/image_gallery_screen.dart';
 
 class PremiumScreen extends StatelessWidget {
   const PremiumScreen({super.key});
@@ -248,8 +249,18 @@ class PremiumCard extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children:
-                    app.screenshot.map((screenshot) {
-                      return featureImage(screenshot.imageUrl);
+                    app.screenshot.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final screenshot = entry.value;
+                      return featureImage(
+                        screenshot.imageUrl,
+                        onTap:
+                            () => _openImageGallery(
+                              context,
+                              app.screenshot,
+                              index,
+                            ),
+                      );
                     }).toList(),
               ),
             ),
@@ -313,41 +324,72 @@ class PremiumCard extends StatelessWidget {
     return 'https://applist.sgp1.digitaloceanspaces.com/$imagePath';
   }
 
-  Widget featureImage(String imageUrl) {
-    return Container(
-      width: 110,
-      height: 160,
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: Image.network(
-          _getFullImageUrl(imageUrl),
-          fit: BoxFit.fill,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Container(
-              color: Colors.grey.withValues(alpha: 0.3),
-              child: const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.pinkAccent,
-                  strokeWidth: 2,
-                ),
-              ),
-            );
-          },
-          errorBuilder:
-              (context, error, stackTrace) => Container(
-                color: Colors.grey.withOpacity(0.3),
-                child: const Icon(
-                  Icons.image_not_supported,
-                  color: Colors.white54,
-                ),
-              ),
+  Widget featureImage(String imageUrl, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 110,
+        height: 160,
+        margin: const EdgeInsets.only(right: 12),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
         ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: Stack(
+            children: [
+              Image.network(
+                _getFullImageUrl(imageUrl),
+                fit: BoxFit.fill,
+                width: double.infinity,
+                height: double.infinity,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    color: Colors.grey.withValues(alpha: 0.3),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.pinkAccent,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  );
+                },
+                errorBuilder:
+                    (context, error, stackTrace) => Container(
+                      color: Colors.grey.withOpacity(0.3),
+                      child: const Icon(
+                        Icons.image_not_supported,
+                        color: Colors.white54,
+                      ),
+                    ),
+              ),
+
+              // Subtle overlay to indicate it's tappable
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openImageGallery(
+    BuildContext context,
+    List<Logo> screenshots,
+    int initialIndex,
+  ) {
+    final imageUrls =
+        screenshots.map((screenshot) => screenshot.imageUrl).toList();
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder:
+            (context) => ImageGalleryScreen(
+              imageUrls: imageUrls,
+              initialIndex: initialIndex,
+            ),
       ),
     );
   }
