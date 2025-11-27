@@ -174,9 +174,10 @@ class _CustomButtonState extends State<CustomButton> {
         await FirebaseAuth.instance.signInWithCredential(credential);
         final token = await FirebaseAuth.instance.currentUser?.getIdToken(true);
         print("Firebase ID Token: $token");
-        if (mounted) {
-          context.go('/mainscreen');
-        }
+         await _handleGoogleSignIn(context);
+        // if (mounted) {
+        //   context.go('/mainscreen');
+        // }
       }
     } catch (e) {
       debugPrint('Google Sign-In Error: $e');
@@ -199,7 +200,7 @@ void tapped(bool swap){
            if (istap == false){
               tapped(true);
               await googleSignIn();
-              await _handleGoogleSignIn(context);
+             
               tapped(false);
               context.pop();
 
