@@ -110,11 +110,11 @@ class User {
             final now = DateTime.now().toUtc(); // Compare in UTC
             final isExpired = now.isAfter(expiredAt);
             
-            print('🔍 DEBUG Date Parsing:');
-            print('   Original expireTime: $expireTime');
-            print('   Parsed expiredAt: $expiredAt');
-            print('   Current time (UTC): $now');
-            print('   Is expired: $isExpired');
+            // print('🔍 DEBUG Date Parsing:');
+            // print('   Original expireTime: $expireTime');
+            // print('   Parsed expiredAt: $expiredAt');
+            // print('   Current time (UTC): $now');
+            // print('   Is expired: $isExpired');
             
             return isExpired;
         } catch (e) {

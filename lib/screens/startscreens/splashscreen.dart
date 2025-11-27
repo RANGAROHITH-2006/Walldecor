@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 import 'package:go_router/go_router.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
-import 'package:walldecor/repositories/services/google_auth_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -62,8 +61,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeGuestLogin() async {
     try {
-      final googleAuthService = GoogleAuthService();
-      final deviceId = await googleAuthService.getDeviceId();
+      final authBloc = context.read<AuthBloc>();
+      final deviceId = await authBloc.authRepository.getDeviceId();
       
       // Get FCM token
       String pushToken = '';
@@ -75,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen> {
       }
       
       if (mounted) {
-        context.read<AuthBloc>().add(
+        authBloc.add(
           GuestLogin(
             deviceId: deviceId,
             pushToken: pushToken,

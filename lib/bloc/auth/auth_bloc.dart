@@ -7,8 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:walldecor/models/userdata_model.dart';
-import 'package:walldecor/repositories/services/google_auth_service.dart';
-import 'package:walldecor/repositories/services/apple_auth_service.dart';
 import 'package:walldecor/repositories/auth_repository.dart';
 
 part 'auth_event.dart';
@@ -18,6 +16,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   static const String _baseUrl = 'http://172.168.17.2:13024';
   final AuthRepository _authRepository = AuthRepository();
   static const String _guestIdKey = 'user_id';
+  
+  // Public getter to access AuthRepository methods
+  AuthRepository get authRepository => _authRepository;
   
   AuthBloc() : super(const AuthInitial()) {
     on<AuthEvent>((event, emit) {});
@@ -63,8 +64,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       // If it's a Google user, check Firebase session validity
       if (userType == 'google') {
-        final googleAuthService = GoogleAuthService();
-        final isFirebaseValid = await googleAuthService.isFirebaseSessionValid();
+        final isFirebaseValid = await _authRepository.isFirebaseSessionValid();
         
         if (!isFirebaseValid) {
           print('Firebase session expired, clearing stored data');
@@ -81,10 +81,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       // If it's an Apple user, check Firebase session validity
       if (userType == 'apple') {
-        // Import apple auth service if needed
-        // For now, we'll use the same Firebase validation logic
-        final appleAuthService = AppleAuthService();
-        final isFirebaseValid = await appleAuthService.isFirebaseSessionValid();
+        final isFirebaseValid = await _authRepository.isFirebaseSessionValid();
         
         if (!isFirebaseValid) {
           print('Apple Firebase session expired, clearing stored data');
@@ -177,6 +174,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         Uri.parse('$_baseUrl/auth/guest'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
+          "firstName": "Guest", // Add default firstName for guest users
+          "lastName": "User",   // Add default lastName for guest users
           "deviceId": event.deviceId,
           if (event.pushToken.isNotEmpty) "pushToken": event.pushToken,
         }),
@@ -218,11 +217,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onLoginWithGoogle(
-    
       LoginWithGoogle event, Emitter<AuthState> emit) async {
-      final prefs = await SharedPreferences.getInstance();
-      final guestUserId = prefs.getString(_guestIdKey);
-      print('Guest User ID from prefs: $guestUserId');
+    final prefs = await SharedPreferences.getInstance();
+    final guestUserId = prefs.getString(_guestIdKey);
+    print('Guest User ID from prefs: $guestUserId');
     try {
       emit(state.copyWith(status: AuthStatus.loading));
       var resp = await http.post(
@@ -240,26 +238,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           'userId': guestUserId ?? '',
           if (event.pushToken.isNotEmpty) "pushToken": event.pushToken,
         }),
-        
       );
       
-    print('request body : ${jsonEncode({
-          if (event.firstName.isNotEmpty) "firstName": event.firstName,
-          if (event.lastName.isNotEmpty) "lastName": event.lastName,
-          "email": event.email,
-          "firebaseUserId": event.firebaseUserId,
-          "deviceId": event.deviceId,
-          'userId': guestUserId ?? '',
-          if (event.pushToken.isNotEmpty) "pushToken": event.pushToken,
-        })}');
+      print('request body : ${jsonEncode({
+            if (event.firstName.isNotEmpty) "firstName": event.firstName,
+            if (event.lastName.isNotEmpty) "lastName": event.lastName,
+            "email": event.email,
+            "firebaseUserId": event.firebaseUserId,
+            "deviceId": event.deviceId,
+            'userId': guestUserId ?? '',
+            if (event.pushToken.isNotEmpty) "pushToken": event.pushToken,
+          })}');
       if (resp.statusCode == 200) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
-         prefs.setString('user_type', 'google');
+        prefs.setString('user_type', 'google');
         Map<String, dynamic> data = jsonDecode(resp.body);
         print('$data-----------------');        
         var token = resp.headers["x-auth-token"];
         var id = data["_id"];
-        
         
         prefs.setString('auth_token', token!);
         prefs.setString('user_id', id);
@@ -267,14 +263,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         bool isProUser = data['isProUser'] ?? false;
         prefs.setBool('isProUser', isProUser);
         
-        
-        
         // Store user data with profile image URL
         Map<String, dynamic> userData = Map<String, dynamic>.from(data);
         userData['profileImageUrl'] = event.profileImageUrl;
         
         prefs.setString('user_data', jsonEncode(userData));
-        
         
         User user = User.fromJson(data);
         event.onSuccess(user);

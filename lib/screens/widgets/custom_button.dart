@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
-import 'package:walldecor/repositories/services/google_auth_service.dart';
-import 'package:walldecor/repositories/services/apple_auth_service.dart';
 import 'dart:io';
 
 class CustomButton extends StatefulWidget {
@@ -31,12 +29,12 @@ class _CustomButtonState extends State<CustomButton> {
 
   Future<void> _handleGoogleSignIn(BuildContext context) async {
     try {
-      final googleAuthService = GoogleAuthService();
-      final userData = await googleAuthService.signInWithGoogle();
+      final authBloc = context.read<AuthBloc>();
+      final userData = await authBloc.authRepository.signInWithGoogle();
       print('Google user data: $userData');
       if (userData != null) {
         if (context.mounted) {
-          context.read<AuthBloc>().add(
+          authBloc.add(
             LoginWithGoogle(
               firstName: userData['firstName']!,
               lastName: userData['lastName']!,
@@ -68,12 +66,6 @@ class _CustomButtonState extends State<CustomButton> {
     }
   }
 
-
-
-
-
-
-
   Future<void> _handleAppleSignIn(BuildContext context) async {
     try {
       setState(() => isLoading = true);
@@ -91,10 +83,11 @@ class _CustomButtonState extends State<CustomButton> {
         return;
       }
 
-      final appleAuthService = AppleAuthService();
+      final authBloc = context.read<AuthBloc>();
 
       // Check availability
-      final isAvailable = await appleAuthService.isAppleSignInAvailable();
+      final isAvailable =
+          await authBloc.authRepository.isAppleSignInAvailable();
       if (!isAvailable) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -107,11 +100,11 @@ class _CustomButtonState extends State<CustomButton> {
         return;
       }
 
-      final userData = await appleAuthService.signInWithApple();
+      final userData = await authBloc.authRepository.signInWithApple();
 
       if (userData != null) {
         if (context.mounted) {
-          context.read<AuthBloc>().add(
+          authBloc.add(
             LoginWithApple(
               firstName: userData['firstName']!,
               lastName: userData['lastName']!,
@@ -174,7 +167,7 @@ class _CustomButtonState extends State<CustomButton> {
         await FirebaseAuth.instance.signInWithCredential(credential);
         final token = await FirebaseAuth.instance.currentUser?.getIdToken(true);
         print("Firebase ID Token: $token");
-         await _handleGoogleSignIn(context);
+        await _handleGoogleSignIn(context);
         // if (mounted) {
         //   context.go('/mainscreen');
         // }
@@ -185,26 +178,24 @@ class _CustomButtonState extends State<CustomButton> {
       if (mounted) setState(() => isLoading = false);
     }
   }
-void tapped(bool swap){
-  setState(() {
-    istap = swap;
-  });
-}
 
+  void tapped(bool swap) {
+    setState(() {
+      istap = swap;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
         if (widget.text == 'Login With Google') {
-           if (istap == false){
-              tapped(true);
-              await googleSignIn();
-             
-              tapped(false);
-              context.pop();
-
-           } 
+          if (istap == false) {
+            tapped(true);
+            await googleSignIn();
+            tapped(false);
+            context.pop();
+          }
         } else if (widget.text == 'Login With Apple') {
           await _handleAppleSignIn(context);
         } else {

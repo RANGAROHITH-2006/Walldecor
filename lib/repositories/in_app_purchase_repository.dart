@@ -115,38 +115,51 @@ class InAppPurchaseService {
   }
 
   /// Handle purchase updates
-  void _onPurchaseUpdate(List<PurchaseDetails> purchaseDetailsList) {
-    for (final PurchaseDetails purchaseDetails in purchaseDetailsList) {
-      if (purchaseDetails.status == PurchaseStatus.pending) {
-        // Handle pending purchase
-        if (kDebugMode) print('Purchase pending');
-      } else {
-        if (purchaseDetails.status == PurchaseStatus.error) {
-          // Handle purchase error
-          if (kDebugMode) print('Purchase error: ${purchaseDetails.error}');
-          _purchaseCallback?.call(false, purchaseDetails.error?.message ?? 'Purchase failed');
-        } else if (purchaseDetails.status == PurchaseStatus.purchased ||
-                   purchaseDetails.status == PurchaseStatus.restored) {
-          // Handle successful purchase
-          if (kDebugMode) print('Purchase successful: ${purchaseDetails.productID}');
-          _verifyPurchase(purchaseDetails);
-        } else if (purchaseDetails.status == PurchaseStatus.canceled) {
-          // Handle canceled purchase
-          if (kDebugMode) print('Purchase canceled');
-          _purchaseCallback?.call(false, 'Purchase was canceled');
+ // Add a Set to track processed purchase IDs
+final Set<String> _processedPurchases = {};
+
+void _onPurchaseUpdate(List<PurchaseDetails> purchaseDetailsList) {
+  for (final PurchaseDetails purchaseDetails in purchaseDetailsList) {
+    if (purchaseDetails.status == PurchaseStatus.pending) {
+      // Handle pending purchase
+      if (kDebugMode) print('Purchase pending');
+    } else {
+      if (purchaseDetails.status == PurchaseStatus.error) {
+        // Handle purchase error
+        if (kDebugMode) print('Purchase error: ${purchaseDetails.error}');
+        _purchaseCallback?.call(false, purchaseDetails.error?.message ?? 'Purchase failed');
+      } else if (purchaseDetails.status == PurchaseStatus.purchased ||
+                 purchaseDetails.status == PurchaseStatus.restored) {
+        // Check if the purchase has already been processed
+        if (_processedPurchases.contains(purchaseDetails.purchaseID)) {
+          if (kDebugMode) print('Duplicate purchase update ignored: ${purchaseDetails.purchaseID}');
+          continue;
         }
 
-        // Complete the purchase
-        if (purchaseDetails.pendingCompletePurchase) {
-          _inAppPurchase.completePurchase(purchaseDetails);
-        }
+        // Mark the purchase as processed
+        _processedPurchases.add(purchaseDetails.purchaseID ?? '');
+
+        // Handle successful purchase
+        if (kDebugMode) print('Purchase successful: ${purchaseDetails.productID}');
+        _verifyPurchase(purchaseDetails);
+      } else if (purchaseDetails.status == PurchaseStatus.canceled) {
+        // Handle canceled purchase
+        if (kDebugMode) print('Purchase canceled');
+        _purchaseCallback?.call(false, 'Purchase was canceled');
+      }
+
+      // Complete the purchase
+      if (purchaseDetails.pendingCompletePurchase) {
+        _inAppPurchase.completePurchase(purchaseDetails);
       }
     }
   }
+}
 
   /// Verify the purchase and send to API
   Future<void> _verifyPurchase(PurchaseDetails purchaseDetails) async {
     try {
+      print('-----------------------TTTTTTT----------------------------');
       // Send purchase details to your backend server
       final success = await _sendPurchaseToServer(purchaseDetails);
       
@@ -199,7 +212,7 @@ class InAppPurchaseService {
       final priceNumeric = price.replaceAll(RegExp(r'[^0-9.]'), '');
       
       // Determine subscription type
-      String subscriptionType = 'MONTHLY';
+      String subscriptionType = 'WEEKLY';
       if (purchaseDetails.productID == yearlyPlanId) {
         subscriptionType = 'YEARLY';
       }
@@ -232,6 +245,7 @@ class InAppPurchaseService {
       );
 
       if (response.statusCode == 200) {
+        print('-------------------------------------------------------------------');
         if (kDebugMode) print('Purchase verification successful: ${response.body}');
         return true;
       } else {

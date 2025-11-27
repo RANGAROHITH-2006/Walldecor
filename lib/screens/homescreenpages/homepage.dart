@@ -33,7 +33,6 @@ import 'package:walldecor/repositories/random_image_repository.dart';
 // import 'package:walldecor/models/category_model.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
 import 'package:walldecor/models/random_image_model.dart' as RandomModel;
-import 'package:walldecor/repositories/services/google_auth_service.dart';
 
 class Homepage extends StatefulWidget {
   final Function(int)? onTabChange;
@@ -57,7 +56,7 @@ class _HomepageState extends State<Homepage> {
   @override
   void initState() {
     super.initState();
-    printprefs();
+    // printprefs();
     _categoryBloc = CategoryBloc(CategoryRepository());
     _collectionBloc = CollectionBloc(CollectionRepository());
     _randomImageBloc = RandomImageBloc(RandomImageRepository());
@@ -133,8 +132,8 @@ class _HomepageState extends State<Homepage> {
 
   Future<void> _initializeGuestLogin() async {
     try {
-      final googleAuthService = GoogleAuthService();
-      final deviceId = await googleAuthService.getDeviceId();
+      final authBloc = context.read<AuthBloc>();
+      final deviceId = await authBloc.authRepository.getDeviceId();
 
       // Get FCM token
       String pushToken = '';
@@ -454,11 +453,29 @@ class _HomepageState extends State<Homepage> {
 
     if (categoryImages.isEmpty) {
       return Container(
-        height: 200,
+        height: 400,
         alignment: Alignment.center,
-        child: const Text(
-          'No wallpapers found for this category',
-          style: TextStyle(color: Color(0xFF868EAE), fontSize: 16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'No wallpapers found for this category',
+              style: TextStyle(color: Color(0xFF868EAE), fontSize: 16),
+            ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFEE5776),
+              ),
+              onPressed: () {
+
+              },
+              child: const Text(
+                'Retry',
+                style: TextStyle(color: Colors.white, fontSize: 12),
+              ),
+            ),
+          ],
         ),
       );
     }
