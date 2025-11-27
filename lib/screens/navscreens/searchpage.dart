@@ -361,15 +361,15 @@ class _SearchpageState extends State<Searchpage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Search Results (${results.length})',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
+            // Text(
+            //   'Search Results (${results.length})',
+            //   style: const TextStyle(
+            //     color: Colors.white,
+            //     fontSize: 16,
+            //     fontWeight: FontWeight.bold,
+            //   ),
+            // ),
+            // const SizedBox(height: 10),
             GridView.builder(
               itemCount: results.length + (showLoadingMore ? 3 : 0),
               physics: const NeverScrollableScrollPhysics(),

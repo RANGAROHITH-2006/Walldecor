@@ -83,43 +83,42 @@ Future<bool?> showDownloadConfirmationDialog({
                     ),
                   ),
                   const SizedBox(width: 10),
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEE5776),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFEE5776),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed:
+                          isLoading
+                              ? null
+                              : () {
+                                setState(() => isLoading = true);
+                                Navigator.of(context).pop(true);
+                              },
+                      child:
+                          isLoading
+                              ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                              : const Text(
+                                'Download',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                ),
+                              ),
                     ),
                   ),
-                  onPressed:
-                      isLoading
-                          ? null
-                          : () {
-                            setState(() => isLoading = true);
-                            Navigator.of(context).pop(true);
-                          },
-                  child:
-                      isLoading
-                          ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                          : const Text(
-                            'Download',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                            ),
-                          ),
-                ),
-              ),
                 ],
               ),
-              
             ],
           );
         },
@@ -786,14 +785,34 @@ class _SaveLibrarySheetState extends State<SaveLibrarySheet> {
                 return Column(
                   children: [
                     // Show dynamic library list
-                    ...libraries.map(
-                      (library) => _DynamicLibraryItem(
-                        library: library,
-                        urls: widget.urls,
-                        user: widget.user,
+                    if (libraries.isEmpty)
+                      ListTile(
+                        leading: Icon(Icons.library_add, color: Colors.white),
+                        title: Text(
+                          ' Create New Library',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        onTap: () async{
+                         await AddLibraryDialog(
+                            context: context,
+                            urls: widget.urls,
+                            user: widget.user,
+                            onCreate: (libraryName) {},
+                            
+                          );
+                         Navigator.pop(context);  
+                        },
+                      )
+                    else
+                      ...libraries.map(
+                        (library) => _DynamicLibraryItem(
+                          library: library,
+                          urls: widget.urls,
+                          user: widget.user,
+                        ),
                       ),
-                    ),
                     const SizedBox(height: 10),
+
                     // Download to Gallery option
                     ListTile(
                       leading: Image.asset(
