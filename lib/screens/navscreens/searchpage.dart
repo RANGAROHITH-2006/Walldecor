@@ -35,6 +35,10 @@ class _SearchpageState extends State<Searchpage> {
   bool _isSearching = false;
   Timer? _debounceTimer;
   late CategoryBloc _categoryBloc;
+  final ScrollController _scrollController = ScrollController();
+  int _currentPage = 1;
+  final int _pageSize = 15;
+  String _lastSearchText = '';
 
   @override
   void initState() {
@@ -42,6 +46,7 @@ class _SearchpageState extends State<Searchpage> {
     _categoryBloc = CategoryBloc(CategoryRepository());
     context.read<TrendingBloc>().add(FetchSearchTrendingEvent());
     _categoryBloc.add(FetchCarouselWallpapersEvent('wallpaper'));
+    _scrollController.addListener(_onScroll);
   }
 
   @override
@@ -50,7 +55,32 @@ class _SearchpageState extends State<Searchpage> {
     _searchFocusNode.dispose();
     _debounceTimer?.cancel();
     _categoryBloc.close();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= 
+        _scrollController.position.maxScrollExtent - 200) {
+      _loadMoreSearchResults();
+    }
+  }
+
+  void _loadMoreSearchResults() {
+    final currentState = context.read<SearchBloc>().state;
+    if (currentState is SearchPaginatedSuccess) {
+      if (currentState.hasMoreData && !currentState.isLoadingMore) {
+        _currentPage++;
+        context.read<SearchBloc>().add(
+          SearchPaginatedEvent(
+            text: _lastSearchText,
+            page: _currentPage,
+            limit: _pageSize,
+            isLoadMore: true,
+          ),
+        );
+      }
+    }
   }
 
   void _onSearchChanged(String query) {
@@ -65,10 +95,21 @@ class _SearchpageState extends State<Searchpage> {
       return;
     }
 
+    // Reset pagination for new search
+    _currentPage = 1;
+    _lastSearchText = query;
+
     // Start new timer for debouncing
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
       if (query.isNotEmpty) {
-        context.read<SearchBloc>().add(CreateSearchEvent(text: query));
+        // Use paginated search instead of regular search
+        context.read<SearchBloc>().add(
+          SearchPaginatedEvent(
+            text: query,
+            page: _currentPage,
+            limit: _pageSize,
+          ),
+        );
       }
     });
   }
@@ -201,6 +242,7 @@ class _SearchpageState extends State<Searchpage> {
                     const SizedBox(height: 10),
                     Expanded(
                       child: SingleChildScrollView(
+                        controller: _scrollController,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 8,
@@ -250,8 +292,13 @@ class _SearchpageState extends State<Searchpage> {
                 TextButton(
                   onPressed: () {
                     if (_searchController.text.isNotEmpty) {
+                      _currentPage = 1;
                       context.read<SearchBloc>().add(
-                        CreateSearchEvent(text: _searchController.text),
+                        SearchPaginatedEvent(
+                          text: _searchController.text,
+                          page: _currentPage,
+                          limit: _pageSize,
+                        ),
                       );
                     }
                   },
@@ -265,163 +312,189 @@ class _SearchpageState extends State<Searchpage> {
           );
         }
 
+        // Handle both old and new search states for compatibility
+        List<dynamic> results = [];
+        bool showLoadingMore = false;
+        
         if (state is SearchSuccess) {
-          List<dynamic> results = [];
           try {
             if (state.data.containsKey('results')) {
               results = state.data['results'] as List<dynamic>? ?? [];
             } else if (state.data is List) {
               results = state.data as List<dynamic>;
-            } else {
-              // Handle other possible structures
-              results = [];
             }
           } catch (e) {
             print("Error parsing search results: $e");
             results = [];
           }
+        } else if (state is SearchPaginatedSuccess) {
+          results = state.results;
+          showLoadingMore = state.isLoadingMore;
+        }
 
-          if (results.isEmpty) {
-            return _buildNoResultsScreen();
-          }
+        if (results.isEmpty && state is! SearchPaginatedSuccess) {
+          return _buildNoResultsScreen();
+        }
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Search Results (${results.length})',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+        if (results.isEmpty && state is SearchPaginatedSuccess) {
+          return _buildNoResultsScreen();
+        }
+
+        if (state is SearchInitial) {
+          // Initial state - show message to start searching
+          return Center(
+            child: Column(
+              children: [
+                const SizedBox(height: 50),
+                Icon(Icons.search, color: Colors.grey[600], size: 64),
+                const SizedBox(height: 16),
+                Text(
+                  'Start typing to search collections',
+                  style: TextStyle(color: Colors.grey[400], fontSize: 16),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              const SizedBox(height: 10),
-              GridView.builder(
-                itemCount: results.length,
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                  childAspectRatio: 0.81,
-                ),
-                itemBuilder: (context, index) {
-                  final item = results[index] as Map<String, dynamic>? ?? {};
-                  return GestureDetector(
-                    onTap: () {
-                      try {
-                        // Convert search result to expected format for Resultpage
-                        final urls = Urls(
-                          full: _getImageUrl(item),
-                          regular: _getImageUrl(item),
-                          small: _getImageUrl(item),
-                        );
-
-                        final user = User(
-                          id: item['id'] ?? '',
-                          username: item['user']?['username'] ?? 'Unknown',
-                          name: item['user']?['name'] ?? 'Unknown',
-                          firstName: item['user']?['first_name'] ?? '',
-                          lastName: item['user']?['last_name'] ?? '',
-                          profileLink: item['user']?['profile_link'] ?? '',
-                          profileImage: item['user']?['profile_image'] ?? '',
-                        );
-
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => Resultpage(
-                                  id: item['id'] ?? '',
-                                  urls: urls,
-                                  user: user,
-                                ),
-                          ),
-                        );
-                      } catch (e) {
-                        print('Error navigating to result page: $e');
-                        // Show error snackbar
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Unable to open image details'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    },
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.network(
-                            _getImageUrl(item),
-                            fit: BoxFit.cover,
-                            errorBuilder:
-                                (_, __, ___) => Container(
-                                  color: Colors.grey[800],
-                                  child: const Icon(
-                                    Icons.image_not_supported,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.black.withOpacity(0.7),
-                                ],
-                              ),
-                            ),
-                          ),
-                          if (_getImageDescription(item).isNotEmpty)
-                            Positioned(
-                              bottom: 8,
-                              left: 8,
-                              right: 8,
-                              child: Text(
-                                _getImageDescription(item),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
+              ],
+            ),
           );
         }
 
-        // Initial state - show message to start searching
-        return Center(
-          child: Column(
-            children: [
-              const SizedBox(height: 50),
-              Icon(Icons.search, color: Colors.grey[600], size: 64),
-              const SizedBox(height: 16),
-              Text(
-                'Start typing to search collections',
-                style: TextStyle(color: Colors.grey[400], fontSize: 16),
-                textAlign: TextAlign.center,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Search Results (${results.length})',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 10),
+            GridView.builder(
+              itemCount: results.length + (showLoadingMore ? 3 : 0),
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 0.81,
+              ),
+              itemBuilder: (context, index) {
+                if (index >= results.length) {
+                  // Show loading indicators for new items being loaded
+                  return Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.grey[800],
+                    ),
+                    child: const Center(
+                      child: CupertinoActivityIndicator(
+                        color: Color(0xFFEE5776),
+                        radius: 10,
+                      ),
+                    ),
+                  );
+                }
+                
+                final item = results[index] as Map<String, dynamic>? ?? {};
+                return _buildSearchResultItem(item, index);
+              },
+            ),
+          ],
         );
       },
+    );
+  }
+
+  Widget _buildSearchResultItem(Map<String, dynamic> item, int index) {
+    return GestureDetector(
+      onTap: () {
+        try {
+          // Convert search result to expected format for Resultpage
+          final urls = Urls(
+            full: _getImageUrl(item),
+            regular: _getImageUrl(item),
+            small: _getImageUrl(item),
+          );
+
+          final user = User(
+            id: item['id'] ?? '',
+            username: item['user']?['username'] ?? 'Unknown',
+            name: item['user']?['name'] ?? 'Unknown',
+            firstName: item['user']?['first_name'] ?? '',
+            lastName: item['user']?['last_name'] ?? '',
+            profileLink: item['user']?['profile_link'] ?? '',
+            profileImage: item['user']?['profile_image'] ?? '',
+          );
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Resultpage(
+                id: item['id'] ?? '',
+                urls: urls,
+                user: user,
+              ),
+            ),
+          );
+        } catch (e) {
+          print('Error navigating to result page: $e');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unable to open image details'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.network(
+              _getImageUrl(item),
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                color: Colors.grey[800],
+                child: const Icon(
+                  Icons.image_not_supported,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.7),
+                  ],
+                ),
+              ),
+            ),
+            if (_getImageDescription(item).isNotEmpty)
+              Positioned(
+                bottom: 8,
+                left: 8,
+                right: 8,
+                child: Text(
+                  _getImageDescription(item),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -662,6 +735,8 @@ class _SearchpageState extends State<Searchpage> {
                       _searchController = TextEditingController(
                         text: item.text,
                       );
+                      _currentPage = 1;
+                      _lastSearchText = item.text;
                       _onSearchChanged(item.text);
                     },
                     child: ClipRRect(

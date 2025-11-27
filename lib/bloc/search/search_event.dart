@@ -15,3 +15,20 @@ class CreateSearchEvent extends SearchEvent {
   @override
   List<Object?> get props => [text];
 }
+
+class SearchPaginatedEvent extends SearchEvent {
+  final String text;
+  final int page;
+  final int limit;
+  final bool isLoadMore;
+
+  SearchPaginatedEvent({
+    required this.text,
+    this.page = 1,
+    this.limit = 15,
+    this.isLoadMore = false,
+  });
+
+  @override
+  List<Object?> get props => [text, page, limit, isLoadMore];
+}
