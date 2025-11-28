@@ -18,10 +18,10 @@ class InAppPurchaseService {
   late StreamSubscription<List<PurchaseDetails>> _subscription;
   
   // Product IDs for subscription plans
-  static const String weeklyPlanId = 'test_weekly';
-  static const String yearlyPlanId = 'test_yearly';
+  static const String weeklyPlanId = 'freephotos_weekly';
+  static const String monthlyPlanId = 'freephotos_monthly';
   
-  static const List<String> productIds = [weeklyPlanId, yearlyPlanId];
+  static const List<String> productIds = [weeklyPlanId, monthlyPlanId];
 
   List<ProductDetails> _products = [];
   List<ProductDetails> get products => _products;
@@ -213,8 +213,8 @@ void _onPurchaseUpdate(List<PurchaseDetails> purchaseDetailsList) {
       
       // Determine subscription type
       String subscriptionType = 'WEEKLY';
-      if (purchaseDetails.productID == yearlyPlanId) {
-        subscriptionType = 'YEARLY';
+      if (purchaseDetails.productID == monthlyPlanId) {
+        subscriptionType = 'MONTHLY';
       }
 
       // Prepare API body

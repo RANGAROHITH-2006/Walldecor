@@ -30,7 +30,16 @@ import 'package:flutter/material.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  // Initialize Firebase only if not already initialized
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    }
+  } catch (e) {
+    // If Firebase is already initialized, ignore the error
+    print('Firebase already initialized: $e');
+  }
   
   // Initialize connectivity service
   final connectivityService = ConnectivityService();

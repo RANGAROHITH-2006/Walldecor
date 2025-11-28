@@ -66,7 +66,7 @@ class DefaultFirebaseOptions {
     storageBucket: 'walldecor-88cdf.firebasestorage.app',
     androidClientId: '313737940069-dvg0o6tkmaau7vnaeqgmoso74nl5irnl.apps.googleusercontent.com',
     iosClientId: '313737940069-ghfu959khod5pjg9l0f69ottppn4eook.apps.googleusercontent.com',
-    iosBundleId: 'com.zooq.ai.photo.art.image.generator',
+    iosBundleId: 'freephotos.stockimages.freeimages.hdimages.ai',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -77,7 +77,7 @@ class DefaultFirebaseOptions {
     storageBucket: 'walldecor-88cdf.firebasestorage.app',
     androidClientId: '313737940069-dvg0o6tkmaau7vnaeqgmoso74nl5irnl.apps.googleusercontent.com',
     iosClientId: '313737940069-ghfu959khod5pjg9l0f69ottppn4eook.apps.googleusercontent.com',
-    iosBundleId: 'com.zooq.ai.photo.art.image.generator',
+    iosBundleId: 'freephotos.stockimages.freeimages.hdimages.ai',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

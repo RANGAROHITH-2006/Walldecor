@@ -16,7 +16,7 @@ import 'package:walldecor/bloc/random_image/random_image_bloc.dart';
 import 'package:walldecor/bloc/random_image/random_image_event.dart';
 import 'package:walldecor/bloc/random_image/random_image_state.dart';
 import 'package:walldecor/bloc/collection/collection_bloc.dart';
-import 'package:walldecor/bloc/collection/collection_event.dart';
+// import 'package:walldecor/bloc/collection/collection_event.dart';
 // import 'package:walldecor/bloc/collection/collection_state.dart';
 import 'package:walldecor/bloc/connectivity/connectivity_bloc.dart';
 import 'package:walldecor/bloc/connectivity/connectivity_event.dart';
@@ -28,7 +28,7 @@ import 'package:walldecor/screens/widgets/diolog.dart';
 import 'package:walldecor/utils/download_restrictions.dart';
 import 'package:walldecor/screens/widgets/no_internet_widget.dart';
 import 'package:walldecor/repositories/category_repository.dart';
-import 'package:walldecor/repositories/collection_repository.dart';
+// import 'package:walldecor/repositories/collection_repository.dart';
 import 'package:walldecor/repositories/random_image_repository.dart';
 // import 'package:walldecor/models/category_model.dart';
 import 'package:walldecor/models/categorydetailes_model.dart';
@@ -58,12 +58,12 @@ class _HomepageState extends State<Homepage> {
     super.initState();
     // printprefs();
     _categoryBloc = CategoryBloc(CategoryRepository());
-    _collectionBloc = CollectionBloc(CollectionRepository());
+    // _collectionBloc = CollectionBloc(CollectionRepository());
     _randomImageBloc = RandomImageBloc(RandomImageRepository());
     _scrollController.addListener(_onScroll);
     // Fetch initial data
     _categoryBloc.add(FetchCategoryEvent());
-    _collectionBloc.add(FetchCollectionEvent());
+    // _collectionBloc.add(FetchCollectionEvent());
   }
 
   @override
@@ -96,10 +96,13 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
-  void printprefs() async {
+  void checkUserType() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    for (String key in prefs.getKeys()) {
-      print('$key : ${prefs.get(key)}');
+    final usertype = prefs.getString('user_type');
+    print('User type: $usertype');
+    if (usertype == null) {
+      print('--------------------------');
+      _checkUserAuthentication();
     }
   }
 
@@ -204,7 +207,7 @@ class _HomepageState extends State<Homepage> {
           }
           if (connectivityState is ConnectivityOnline) {
             print('🌐 Internet restored - Rechecking session...');
-            _checkUserAuthentication();
+            checkUserType();
           }
 
           return MultiBlocListener(
@@ -468,7 +471,9 @@ class _HomepageState extends State<Homepage> {
                 backgroundColor: Color(0xFFEE5776),
               ),
               onPressed: () {
-
+                 _randomImageBloc.add(
+                        FetchRandomImagesEvent('bo8jQKTaE0Y'),
+                      );
               },
               child: const Text(
                 'Retry',

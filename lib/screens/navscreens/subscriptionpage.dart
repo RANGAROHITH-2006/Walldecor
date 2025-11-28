@@ -27,8 +27,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       'price': 'Loading...',
     },
     {
-      'id': InAppPurchaseService.yearlyPlanId,
-      'title': 'Year',
+      'id': InAppPurchaseService.monthlyPlanId,
+      'title': 'Month',
       'price': 'Loading...',
     },
   ];
@@ -115,9 +115,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         message: 'You have successfully subscribed to Premium!',
         onConfirm: () {
           if (mounted) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const MainScreen()),
-            );
+            Navigator.push(context, MaterialPageRoute(builder: (context)=> MainScreen()));
           }
         },
       );

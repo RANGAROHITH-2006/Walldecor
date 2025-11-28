@@ -95,7 +95,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           return;
         }
       }
-
+  print('Hitting-----------------------------------------');
       var resp = await http.get(
         Uri.parse('$_baseUrl/user'),
         headers: {

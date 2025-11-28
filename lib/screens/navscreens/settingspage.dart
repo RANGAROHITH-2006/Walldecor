@@ -125,7 +125,7 @@ class _SettingspageState extends State<Settingspage> {
   ///share app function
   void shareApp() {
     const String packageName =
-        "com.zooq.ai.photo.art.image.generator"; // change this
+        "freephotos.stockimages.freeimages.hdimages.ai"; // change this
     final String playStoreLink =
         "https://play.google.com/store/apps/details?id=$packageName";
 

@@ -31,7 +31,7 @@ class FeedbackDialog {
 
 Future<void> openPlayStore() async {
   final url = Uri.parse(
-    "https://play.google.com/store/apps/details?id=com.zooq.ai.photo.art.image.generator",
+    "https://play.google.com/store/apps/details?id=freephotos.stockimages.freeimages.hdimages.ai",
   );
 
   if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {

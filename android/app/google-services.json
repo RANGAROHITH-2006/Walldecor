@@ -1,92 +1,88 @@
 {
   "project_info": {
-    "project_number": "313737940069",
-    "project_id": "walldecor-88cdf",
-    "storage_bucket": "walldecor-88cdf.firebasestorage.app"
+    "project_number": "465589693980",
+    "project_id": "unsplash-b71bb",
+    "storage_bucket": "unsplash-b71bb.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:313737940069:android:1c112c6561665e2c758a8c",
+        "mobilesdk_app_id": "1:465589693980:android:d7c79067dc2caf025ab9d9",
         "android_client_info": {
-          "package_name": "com.example.walldecorapp"
+          "package_name": "freephotos.stockimages.freeimages.hdimages.ai"
         }
       },
       "oauth_client": [
         {
-          "client_id": "313737940069-dvg0o6tkmaau7vnaeqgmoso74nl5irnl.apps.googleusercontent.com",
+          "client_id": "465589693980-07gmarqspcrdvunn1ak2vohvfv6as7og.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.walldecorapp",
+            "package_name": "freephotos.stockimages.freeimages.hdimages.ai",
+            "certificate_hash": "83ecce536e5d198a0fbf44a42a2181aafcd0060a"
+          }
+        },
+        {
+          "client_id": "465589693980-9bcbg0dtgbn2doeq3mcgd5s1m01p8aov.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "freephotos.stockimages.freeimages.hdimages.ai",
+            "certificate_hash": "bfba634f0692e899b28716aa39dff5f045ff899d"
+          }
+        },
+        {
+          "client_id": "465589693980-jf01h461o9sjfcr0pasfdut1bpcelfdq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "freephotos.stockimages.freeimages.hdimages.ai",
+            "certificate_hash": "d85457adbb1865047b3027f1eb795183768a5e99"
+          }
+        },
+        {
+          "client_id": "465589693980-p1mm5qggpjmf41bujguar3jl8dceslqm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "freephotos.stockimages.freeimages.hdimages.ai",
+            "certificate_hash": "059b8f8aec04f34c5cb471588719d0306da68b71"
+          }
+        },
+        {
+          "client_id": "465589693980-p39hi7628msesk0bbcre1808hlntmgnb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "freephotos.stockimages.freeimages.hdimages.ai",
+            "certificate_hash": "d15b12f2130d51fe911eb5dfbcb614371156d1ca"
+          }
+        },
+        {
+          "client_id": "465589693980-vb9mqufcakk3r6i3d4130d3c1h3unl42.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "freephotos.stockimages.freeimages.hdimages.ai",
             "certificate_hash": "0e819d718404bd24ec56ea221ca967b92710ddc9"
           }
         },
         {
-          "client_id": "313737940069-4tm5udu51fj7fjrfi8asgr0qgcgbdhc4.apps.googleusercontent.com",
+          "client_id": "465589693980-o2lspp3sqbtalf7h66pvc6adj7jlbk02.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAvguBjufM1Z8TeJB3vUNJEWGORHco16g4"
+          "current_key": "AIzaSyC_Cu5NofJaeZQkZKTcVp6H-FAuPBCPQCU"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "313737940069-4tm5udu51fj7fjrfi8asgr0qgcgbdhc4.apps.googleusercontent.com",
+              "client_id": "465589693980-o2lspp3sqbtalf7h66pvc6adj7jlbk02.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "313737940069-ghfu959khod5pjg9l0f69ottppn4eook.apps.googleusercontent.com",
+              "client_id": "465589693980-1jfh3fs64b5bjktp3urlrbr9ei36emh3.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.zooq.ai.photo.art.image.generator"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:313737940069:android:9c5788b037de41f0758a8c",
-        "android_client_info": {
-          "package_name": "com.zooq.ai.photo.art.image.generator"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "313737940069-3uodidsm9krof9jcrup092q5rf1to7m0.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.zooq.ai.photo.art.image.generator",
-            "certificate_hash": "0e819d718404bd24ec56ea221ca967b92710ddc9"
-          }
-        },
-        {
-          "client_id": "313737940069-4tm5udu51fj7fjrfi8asgr0qgcgbdhc4.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAvguBjufM1Z8TeJB3vUNJEWGORHco16g4"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "313737940069-4tm5udu51fj7fjrfi8asgr0qgcgbdhc4.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "313737940069-ghfu959khod5pjg9l0f69ottppn4eook.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.zooq.ai.photo.art.image.generator"
+                "bundle_id": "com.example.unsplash"
               }
             }
           ]

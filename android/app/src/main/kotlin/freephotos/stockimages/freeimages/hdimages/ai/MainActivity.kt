@@ -1,4 +1,4 @@
-package com.zooq.ai.photo.art.image.generator
+package freephotos.stockimages.freeimages.hdimages.ai
 
 import io.flutter.embedding.android.FlutterActivity
 

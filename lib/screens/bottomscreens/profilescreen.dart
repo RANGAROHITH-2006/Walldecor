@@ -51,8 +51,8 @@ class ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void dispose() {
-    _downloadBloc.close();
     super.dispose();
+    _downloadBloc.close();
   }
 
   @override

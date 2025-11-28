@@ -8,7 +8,7 @@
 PRODUCT_NAME = walldecorapp
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.zooq.ai.photo.art.image.generator
+PRODUCT_BUNDLE_IDENTIFIER = freephotos.stockimages.freeimages.hdimages.ai
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2025 com.example. All rights reserved.
