@@ -94,9 +94,26 @@ class ProIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
+      buildWhen: (previous, current) {
+        // Rebuild when user changes or subscription status changes
+        final prevHasSubscription = previous.user?.hasActiveSubscription ?? false;
+        final currentHasSubscription = current.user?.hasActiveSubscription ?? false;
+        final prevIsProUser = previous.user?.isProUser ?? false;
+        final currentIsProUser = current.user?.isProUser ?? false;
+        
+        bool shouldRebuild = prevHasSubscription != currentHasSubscription ||
+                            prevIsProUser != currentIsProUser ||
+                            previous.status != current.status;
+                            
+        if (shouldRebuild) {
+          print('🔄 ProIndicator rebuilding: hasActiveSubscription $prevHasSubscription -> $currentHasSubscription, isProUser $prevIsProUser -> $currentIsProUser');
+        }
+        
+        return shouldRebuild;
+      },
       builder: (context, state) {
         bool isProUser = state.user?.hasActiveSubscription ?? false;
-        print('   Final isProUser: $isProUser');
+        print('   ProIndicator render - isProUser: $isProUser (Auth Status: ${state.status})');
         return GestureDetector(
           onTap: () {
             if (isProUser) {

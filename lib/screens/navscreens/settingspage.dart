@@ -9,6 +9,7 @@ import 'package:walldecor/screens/bottomscreens/premiumscreen.dart';
 import 'package:walldecor/bloc/auth/auth_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:walldecor/screens/startscreens/splashscreen.dart';
 import 'package:walldecor/screens/widgets/feedback_dialog.dart';
 import 'package:walldecor/repositories/auth_repository.dart';
 
@@ -242,18 +243,22 @@ class _SettingspageState extends State<Settingspage> {
       context.read<AuthBloc>().add(
         DeleteUser(
           onSuccess: (message) {
+            // Check if the widget is still mounted before proceeding
+            if (!mounted) return;
+            
             Navigator.of(context).pop(); // Remove loading dialog
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(message),
-                backgroundColor: Colors.green,
-                duration: const Duration(seconds: 3),
-              ),
-            );
             print('Account deletion successful: $message');
-            context.go('/splashscreen');
+            
+            // Navigate immediately without showing SnackBar to avoid context issues
+            Navigator.pushReplacement(
+              context, 
+              MaterialPageRoute(builder: (context) => SplashScreen())
+            );
           },
           onError: (error) {
+            // Check if the widget is still mounted before proceeding
+            if (!mounted) return;
+            
             Navigator.of(context).pop(); // Remove loading dialog
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -266,14 +271,16 @@ class _SettingspageState extends State<Settingspage> {
         ),
       );
     } catch (e) {
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Delete account error: $e'),
-          backgroundColor: Colors.redAccent,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Delete account error: $e'),
+            backgroundColor: Colors.redAccent,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
@@ -305,7 +312,8 @@ class _SettingspageState extends State<Settingspage> {
           fcmToken: fcmToken,
           onSuccess: () {
             print('Logout successful');
-            context.go('/splashscreen');
+            // Use GoRouter to navigate and clear the route stack
+            GoRouter.of(context).go('/splashscreen');
           },
         ),
       );
@@ -331,7 +339,8 @@ class _SettingspageState extends State<Settingspage> {
           if (Navigator.of(context).canPop()) {
             Navigator.of(context).pop();
           }
-          context.go('/splashscreen');
+          // Use GoRouter to navigate and clear the route stack
+          GoRouter.of(context).go('/splashscreen');
         } else if (state.status == AuthStatus.failure) {
           if (Navigator.of(context).canPop()) {
             Navigator.of(context).pop();

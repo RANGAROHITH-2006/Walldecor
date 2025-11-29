@@ -38,13 +38,35 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   _onUpdateUserSubscription(UpdateUserSubscription event, Emitter<AuthState> emit) async {
     if (state.user != null) {
-      User updatedUser = state.user!.copyWith(isProUser: event.isProUser);
+      // Set a temporary future expiry date to ensure hasActiveSubscription works immediately
+      String tempExpireTime = '';
+      if (event.isProUser) {
+        // Set expiry to 1 year from now (server will override this with real data)
+        final futureDate = DateTime.now().add(const Duration(days: 365));
+        tempExpireTime = futureDate.toString();
+      }
+      
+      User updatedUser = state.user!.copyWith(
+        isProUser: event.isProUser,
+        expireTime: event.isProUser ? tempExpireTime : '',
+      );
       
       // Update shared preferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isProUser', event.isProUser);
       
-      emit(state.copyWith(user: updatedUser));
+      print('💎 UpdateUserSubscription: Updated user pro status to ${event.isProUser}');
+      print('💎 UpdateUserSubscription: Temp expireTime set to: $tempExpireTime');
+      print('💎 UpdateUserSubscription: User hasActiveSubscription = ${updatedUser.hasActiveSubscription}');
+      print('💎 UpdateUserSubscription: Emitting new state with status: ${AuthStatus.success}');
+      
+      // Force a state change by creating a completely new state
+      emit(AuthState(
+        status: AuthStatus.success,
+        token: state.token,
+        user: updatedUser,
+        message: state.message,
+      ));
     }
   }
 

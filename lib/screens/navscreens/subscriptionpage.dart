@@ -109,13 +109,28 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         const UpdateUserSubscription(isProUser: true),
       );
 
+      // Also refresh user data from server to ensure consistency
+      context.read<AuthBloc>().add(
+        SessionRequest(
+          onSuccess: (user) {
+            print('✅ User data refreshed after purchase: ${user.hasActiveSubscription}');
+          },
+          onError: (error) {
+            print('❌ Failed to refresh user data after purchase: $error');
+          },
+        ),
+      );
+
       SuccessPopup.show(
         context,
         title: 'Purchase Successful!',
         message: 'You have successfully subscribed to Premium!',
         onConfirm: () {
           if (mounted) {
-            Navigator.push(context, MaterialPageRoute(builder: (context)=> MainScreen()));
+            Navigator.push(
+              context, 
+              MaterialPageRoute(builder: (context) => MainScreen())
+            );
           }
         },
       );
